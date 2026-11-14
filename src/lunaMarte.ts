@@ -2,9 +2,6 @@
 // Datos: src/data/results.json (pipeline/analogs/rank.py). Relieve: public/relieve/ (relief_images.py).
 // Admite el formato v1 (solo ventanas de 30 km) y el v2 (referencias por grupo y búsqueda de grueso a fino:
 // L0 = 30 km, L1 = 10 km, L2 = 5 km en la Luna y 2 km en Marte). Todos los campos v2 son opcionales.
-import "@fontsource/barlow/latin-400.css";
-import "@fontsource/barlow/latin-500.css";
-import "@fontsource/barlow/latin-600.css";
 import "leaflet/dist/leaflet.css";
 import "./style.css";
 import "./lunaMarte.css";

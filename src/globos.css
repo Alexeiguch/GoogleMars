@@ -7,12 +7,12 @@ main.gl {
   display: flex;
   flex-direction: column;
   max-width: none;
-  height: 100vh;
-  height: 100svh;
-  min-height: 640px;
+  /* Alto de la pantalla menos la cabecera del sitio (--header-h en style.css). */
+  height: calc(100vh - var(--header-h));
+  height: calc(100svh - var(--header-h));
+  min-height: 520px;
   padding-bottom: 12px;
 }
-.gl .masthead { flex: none; }
 
 /* ---- barra de controles (con el título de la vista) ---- */
 .gl-toolbar {
@@ -25,14 +25,14 @@ main.gl {
 }
 .gl-title {
   margin: 0;
-  font-size: clamp(28px, 2.4vw, 38px);
+  font-size: clamp(26px, 2.2vw, 34px);
   font-weight: 700;
-  line-height: 1;
-  text-transform: uppercase;
+  line-height: 1.05;
+  letter-spacing: -.035em;
 }
 .gl-pickers { margin-left: auto; }
 .gl-mode { display: flex; align-items: center; gap: 14px; }
-.gl-seg { display: inline-flex; border: 1px solid var(--control-border); }
+.gl-seg { display: inline-flex; border: 1px solid var(--control-border); border-radius: 4px; overflow: hidden; }
 .gl-seg button {
   min-height: 40px;
   padding: 0 16px;
@@ -45,12 +45,12 @@ main.gl {
 }
 .gl-seg button + button { border-left: 1px solid var(--control-border); }
 .gl-seg button:hover { color: var(--text); background: var(--hover); }
-.gl-seg button[aria-pressed="true"] { background: var(--action); color: var(--action-ink); }
+.gl-seg button[aria-pressed="true"] { background: var(--signal); color: var(--signal-ink); }
 .gl-seg button:active, .gl-reset:active, .gl-legend-toggle:active { transform: scale(.97); }
 .gl-seg button, .gl-reset, .gl-legend-toggle {
   transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
 }
-.gl-count { color: var(--muted); font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gl-count { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .gl-legend-toggle { display: none; }
 
 .gl-pickers { display: flex; flex-wrap: wrap; gap: 8px 16px; min-width: 0; }
@@ -60,6 +60,7 @@ main.gl {
   max-width: 300px;
   min-width: 0;
   border: 1px solid var(--control-border);
+  border-radius: 4px;
   background: var(--surface);
   color: var(--text);
   padding: 3px 10px;
@@ -83,27 +84,8 @@ main.gl {
   background: var(--sunken);
   overflow: hidden;
 }
-/* Marcas de esquina del instrumento (mismo dibujo que .panel en style.css). */
-.gl-stage::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  --tick: var(--muted);
-  background:
-    linear-gradient(var(--tick), var(--tick)) 0 0 / 14px 2px,
-    linear-gradient(var(--tick), var(--tick)) 0 0 / 2px 14px,
-    linear-gradient(var(--tick), var(--tick)) 100% 0 / 14px 2px,
-    linear-gradient(var(--tick), var(--tick)) 100% 0 / 2px 14px,
-    linear-gradient(var(--tick), var(--tick)) 0 100% / 14px 2px,
-    linear-gradient(var(--tick), var(--tick)) 0 100% / 2px 14px,
-    linear-gradient(var(--tick), var(--tick)) 100% 100% / 14px 2px,
-    linear-gradient(var(--tick), var(--tick)) 100% 100% / 2px 14px;
-  background-repeat: no-repeat;
-}
 #gl-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; cursor: default; }
-/* Cada globo lleva arriba una regla con su color de cuerpo. */
+/* Cada globo lleva arriba una línea con su color de cuerpo. */
 .gl-panel { --body-c: var(--text); }
 .gl-panel[data-globe="moon"] { --body-c: var(--moon); }
 .gl-panel[data-globe="earth"] { --body-c: var(--earth); }
@@ -112,11 +94,9 @@ main.gl {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 6px;
   z-index: 1;
   pointer-events: none;
   border-top: 2px solid var(--body-c);
-  background-image: repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px 24px);
 }
 .gl-panel {
   position: relative;
@@ -131,7 +111,7 @@ main.gl {
 .gl-panel:active { cursor: grabbing; }
 .gl-panel.is-over-point { cursor: pointer; }
 .gl-panel + .gl-panel { border-left: 1px solid var(--border); }
-/* Rótulo tipo telemetría: placa propia para que se lea sobre cualquier zona del globo al acercar. */
+/* Rótulo: placa propia para que se lea sobre cualquier zona del globo al acercar. */
 .gl-label {
   position: absolute;
   top: 14px;
@@ -140,8 +120,8 @@ main.gl {
   pointer-events: none;
   padding: 6px 10px 7px;
   border: 1px solid var(--border);
+  border-radius: 4px;
   background: var(--overlay);
-  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
@@ -149,12 +129,11 @@ main.gl {
 .gl-label b {
   display: block;
   color: var(--text);
-  font-family: var(--font-display);
-  font-size: 24px;
+  font-family: var(--display);
+  font-size: 22px;
   font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: .04em;
-  text-transform: uppercase;
+  line-height: 1.1;
+  letter-spacing: -.03em;
 }
 .gl-label b::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 8px; vertical-align: .12em; background: var(--body-c); }
 .gl-reset {
@@ -165,6 +144,7 @@ main.gl {
   min-height: 34px;
   padding: 0 12px;
   border: 1px solid var(--control-border);
+  border-radius: 4px;
   background: var(--overlay);
   color: var(--text);
   font-size: 13px;
@@ -222,7 +202,7 @@ main.gl {
 .gl-detail[hidden] { display: none; }
 .gl-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .gl-detail { animation: rise var(--t-enter) var(--ease-out) both; }
-.gl-kicker { color: var(--muted); font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; padding-top: 12px; }
+.gl-kicker { color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; padding-top: 12px; }
 .gl-close {
   flex: none;
   width: 36px;
@@ -236,11 +216,11 @@ main.gl {
   cursor: pointer;
 }
 .gl-close:hover { color: var(--text); }
-.gl-detail h2 { margin-top: 4px; font-size: 26px; font-weight: 600; line-height: 1.08; overflow-wrap: anywhere; }
-.gl-detail h3 { margin: 20px 0 8px; font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: .06em; text-transform: uppercase; }
-.gl-coords { color: var(--muted); font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; margin-top: 6px; }
+.gl-detail h2 { margin-top: 4px; font-size: 24px; font-weight: 700; line-height: 1.1; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.gl-detail h3 { margin: 20px 0 8px; font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+.gl-coords { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; margin-top: 6px; }
 .gl-roles { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 0; padding: 0; list-style: none; }
-.gl-roles li { padding: 1px 7px; border: 1px solid var(--border); font-size: 12.5px; color: var(--story); }
+.gl-roles li { padding: 1px 7px; border: 1px solid var(--border); border-radius: 4px; font-size: 12.5px; color: var(--story); }
 .gl-note { margin-top: 12px; color: var(--story); }
 /* Referencia sin puntuar: aviso con marco de aviso, antes de la nota de la fuente. */
 .gl-unscored { margin-top: 12px; padding: 8px 10px; border: 1px solid var(--warn); color: var(--story); font-size: 13px; }
@@ -252,11 +232,11 @@ main.gl {
 .gl-bar span { color: var(--muted); }
 .gl-bar i { height: 6px; background: var(--hover); position: relative; }
 .gl-bar i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: calc(var(--v) * 100%); background: var(--c); }
-.gl-bar b { font-family: var(--font-mono); font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+.gl-bar b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
 .gl-dl { margin: 0; display: grid; gap: 0; }
 .gl-dl div { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); }
 .gl-dl dt { color: var(--muted); }
-.gl-dl dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.gl-dl dd { margin: 0; font-size: 13px; font-variant-numeric: tabular-nums; }
 .gl-twins { margin: 0; padding: 0; list-style: none; counter-reset: twin; }
 .gl-twins li { counter-increment: twin; }
 .gl-twins button {
@@ -274,16 +254,16 @@ main.gl {
   text-align: left;
   cursor: pointer;
 }
-.gl-twins button::before { content: counter(twin, decimal-leading-zero); color: var(--muted); font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.gl-twins button::before { content: counter(twin, decimal-leading-zero); color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .gl-twins button:hover { background: var(--hover); }
-.gl-twins small { display: block; color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
-.gl-twins b { color: var(--earth); font-family: var(--font-mono); font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.gl-twins small { display: block; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.gl-twins b { color: var(--earth); font-family: var(--display); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* ---- pie ---- */
 .gl-footer { max-width: 1560px; margin: 0 auto; padding: 0 var(--pad) 48px; border-top: 0; }
 .gl-about { padding: 32px 0 8px; }
 .gl-about .intro__lede { margin-top: 0; }
-.gl-footer h2 { padding-top: 18px; border-top: 1px solid var(--rule); }
+.gl-footer h2 { padding-top: 18px; border-top: 1px solid var(--border); }
 .gl-howto { margin-top: 12px; color: var(--muted); font-size: 14px; max-width: 70ch; }
 
 /* ---- pantallas estrechas: tres filas ---- */
@@ -326,8 +306,8 @@ main.gl {
   }
 }
 @media (max-width: 640px) {
-  main.gl { padding-bottom: 8px; min-height: 720px; }
-  .gl-title { width: 100%; font-size: 28px; }
+  main.gl { padding-bottom: 8px; min-height: 600px; }
+  .gl-title { width: 100%; font-size: 26px; }
   .gl-about { padding-top: 24px; }
   .gl-toolbar { gap: 6px; padding: 10px 0 8px; }
   .gl-mode { width: 100%; gap: 10px; }
@@ -346,8 +326,7 @@ main.gl {
   .gl-bar { grid-template-columns: 110px 1fr 30px; }
 }
 
-/* Path Planner shares the globe canvas and the app's existing controls. */
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* Path Planner shares the globe canvas and the app's existing controls (.visually-hidden lives in style.css). */
 /* The legend and the intro figures describe the browse view. */
 .is-planning :is(.gl-toolbar, .gl-legend), main.gl.is-planning + .gl-footer .gl-about { display: none; }
 main.gl.is-planning {
@@ -360,7 +339,7 @@ main.gl.is-planning {
 .path-toolbar-head { justify-content: space-between; margin-bottom: 10px; gap: 12px; }
 .path-search-actions { display: flex; align-items: center; gap: 8px 16px; }
 .path-distance { display: grid; font-variant-numeric: tabular-nums; line-height: 1.3; text-align: end; }
-.path-distance strong { font: 600 18px/1.2 var(--font-display); }
+.path-distance strong { font: 600 18px/1.2 var(--display); }
 .path-distance span { color: var(--muted); font-size: 13px; }
 .path-distance:is([data-range="short"], [data-range="long"]) span { color: var(--warn); }
 .path-distance[data-range="ready"] span { color: var(--ok); }
@@ -368,6 +347,7 @@ main.gl.is-planning {
   min-height: 38px;
   padding: 4px 12px;
   border: 1px solid var(--border);
+  border-radius: 4px;
   color: var(--text);
   background: var(--surface);
   font-size: 14px;
@@ -403,7 +383,7 @@ main.gl.is-planning {
 .is-planning .gl-panel { z-index: 1; }
 .is-planning .gl-panel[data-globe="mars"] { border: 0; }
 .is-planning.is-map-unavailable .gl-body, .is-planning #gl-error { display: none; }
-.is-planning .gl-label b { font-family: var(--font-display); }
+.is-planning .gl-label b { font-family: var(--display); }
 .is-planning .gl-label span { display: none; }
 .is-planning .gl-panel:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
 .is-planning .gl-panel.is-drawing { cursor: crosshair; }
