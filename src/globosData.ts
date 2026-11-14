@@ -95,8 +95,11 @@ const keyOf = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(2)}
 
 export const refById = new Map(DATA.references.map((r) => [r.id, r]));
 
-/** Puntaje mínimo (0–100) para que un punto de la Tierra salga en «Mejores». */
-export const BEST_MIN_SCORE = 85;
+/**
+ * Puntaje mínimo (0–100) para que un punto de la Tierra salga en «Mejores», por cuerpo: la Luna puntúa más bajo
+ * (su terreno es más abrupto que casi toda la Tierra y el clima nunca se le parece), su máximo actual es 82.
+ */
+export const BEST_MIN_SCORE: Record<Body, number> = { moon: 80, mars: 85 };
 
 export function buildEarthPoints(): EarthPoint[] {
   const points = new Map<string, EarthPoint>();
@@ -134,10 +137,10 @@ export function buildEarthPoints(): EarthPoint[] {
   }
 
   for (const point of points.values()) {
-    // «Mejores»: top 20, gemelo o historia destacada, y además con puntaje de BEST_MIN_SCORE o más
+    // «Mejores»: top 20, gemelo o historia destacada, y además con el puntaje mínimo de su cuerpo o más
     // (redondeado como se muestra en la página, para que un 80 en pantalla cuente).
     const listed = point.roles.some((r) => r.kind === "site" || r.kind === "twin" || r.kind === "featured");
-    const strong = BODIES.some((b) => point.data[b] && Math.round(point.data[b]!.score * 100) >= BEST_MIN_SCORE);
+    const strong = BODIES.some((b) => point.data[b] && Math.round(point.data[b]!.score * 100) >= BEST_MIN_SCORE[b]);
     point.best = listed && strong;
     point.color = colorBody(point);
     point.name = earthName(point);

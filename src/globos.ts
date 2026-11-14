@@ -1085,7 +1085,7 @@ function fillLegend() {
     <span>${swatch("disc", COLOR.mars)}${t("gl.analogOf.mars")}</span>
     <span>${swatch("diamond", SHAPE_INK)}${t("gl.lg.ref")}</span>
     <span>${swatch("star", SHAPE_INK)}${t("gl.lg.featured")}</span>
-    <span>${swatch("disc", SHAPE_INK)}${t("gl.lg.site").replace("80", String(BEST_MIN_SCORE))}</span>
+    <span>${swatch("disc", SHAPE_INK)}${t("gl.lg.site").replace("80", `${bodyName("moon")} ${BEST_MIN_SCORE.moon} · ${bodyName("mars")} ${BEST_MIN_SCORE.mars}`)}</span>
     <span>${swatch("ring", SHAPE_INK)}${t("gl.lg.validation")}</span>
     <span>${swatch("small", SHAPE_INK)}${t("gl.lg.catalog")}</span>
     <span><i class="gl-ramp" style="--a:${HEAT_RAMP.moon[0]};--b:${HEAT_RAMP.moon[1]}"></i><i class="gl-ramp" style="--a:${HEAT_RAMP.mars[0]};--b:${HEAT_RAMP.mars[1]}"></i>${t("gl.lg.heat")}</span>`;
