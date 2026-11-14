@@ -155,6 +155,38 @@ FEATURED = [
                   "análogo; hay trabajos regionales sobre el Teneré que no sitúan su zona aquí. Dónde falla: es "
                   "caluroso (media de 23,7 °C), al contrario que Marte."),
     },
+    # Historias de la lista «Solo nuevos» (redactadas por agentes con los datos de results.json, verificadas
+    # cifra a cifra por un segundo agente y revisadas a mano; bibliografía: literature_v2.json).
+    {
+        "body": "moon", "ref": "malla_polar", "lat": -28.94966, "lon": -69.19168, "tag": "nuevo",
+        "title": "Iglesia (San Juan, Argentina, ~3.280 m), gemelo de las llanuras de Haworth",
+        "story": "A 5 km, esta ventana del departamento de Iglesia (San Juan, Cordillera Frontal andina) se parece a una tesela de 5 km de la región Haworth de Artemis III: pendiente típica 3,2° frente a 4,1°; p90 9,1° frente a 7,9°; 71 % llano frente a 64 %; relieve 172 m frente a 181 m (94/100). A 10 y 30 km se parece a celdas de la malla polar de 84–90°S (97/100 en las dos escalas). Es suelo desnudo al 99 %, con media de 6,4 °C, mínima de −22,1 °C y 187 mm de lluvia (ERA5, 2025). Como hipótesis, serviría para ensayar movilidad de rovers en llanuras suaves con algunas pendientes, a gran altitud. Tras 11 búsquedas en inglés y español no encontramos estudios que lo usen como análogo; los análogos andinos que aparecen (Dos Lenguas, Ojos del Salado, Maricunga) son de Marte y están a más de 150 km (distancias estimadas). Dónde falla: hay atmósfera y lluvia, la máxima llega a 26,9 °C y la similitud climática es solo 31/100.",
+    },
+    {
+        "body": "moon", "ref": "malla_polar", "lat": -21.85973, "lon": -68.93605, "tag": "nuevo",
+        "title": "Cuenca alta del Loa (Antofagasta, Chile, ~3.490 m), gemela de las laderas de Mons Mouton Plateau",
+        "story": "A 5 km, esta ventana de la cuenca alta del río Loa (Provincia de El Loa, Región de Antofagasta, Chile; 3.487 m de altitud media, a unos 67 km al norte de Calama) se parece en terreno a la tesela 12 del Mons Mouton Plateau, en el polo sur lunar: pendiente mediana 6,3° frente a 6,8°; p90 13,9° frente a 14,6°; 38 % llano frente a 28 %; relieve 352 m frente a 386 m. La similitud de terreno es 88/100 a 5 km; a 10 y 30 km se parece a celdas de la malla polar de 84–90°S (94/100 y 96/100). El suelo es 100 % desnudo, con media de 7,5 °C, mínimas de −6,8 °C y 68 mm de lluvia al año (ERA5, 2025). Como hipótesis, serviría para ensayar movilidad y navegación de rovers en pendientes moderadas como las de Mons Mouton. Tras más de diez búsquedas en inglés y español no encontramos estudios que lo usen como análogo; lo más cercano es el Salar de Ascotán (~77 km), solo con una nota de prensa, y los análogos documentados del Atacama están a más de 100 km. Dónde falla: la similitud climática es de solo 28/100, porque aquí llueve (68 mm al año) y las mínimas de −6,8 °C son un frío suave comparado con el polo lunar.",
+    },
+    {
+        "body": "mars", "ref": "arcadia_planitia_crater_hielo", "lat": 20.14027, "lon": 6.16474, "tag": "nuevo",
+        "title": "Llanura de la Tamesna (Argelia, ~490 m), gemela del cráter con hielo de Arcadia Planitia",
+        "story": "Esta ventana de la llanura de la Tamesna (daïra de In Guezzam, sur de Argelia, a ~490 m, unos 70 km al NNE de In Guezzam) es casi plana: pendiente típica de 1,6°, p90 de 3,7°, 97 % del terreno por debajo de 5°, nada por encima de 15° y solo 18 m de relieve. Su similitud de terreno con el sitio marciano de Arcadia Planitia donde un cráter nuevo dejó hielo al descubierto es de 95/100 a 30 km y 94/100 a 10 km; a 2 km puntúa 96/100 frente a un modelo digital de terreno HiRISE de la categoría de terreno helado y polar. Es suelo desnudo al 100 %, con 29,5 °C de media, mínimas de 6,9 °C y 2 mm de lluvia al año (ERA5, 2025). Puntúa 85/100 en total y en todas las combinaciones de pesos probadas queda entre los diez primeros nuevos (peor puesto: 6.º). Por su pendiente podría servir para ensayar navegación de rovers en terreno llano. Tras 12 búsquedas en inglés, francés y árabe no encontramos estudios que la usen como análogo; los análogos saharianos publicados (cuenca de Ahnet, salares del Tanezrouft) están a cientos de km al norte. Dónde falla: hace calor (hasta 46,2 °C) y no hay hielo (0 %), justo lo que define al sitio marciano; además, el terreno de Arcadia es aún más llano (pendiente típica de 0,3° a 30 km).",
+    },
+    {
+        "body": "mars", "ref": "nili_fossae_llanuras_carbonatos", "lat": 23.5, "lon": 35.0587, "tag": "nuevo",
+        "title": "Colinas del Mar Rojo (Egipto, ~456 m), gemelas de capas de roca de Terra Sirenum",
+        "story": "Ventana de 2 km en las colinas del Mar Rojo (Desierto Oriental, Egipto; ~456 m de altitud) con pendientes muy parecidas a las de una imagen HiRISE de roca estratificada en un cráter erosionado de Terra Sirenum: pendiente típica 12,1° frente a 11,2°, p90 27,1° frente a 27,0°, 43 % de terreno >15° frente a 37 % y relieve de 151 m frente a 160 m (similitud 98/100). A 10 y 30 km la referencia son las llanuras con carbonatos de Nili Fossae y la similitud sigue alta (97/100 y 95/100), aunque allí el terreno es mucho más suave (pendiente típica 3,2° a 10 km). Es suelo desnudo al 100 %, con media de 26,9 °C, mínima anual de 8,2 °C y 5 mm de lluvia al año (ERA5, 2025). Tras 11 búsquedas en inglés, árabe y francés no encontramos estudios que usen este lugar como análogo; los análogos egipcios publicados que aparecieron están en el Desierto Occidental, a cientos de km. Dónde falla: hace mucho más calor que en Marte (máxima 44,9 °C), cae algo de lluvia y no hemos comprobado su geología frente a la de Nili Fossae.",
+    },
+    {
+        "body": "mars", "ref": "kasei_valles_isla_aerodinamica", "lat": 35.7698, "lon": 85.72168, "tag": "nuevo",
+        "title": "Borde norte del Changtang (Qiemo, Xinjiang, ~5.370 m), frío y parecido a Kasei Valles",
+        "story": "Ventana a unos 5.370 m de altitud en el condado de Qiemo (Xinjiang), en el Kunlun/Arka Tagh, borde norte del Changtang. A 2 km su relieve se parece al de una tesela HiRISE de material del extremo distal de un delta invertido (otro lugar de Marte, no Kasei): pendiente típica 5,4° frente a 4,5°; p90 15,6° frente a 14,6°; 47 % llano frente a 54 %; relieve 108 m frente a 102 m. Similitud de terreno: 97,5/100 a 2 km con esa tesela, 99,5/100 a 10 km con la tesela 3 del grupo «Kasei Valles: canales en una isla aerodinámica» y 94,6/100 a 30 km con el grupo entero. Suelo desnudo al 100 %, −10,3 °C de media, mínimas de −38,1 °C y 15,6 °C de oscilación diaria (ERA5, 2025). Como hipótesis nuestra, podría servir para ensayar movilidad de rovers y rutas en terreno suave y ondulado de valles y abanicos, con frío y altitud. Tras más de diez búsquedas en inglés y chino no hallamos estudios que lo usen como análogo; lo más cercano es la cuenca de Qaidam, a 600–800 km. Dónde falla: caen 368 mm al año, algo que Marte hoy no tiene, y el parecido es solo de forma, sin garantía de procesos de formación equivalentes.",
+    },
+    {
+        "body": "mars", "ref": "meridiani", "lat": 19.67986, "lon": 7.54776, "tag": "nuevo",
+        "title": "Llanura de Tim Mersoï (Níger, ~490 m), gemela de Meridiani Planum",
+        "story": "A 2 km, esta ventana de la llanura de Tim Mersoï (unos 100 km al norte de Arlit, Níger, ~490 m) es casi tan lisa como una ventana HiRISE de la región de Diacria, en Marte: pendiente típica 0,6° frente a 0,7°, p90 1,2° frente a 1,2°, 100 % llano en ambas y relieve de 13 m frente a 12 m (terreno 96/100). A mayor escala se parece a Meridiani Planum, junto al cráter Eagle de Opportunity: 98/100 a 30 km y 94/100 a 10 km. Es suelo desnudo al 100 %, con 29,9 °C de media, mínima de 7,2 °C, máxima de 46,7 °C y 18 mm de lluvia al año (ERA5, 2025). Meridiani es una llanura ecuatorial cuyas capas superiores son areniscas eólicas ricas en sulfatos (formación Burns, según la NASA). Tras unas 10 búsquedas en inglés, francés y árabe no encontramos estudios que usen este lugar como análogo; los análogos saharianos publicados (Ténéré, Ahnet, Tanezrouft) están a cientos de km. Dónde falla: la lluvia y los ~30 °C de media no son los de Marte, y no hemos comprobado que su roca se parezca a esas areniscas con sulfatos.",
+    },
 ]
 
 LEVELS = {
@@ -1094,7 +1126,7 @@ def check_featured(bodies: dict) -> list[dict]:
             continue
         B = bodies[f["body"]]
         fine = B.get("fine") or {}
-        pool = [*tw, *B["sites"], *(fine.get("final") or []), *(fine.get("sites") or [])]
+        pool = [*tw, *B["sites"], *(fine.get("final") or []), *(fine.get("final_new") or []), *(fine.get("sites") or [])]
         pool.extend(s for matches in (fine.get("twins") or {}).values() for s in matches)
         dmin = min(float(haversine_km(f["lat"], f["lon"], s["lat"], s["lon"])) for s in pool)
         if dmin > 0.1:

@@ -717,7 +717,8 @@ function featuredSite(f: Featured): EarthSite | null {
   };
   // Primero el ranking final y los gemelos finos (tienen las tres escalas); luego los de 30 km.
   // Siempre cerca del punto de la historia, para que el texto corresponda al sitio mostrado.
-  const fine = B.fine ? [...(B.fine.final ?? []), ...(B.fine.sites ?? []), ...Object.values(B.fine.twins ?? {}).flat()] : [];
+  const fine = B.fine ? [...(B.fine.final ?? []), ...(B.fine.final_new ?? []), ...(B.fine.sites ?? []),
+    ...Object.values(B.fine.twins ?? {}).flat()] : [];
   return near(fine, 30)
     ?? near(B.twins?.[f.ref] ?? [], 30)
     ?? near([...B.sites, ...Object.values(B.twins ?? {}).flat()], 30);

@@ -198,6 +198,15 @@ combinaciones en que sigue en el top 10 de su lista, y su mejor y peor puesto.
 | 10 | — | 29,32, 37,19 | Spirit (cráter Gusev) | 0,81 | 0,95 (0,98/0,96/0,92) | 20,4 °C, 19 mm | sin revisar | 57 % (puesto 9–16) |
 
 
+**Historias destacadas nuevas (6).**
+- Proceso: un agente redactó cada historia solo con los datos de `results.json` y con fuentes web citadas. Un
+  segundo agente comprobó cada cifra y cada afirmación, y después se revisaron a mano. Hubo que corregir, por
+  ejemplo, que se mezclaba la tesela de 5 km de Haworth con la malla polar de 10 y 30 km.
+- Luna: Iglesia (San Juan, Argentina) y la cuenca alta del Loa (Antofagasta, Chile).
+- Marte: la llanura de la Tamesna (Argelia), las colinas del Mar Rojo (Egipto), el borde norte del Changtang
+  (Qiemo, Xinjiang) y la llanura de Tim Mersoï (Níger).
+- Golshan, Jhal Jhao y Hoggar quedan solo en la lista de nuevos: a 5 km su similitud baja a 64–81/100.
+
 Los 9 primeros nuevos de la Luna y los 9 primeros de Marte tienen revisión bibliográfica, y casi todos siguen
 en el top 10 con cualquier combinación de pesos. En los nuevos de Marte el fallo es siempre el mismo: son
 desiertos cálidos (medias de 20–30 °C). El terreno y la sequedad se parecen; el frío no.
