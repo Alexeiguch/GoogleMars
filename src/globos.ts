@@ -1,8 +1,5 @@
 // Página «Globos 3D»: Luna | Tierra | Marte en un solo canvas (un contexto WebGL), con viewports y scissor
 // como src/globes.ts. Se dibuja solo cuando algo cambia (sin bucle continuo).
-import "@fontsource/barlow/latin-400.css";
-import "@fontsource/barlow/latin-500.css";
-import "@fontsource/barlow/latin-600.css";
 import "./style.css";
 import "./globos.css";
 import "./prefs";

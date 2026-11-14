@@ -2,6 +2,7 @@
 /* --moon y el resto de colores vienen de style.css (tema claro/oscuro); --body sigue a la pestaña Luna/Marte. */
 :root { --body: var(--moon); --panel-h: calc(100vh - 82px - 24px); }
 :root[data-body="mars"] { --body: var(--accent); }
+.lm { padding-top: 14px; }
 
 .lm-layout {
   display: grid;
@@ -29,7 +30,7 @@
 }
 .lm-tabs button:hover, .lm-tabs button[aria-selected="true"],
 .lm-cmp-modes button:hover, .lm-cmp-modes button[aria-pressed="true"] { color: var(--text); }
-.lm-tabs button[aria-selected="true"] { border-bottom-color: var(--body); }
+.lm-tabs button[aria-selected="true"] { border-bottom: 2px solid var(--accent); }
 .lm-cmp-modes { display: flex; gap: 18px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
 .lm-cmp-modes button { min-height: 36px; font-size: 14px; }
 .lm-cmp-modes button[aria-pressed="true"] { border-bottom-color: var(--accent); }

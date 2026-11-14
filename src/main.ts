@@ -1,6 +1,3 @@
-import "@fontsource/barlow/latin-400.css";
-import "@fontsource/barlow/latin-500.css";
-import "@fontsource/barlow/latin-600.css";
 import "./style.css";
 import "./prefs";
 import {
@@ -55,6 +52,8 @@ const results = document.querySelector<HTMLElement>("#results")!;
 const comparison = document.querySelector<HTMLElement>("#comparison")!;
 const details = document.querySelector<HTMLElement>("#details")!;
 const matchList = document.querySelector("#match-list")!;
+const marsCoordinate = document.querySelector("#mars-coordinate")!;
+const earthCoordinate = document.querySelector("#earth-coordinate")!;
 
 const sources = [
   ["src.marsElev", "https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/"],
@@ -80,10 +79,10 @@ function renderChrome() {
     item.append(link);
     return item;
   }));
-  legend.innerHTML = `<span>${t("v.slope")}</span>${slopeBands.map(({ label, color }) =>
+  legend.innerHTML = slopeBands.map(({ label, color }) =>
     `<span><i style="background:${color}" aria-hidden="true"></i>${label}</span>`,
-  ).join("")}`;
-  document.querySelector("#mars-count")!.textContent = t("v.siteCount", { n: marsSites.length });
+  ).join("");
+  renderCoordinates();
   for (const { site, button } of markers) {
     button.title = siteLabel(site);
     button.setAttribute("aria-label", siteLabel(site));
@@ -117,7 +116,7 @@ for (const button of modeButtons) {
   button.addEventListener("click", () => {
     const mode = button.dataset.mode as Mode;
     viewer?.setMode(mode);
-    legend.style.visibility = mode === "slope" ? "visible" : "hidden";
+    legend.hidden = mode !== "slope";
     for (const option of modeButtons) option.setAttribute("aria-pressed", String(option === button));
   });
 }
@@ -191,8 +190,12 @@ function breakdownRows(match: Match) {
 }
 
 let currentMatch: Match | undefined;
-let shownMatches: Match[] = [];
-let rankedCount = 0;
+let shownMatches: { match: Match; rank: number }[] = [];
+
+function renderCoordinates() {
+  marsCoordinate.textContent = siteCoordinates(target);
+  earthCoordinate.textContent = currentMatch ? siteCoordinates(currentMatch.site) : "";
+}
 
 /** Cabeceras y tabla de medidas del par elegido (sin volver a cargar el terreno 3D). */
 function renderDetails(match: Match) {
@@ -200,7 +203,7 @@ function renderDetails(match: Match) {
   headings.replaceChildren(...pair.map((site) => {
     const panel = document.createElement("div");
     panel.className = "site";
-    const name = document.createElement("h2");
+    const name = document.createElement("h3");
     name.textContent = site.name;
     const source = document.createElement("a");
     source.href = site.raster || site.sourceUrl;
@@ -223,7 +226,7 @@ async function selectMatch(match: Match) {
   const request = new AbortController();
   pending = request;
   const pair = [target, candidate];
-  document.querySelector("#earth-site")!.textContent = candidate.name;
+  renderCoordinates();
   globes?.flyTo(candidate);
   renderDetails(match);
 
@@ -262,22 +265,27 @@ async function selectMatch(match: Match) {
 }
 
 function renderMatchList() {
-  matchList.replaceChildren(...shownMatches.map((match, index) => {
+  matchList.replaceChildren(...shownMatches.map(({ match, rank: position }) => {
     const { site: candidate } = match;
     const item = document.createElement("li");
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.site = candidate.id;
     button.setAttribute("aria-pressed", String(currentMatch?.site === candidate));
+    const rank = document.createElement("span");
+    rank.className = "match-rank";
+    rank.textContent = String(position);
+    rank.setAttribute("aria-label", t("v.rank", { n: position }));
     const name = document.createElement("span");
     name.className = "match-name";
     name.textContent = candidate.name;
     const origin = document.createElement("span");
-    origin.className = `match-origin ${candidate.origin ?? ""}`;
+    origin.className = "match-origin";
     origin.textContent = originLabel(candidate);
     const score = document.createElement("span");
     score.className = "match-distance";
-    score.textContent = `${index === 0 ? t("v.bestOf", { n: rankedCount }) : ""}${t("v.score", { v: num(match.total) })}`;
+    score.textContent = num(match.total);
+    score.setAttribute("aria-label", t("v.score", { v: score.textContent }));
     const bars = document.createElement("span");
     bars.className = "match-bars";
     bars.setAttribute("aria-label",
@@ -288,7 +296,7 @@ function renderMatchList() {
         return `<span title="${label} ${num(value)}"><b>${label[0]}</b><i style="--v:${Math.max(0, value)}"></i></span>`;
       })
       .join("");
-    button.append(name, origin, score, bars);
+    button.append(rank, name, score, origin, bars);
     button.addEventListener("click", () => void selectMatch(match));
     item.append(button);
     return item;
@@ -314,8 +322,7 @@ function selectSite(site: Site) {
   }).slice(0, 5);
   const bestCurated = ranked.find(({ site: s }) => s.origin === "curated");
   if (bestCurated && !shown.includes(bestCurated)) shown[shown.length - 1] = bestCurated;
-  shownMatches = shown;
-  rankedCount = ranked.length;
+  shownMatches = shown.map(match => ({ match, rank: ranked.indexOf(match) + 1 }));
   currentMatch = undefined;
   renderMatchList();
   results.hidden = false;
@@ -327,9 +334,8 @@ picker.addEventListener("change", () => {
   const site = marsSites.find(({ id }) => id === picker.value);
   if (site) selectSite(site);
 });
-document.querySelector("#find-matches")!.addEventListener("click", () => selectSite(target));
-markers.find(({ site }) => site === target)?.button.setAttribute("aria-pressed", "true");
 renderChrome();
+selectSite(target);
 
 // Cambio de idioma: se vuelven a pintar los textos generados sin perder la selección ni recargar el 3D.
 onLangChange(() => {

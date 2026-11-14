@@ -1,8 +1,5 @@
 // Vista 2D global: análogos terrestres de la Luna (polo sur) y de Marte en ventanas de 30 km.
 // Datos: src/data/results.json (pipeline/analogs/rank.py). Relieve: public/relieve/ (relief_images.py).
-import "@fontsource/barlow/latin-400.css";
-import "@fontsource/barlow/latin-500.css";
-import "@fontsource/barlow/latin-600.css";
 import "leaflet/dist/leaflet.css";
 import "./style.css";
 import "./lunaMarte.css";

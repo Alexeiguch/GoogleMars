@@ -1,10 +1,13 @@
 // Botones de idioma (ES/EN) y tema (claro/oscuro) en la cabecera de las dos páginas.
 // El tema y el idioma iniciales los fija el script en línea del <head> para que no haya parpadeo.
+import "@fontsource/fira-sans/latin-400.css";
+import "@fontsource/fira-sans/latin-500.css";
+import "@fontsource/inter/latin-600.css";
+import "@fontsource/inter/latin-700.css";
 import { applyStatic, getLang, onLangChange, setLang, t, type Lang } from "./i18n";
 
 type Theme = "light" | "dark";
 const THEME_KEY = "analogs-theme";
-const THEME_COLOR: Record<Theme, string> = { dark: "#171719", light: "#f6f4f1" };
 
 const root = document.documentElement;
 const currentTheme = (): Theme => (root.dataset.theme === "light" ? "light" : "dark");
@@ -41,7 +44,6 @@ function syncTheme() {
   const label = t(currentTheme() === "dark" ? "prefs.toLight" : "prefs.toDark");
   themeButton.setAttribute("aria-label", label);
   themeButton.title = label;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLOR[currentTheme()]);
 }
 
 for (const button of langButtons) button.addEventListener("click", () => setLang(button.dataset.lang as Lang));
