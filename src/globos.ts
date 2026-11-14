@@ -20,6 +20,8 @@ import {
   windowName, type Body, type EarthPoint, type EarthRole, type GlobeId, type Reference,
 } from "./globosData";
 import { TileLayer, direction, type TileLayerOptions } from "./tiles";
+import { mountPathPlanner } from "./pathPlanner";
+import { EARTH_RADIUS_KM, interpolateRoutePoint, MARS_RADIUS_KM, type RoutePoint } from "./pathRoute";
 
 // ---------------------------------------------------------------------------------------------
 // Franja de introducción: textos propios de esta página (no están en i18n.ts) y cifras de los datos ya cargados.
@@ -81,7 +83,7 @@ const PATCH_KM = 2;
 const FRAME_FILL = 0.6;
 /** El lado menor de la vista abarca siempre 36° (render() abre el campo vertical en paneles estrechos). */
 const VIEW_TAN = Math.tan(THREE.MathUtils.degToRad(18));
-const RADIUS_KM: Record<GlobeId, number> = { earth: 6371, moon: 1737.4, mars: 3389.5 };
+const RADIUS_KM: Record<GlobeId, number> = { earth: EARTH_RADIUS_KM, moon: 1737.4, mars: MARS_RADIUS_KM };
 /**
  * Brillo de la Luna: el mosaico LRO WAC (media 0,31) es mucho más oscuro que la imagen global (0,75).
  * Se suben los mosaicos y se bajan la imagen global y la capa polar para que se encuentren en ~0,49.
@@ -609,6 +611,9 @@ function render() {
     camera.near = Math.max((distance - 1) * 0.2, 1e-6);
     camera.far = distance + 1.5;
     camera.updateProjectionMatrix();
+    if (globe.id === "mars" && pathHover && pathPlanner.drawing) {
+      pathPlanner.previewPoint(pickPathPoint(pathHover.x - r.left, pathHover.y - r.top, r));
+    }
     // La luz acompaña a la cámara con el mismo ángulo a cualquier altura (si no, de cerca el suelo queda en sombra).
     globe.light.position.copy(camera.position).setLength(HOME_DISTANCE).add(lightOffset);
     globe.tiles.update(camera, rect.h * pixelRatio);
@@ -617,6 +622,9 @@ function render() {
     if (frame.group.visible) {
       for (const line of frame.group.children as Line2[]) (line.material as LineMaterial).resolution.set(rect.w, rect.h);
       frame.group.children.forEach((line) => { line.visible = frame.center.dot(camera.position.clone().sub(frame.center)) > 0; });
+    }
+    if (globe.id !== "moon") {
+      for (const line of routeLayers[globe.id].lines) line.material.resolution.set(rect.w, rect.h);
     }
     const y = height - rect.y - rect.h;
     renderer.setViewport(rect.x, y, rect.w, rect.h);
@@ -738,7 +746,7 @@ for (const globe of Object.values(globes)) {
   const pointers = new Map<number, { x: number; y: number; t: number }>();
   let multi = false;
   panel.addEventListener("pointerdown", (event) => {
-    if ((event.target as HTMLElement).closest("button")) return;
+    if (event.button !== 0 || (event.target as HTMLElement).closest("button")) return;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, t: performance.now() });
     if (pointers.size > 1) multi = true;
   });
@@ -751,13 +759,17 @@ for (const globe of Object.values(globes)) {
     const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y);
     if (moved > 6 || performance.now() - start.t > 700) return;
     const { x, y } = localPoint(globe, event);
+    if (pathPlanner.active) {
+      if (globe.id === "mars" && pathPlanner.drawing) addPathPoint(x, y);
+      return;
+    }
     const item = pick(globe, x, y);
     if (item) select(item);
   };
   panel.addEventListener("pointerup", end);
   panel.addEventListener("pointercancel", end);
   panel.addEventListener("pointermove", (event) => {
-    if (event.pointerType !== "mouse" || event.buttons) return;
+    if (pathPlanner.active || event.pointerType !== "mouse" || event.buttons) return;
     if ((event.target as HTMLElement).closest("button")) { hideTip(); return; }
     const { x, y } = localPoint(globe, event);
     const item = pick(globe, x, y);
@@ -1035,6 +1047,7 @@ detail.addEventListener("click", (event) => {
   if (item) { select(item, selected?.ref); detail.scrollTop = 0; }
 });
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && pathPlanner.drawing) { pathPlanner.endDrawing(); return; }
   if (event.key === "Escape" && !detail.hidden) clearSelection();
 });
 // El panel de detalle cambia el tamaño de los globos en escritorio.
@@ -1139,18 +1152,311 @@ function fillSources() {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Path Planner
+
+type RouteGlobeId = "mars" | "earth";
+const routeGlobeIds = ["mars", "earth"] as const;
+const routeLayers = {} as Record<RouteGlobeId, { group: THREE.Group; lines: Line2[]; markers: THREE.Points }>;
+const routeRadius = 1.000015;
+for (const id of routeGlobeIds) {
+  const color = id === "mars" ? "#ffc39c" : "#a6e4ff";
+  const group = new THREE.Group();
+  const lines = [new LineMaterial({ color: 0x111114, linewidth: 6.25 }), new LineMaterial({ color, linewidth: 3.25 })]
+    .map((material, index) => {
+      material.transparent = true;
+      material.depthWrite = false;
+      const line = new Line2(new LineGeometry(), material);
+      line.renderOrder = 5 + index;
+      line.frustumCulled = false;
+      line.visible = false;
+      group.add(line);
+      return line;
+    });
+  const geometry = new THREE.BufferGeometry();
+  const material = new THREE.ShaderMaterial({
+    uniforms: pointUniforms, vertexShader, fragmentShader, transparent: true, depthTest: false, depthWrite: false,
+  });
+  const markers = new THREE.Points(geometry, material);
+  markers.frustumCulled = false;
+  markers.renderOrder = 7;
+  markers.visible = false;
+  group.add(markers);
+  group.visible = false;
+  globes[id].scene.add(group);
+  routeLayers[id] = { group, lines, markers };
+}
+
+function setRouteOverlay(id: RouteGlobeId, points: readonly RoutePoint[]) {
+  const { lines, markers } = routeLayers[id];
+  const positions: number[] = [];
+  const vertices = points.map((point) => direction(point.lat, point.lon));
+  const angles = vertices.slice(1).map((point, index) => vertices[index].angleTo(point));
+  const maxStep = Math.max(.005, angles.reduce((sum, angle) => sum + angle, 0) / 4000);
+  const append = ({ x, y, z }: THREE.Vector3) => positions.push(x * routeRadius, y * routeRadius, z * routeRadius);
+  if (vertices.length) append(vertices[0]);
+  for (let index = 1; index < vertices.length; index++) {
+    const steps = Math.ceil(angles[index - 1] / maxStep);
+    for (let step = 1; step < steps; step++) {
+      const point = interpolateRoutePoint(points[index - 1], points[index], step / steps);
+      append(direction(point.lat, point.lon));
+    }
+    append(vertices[index]);
+  }
+  for (const line of lines) {
+    line.visible = points.length > 1;
+    line.geometry.dispose();
+    line.geometry = new LineGeometry();
+    if (line.visible) line.geometry.setPositions(positions);
+  }
+  markers.geometry.dispose();
+  markers.visible = vertices.length > 0;
+  const geometry = new THREE.BufferGeometry();
+  if (vertices.length) {
+    const colors = rgb(id === "mars" ? "#ffc39c" : "#a6e4ff");
+    const markerPositions: number[] = [];
+    const markerSizes: number[] = [];
+    const markerShapes: number[] = [];
+    const markerColors: number[] = [];
+    vertices.forEach(({ x, y, z }, index) => {
+      const endpoint = index === 0 || index === vertices.length - 1;
+      if (!endpoint && (id === "earth" || vertices.length > 50)) return;
+      markerPositions.push(x * routeRadius, y * routeRadius, z * routeRadius);
+      markerSizes.push(endpoint ? 13 : 7);
+      markerShapes.push(index === 0 ? Shape.Ring : Shape.Disc);
+      markerColors.push(...colors);
+    });
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(markerPositions, 3));
+    geometry.setAttribute("size", new THREE.Float32BufferAttribute(markerSizes, 1));
+    geometry.setAttribute("shape", new THREE.Float32BufferAttribute(markerShapes, 1));
+    geometry.setAttribute("tint", new THREE.Float32BufferAttribute(markerColors, 3));
+    geometry.setAttribute("hl", new THREE.Float32BufferAttribute(new Float32Array(markerSizes.length), 1));
+  }
+  markers.geometry = geometry;
+}
+
+function routeFrame(globe: Globe, points: readonly RoutePoint[]) {
+  const vectors = points.map(({ lat, lon }) => direction(lat, lon));
+  const center = vectors.reduce((sum, vector) => sum.add(vector), new THREE.Vector3());
+  if (center.lengthSq() < 1e-10) center.copy(vectors[0]);
+  center.normalize();
+  let angle = 0;
+  for (const vector of vectors) angle = Math.max(angle, center.angleTo(vector));
+  if (angle >= Math.PI / 2) return { center, altitudeKm: (HOME_DISTANCE - 1) * RADIUS_KM[globe.id] };
+  // The denominator accounts for the curvature beneath the outermost point.
+  const distance = Math.cos(angle) + Math.sin(angle) / (FRAME_FILL * VIEW_TAN);
+  const altitudeKm = (distance - 1) * RADIUS_KM[globe.id];
+  return { center, altitudeKm };
+}
+
+const pathMain = $<HTMLElement>("main.gl");
+const browseToolbar = $<HTMLElement>(".gl-toolbar");
+const browseTitle = $("#gl-browse-title");
+const pathZoom = $("#path-zoom");
+const marsPanel = globes.mars.panel;
+const earthPanel = globes.earth.panel;
+const browseInstructions = $(".gl-howto");
+const browsePositions = new Map<GlobeId, THREE.Vector3>();
+const browseFrames = new Map<GlobeId, boolean>();
+const pathRay = new THREE.Raycaster();
+const unitSphere = new THREE.Sphere(new THREE.Vector3(), 1);
+const intersection = new THREE.Vector3();
+let pathHover: { x: number; y: number } | null = null;
+
+// Use the bundled 30 km Jezero DEM relief beneath optional high-resolution imagery.
+const jezero = refById.get("jezero")!;
+const jezeroRelief = new THREE.Group();
+jezeroRelief.visible = false;
+globes.mars.scene.add(jezeroRelief);
+if (renderer) {
+  const center = direction(jezero.lat, jezero.lon);
+  const east = new THREE.Vector3().crossVectors(center, new THREE.Vector3(0, 1, 0)).negate().normalize();
+  const north = new THREE.Vector3().crossVectors(center, east).normalize();
+  const grid = new THREE.PlaneGeometry(1, 1, 12, 12);
+  const positions = grid.getAttribute("position");
+  for (let index = 0; index < positions.count; index++) {
+    const offset = 30 / MARS_RADIUS_KM;
+    const point = center.clone().addScaledVector(east, positions.getX(index) * offset)
+      .addScaledVector(north, positions.getY(index) * offset).normalize();
+    positions.setXYZ(index, point.x, point.y, point.z);
+  }
+  grid.computeBoundingSphere();
+  new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}relieve/ref_jezero.png`, (map) => {
+    map.colorSpace = THREE.SRGBColorSpace;
+    const relief = new THREE.Mesh(grid, new THREE.MeshBasicMaterial({ map, color: 0xc29c83, depthTest: false, depthWrite: false }));
+    relief.renderOrder = -95.5;
+    jezeroRelief.add(relief);
+    requestRender();
+  }, undefined, () => grid.dispose());
+}
+
+function pickPathPoint(x: number, y: number, { width, height } = marsPanel.getBoundingClientRect()): RoutePoint | null {
+  const { camera } = globes.mars;
+  if (x < 0 || x >= width || y < 0 || y >= height) return null;
+  camera.updateMatrixWorld();
+  pathRay.setFromCamera(new THREE.Vector2(x / width * 2 - 1, 1 - y / height * 2), camera);
+  const point = pathRay.ray.intersectSphere(unitSphere, intersection);
+  return point ? {
+    lat: THREE.MathUtils.radToDeg(Math.atan2(point.y, Math.hypot(point.x, point.z))),
+    lon: THREE.MathUtils.radToDeg(Math.atan2(-point.z, point.x)),
+  } : null;
+}
+
+function addPathPoint(x: number, y: number) {
+  const point = pickPathPoint(x, y);
+  if (point) pathPlanner.addPoint(point);
+}
+
+const pathPlanner = mountPathPlanner({
+  setActive(active) {
+    pathMain.classList.toggle("is-planning", active);
+    pathMain.classList.toggle("is-map-unavailable", !renderer || contextLost);
+    jezeroRelief.visible = active;
+    browseToolbar.hidden = browseTitle.hidden = globes.moon.panel.hidden = legend.hidden = browseInstructions.hidden = active;
+    detail.hidden = active || !selected;
+    pathZoom.hidden = !active;
+    if (active) earthPanel.before(marsPanel);
+    else marsPanel.before(earthPanel);
+    for (const id of routeGlobeIds) {
+      const panel = globes[id].panel;
+      panel.style.touchAction = active ? "pan-y" : "none";
+      const reset = panel.querySelector<HTMLButtonElement>(".gl-reset")!;
+      if (active) {
+        reset.dataset.i18nAttr = `aria-label:path.reset.${id}`;
+        reset.setAttribute("aria-label", t(`path.reset.${id}`));
+      } else {
+        delete reset.dataset.i18nAttr;
+        reset.removeAttribute("aria-label");
+      }
+    }
+    if (active) {
+      stage.dataset.i18nAttr = "aria-label:path.stage";
+      marsPanel.dataset.i18nAttr = "aria-label:path.marsMap";
+      marsPanel.setAttribute("aria-label", t("path.marsMap"));
+      marsPanel.setAttribute("role", "region");
+      marsPanel.setAttribute("aria-describedby", "path-keyboard");
+    } else {
+      stage.dataset.i18nAttr = "aria-label:gl.stageLabel";
+      delete marsPanel.dataset.i18nAttr;
+      marsPanel.removeAttribute("aria-label");
+      marsPanel.removeAttribute("role");
+      marsPanel.removeAttribute("aria-describedby");
+    }
+    stage.setAttribute("aria-label", t(active ? "path.stage" : "gl.stageLabel"));
+    hideTip();
+    for (const globe of Object.values(globes)) {
+      cancelAnimationFrame(globe.animation);
+      globe.panel.classList.remove("is-over-point");
+      if (active) {
+        browsePositions.set(globe.id, globe.camera.position.clone());
+        browseFrames.set(globe.id, frameLines[globe.id].group.visible);
+        frameLines[globe.id].group.visible = false;
+      } else {
+        const position = browsePositions.get(globe.id);
+        if (position) globe.camera.position.copy(position);
+        frameLines[globe.id].group.visible = browseFrames.get(globe.id) ?? false;
+      }
+      for (const layer of globe.layers) {
+        layer.points.visible = !active && (layer.items[0]?.kind !== "heat" || layer.items[0].visible);
+      }
+      if (globe.id !== "moon") routeLayers[globe.id].group.visible = active;
+      globe.controls.update();
+    }
+    if (active) {
+      globes.mars.camera.position.copy(direction(18.47, 77.36)).setLength(1 + MIN_ALTITUDE.mars);
+      globes.mars.controls.update();
+    }
+    requestRender();
+  },
+  setDrawing(active) {
+    pathHover = null;
+    marsPanel.classList.toggle("is-drawing", active);
+    marsPanel.style.touchAction = active || !pathMain.classList.contains("is-planning") ? "none" : "pan-y";
+    if (active) marsPanel.tabIndex = 0;
+    else marsPanel.removeAttribute("tabindex");
+  },
+  preview(mars, earth) {
+    setRouteOverlay("mars", mars);
+    setRouteOverlay("earth", earth);
+    requestRender();
+  },
+  fit(mars, earth) {
+    if (!mars.length) return;
+    const marsFrame = routeFrame(globes.mars, mars);
+    const earthFrame = earth.length ? routeFrame(globes.earth, earth) : null;
+    const altitude = Math.max(MIN_ALTITUDE.mars * RADIUS_KM.mars, marsFrame.altitudeKm, earthFrame?.altitudeKm ?? 0);
+    flyTo(globes.mars, marsFrame.center, 1 + altitude / RADIUS_KM.mars);
+    if (earthFrame) flyTo(globes.earth, earthFrame.center, 1 + altitude / RADIUS_KM.earth);
+  },
+  isAvailable: () => !!renderer && !contextLost,
+});
+
+function clearPathHover() {
+  if (!pathHover) return;
+  pathHover = null;
+  pathPlanner.previewPoint(null);
+}
+
+marsPanel.addEventListener("pointermove", (event) => {
+  if (!pathPlanner.drawing || event.pointerType === "touch" || event.buttons || (event.target as HTMLElement).closest("button")) {
+    clearPathHover();
+    return;
+  }
+  pathHover = { x: event.clientX, y: event.clientY };
+  const rect = marsPanel.getBoundingClientRect();
+  pathPlanner.previewPoint(pickPathPoint(event.clientX - rect.left, event.clientY - rect.top, rect));
+});
+marsPanel.addEventListener("pointerleave", clearPathHover);
+marsPanel.addEventListener("pointerdown", clearPathHover);
+marsPanel.addEventListener("pointercancel", clearPathHover);
+
+for (const [selector, factor] of [["#path-zoom-in", .63], ["#path-zoom-out", 1.59]] as const) {
+  const button = $<HTMLButtonElement>(selector);
+  button.addEventListener("pointerdown", (event) => event.stopPropagation());
+  button.addEventListener("click", () => zoomBy(globes.mars, factor));
+}
+marsPanel.addEventListener("keydown", (event) => {
+  if (event.target !== marsPanel || !pathPlanner.drawing) return;
+  const globe = globes.mars;
+  const { camera } = globe;
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    const { width, height } = marsPanel.getBoundingClientRect();
+    addPathPoint(width / 2, height / 2);
+  } else if (["+", "=", "-"].includes(event.key)) {
+    event.preventDefault();
+    zoomBy(globe, event.key === "-" ? 1.59 : .63);
+  } else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+    event.preventDefault();
+    cancelAnimationFrame(globe.animation);
+    const step = (camera.position.length() - 1) * .08;
+    const orbit = new THREE.Spherical().setFromVector3(camera.position);
+    if (event.key === "ArrowLeft") orbit.theta -= step / Math.max(.01, Math.sin(orbit.phi));
+    if (event.key === "ArrowRight") orbit.theta += step / Math.max(.01, Math.sin(orbit.phi));
+    if (event.key === "ArrowUp") orbit.phi -= step;
+    if (event.key === "ArrowDown") orbit.phi += step;
+    camera.position.setFromSpherical(orbit.makeSafe());
+    globe.controls.update();
+    requestRender();
+  }
+});
+
+// ---------------------------------------------------------------------------------------------
 // Arranque
 
 canvas.addEventListener("webglcontextlost", (event) => {
   event.preventDefault();
   contextLost = true;
   errorBox.hidden = false;
+  pathMain.classList.add("is-map-unavailable");
   hideTip();
+  pathPlanner.updateAvailability();
 });
 canvas.addEventListener("webglcontextrestored", () => {
   contextLost = false;
   errorBox.hidden = true;
+  pathMain.classList.remove("is-map-unavailable");
   requestRender();
+  pathPlanner.updateAvailability();
 });
 
 function paintTexts() {

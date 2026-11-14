@@ -4,12 +4,13 @@ Proyecto para el reto **"Identify Earth Locations that Analog the Permanent Moon
 
 Buscamos en **toda la Tierra** lugares que se parecen a las zonas candidatas para una base lunar permanente (polo sur, regiones de Artemis III) y a sitios de exploración de Marte. Para cada lugar explicamos **en qué se parece y en qué no**, dimensión por dimensión: terreno, superficie y clima.
 
-La app tiene tres vistas, enlazadas desde la cabecera:
+Las vistas de la app se enlazan desde la cabecera:
 
 | Vista | Página | Qué muestra |
 |---|---|---|
 | **Visor 3D de Marte** | `index.html` | 116 parches de Marte (HiRISE, 2 × 2 km a 20 m) frente a candidatos terrestres al mismo tamaño y escala, en 3D y con cámara compartida. |
 | **Globos 3D** | `globos.html` | Luna, Tierra y Marte con sitios y análogos del mapa y del visor. |
+| **Planificador de rutas** | `globos.html#path-planner` | Dibuja una ruta en Marte o importa GeoJSON, GPX o KML. Compara las rutas propuestas en la Tierra y guarda un candidato para un ensayo. |
 | **Mapa Luna y Marte** | `luna-marte.html` | Mapa 2D global con pestañas Luna/Marte, historias destacadas, gemelos por sitio, ranking general, validación con análogos conocidos y comparación lado a lado (relieve a la misma escala e imagen real). |
 
 ## Cómo se ejecuta
@@ -118,6 +119,15 @@ Se usa el modelo **ERA5** (`ecmwf-era5`). El modelo por defecto de Meteomatics (
 - Globos 3D de cerca: mosaicos que se cargan según el zoom (`src/tiles.ts`), como en Google Earth. Tierra: Esri World Imagery (la misma del mapa 2D). Luna: mosaico LRO WAC de 100 m (NASA Moon Trek). Marte: Viking MDIM 2.1 (NASA Mars Trek) de lejos y mosaico CTX beta01 de ~5 m (Caltech Murray Lab, vía Esri) de cerca, teñido con el color medio de Marte porque CTX es gris. Necesitan conexión; sin ella se ven las imágenes globales de `public/imagery/`. El servidor de CTX entrega algunos PNG cortados: se pasan por un canvas para conservar la parte buena, y los huecos se rellenan con el nivel anterior.
 
 Para añadir terreno a mano: `python3 scripts/export-catalog.py <carpeta>`, con subcarpetas `mars-crops/` y `earth-crops/`. Cada recorte es un array NumPy de 100 × 100 con un JSON del mismo nombre que lleva sus metadatos. El script calcula las medidas y escribe el catálogo y las rejillas `.f32` en little-endian.
+
+### Planificador de rutas
+
+El planificador acepta una línea continua de 0,1 a 200 km, con coordenadas planetocéntricas y longitudes positivas al este. Las elevaciones salen de modelos digitales del terreno. En la Tierra se prueba la forma de la ruta de Marte en distintas posiciones y orientaciones, con longitudes del 85 %, 100 % y 115 % de la original. La puntuación pondera la distancia (20 %), el cambio de elevación (40 %) y la pendiente con signo (40 %). Los perfiles se comparan al mismo porcentaje recorrido y con escalas verticales compartidas.
+
+- **Marte.** Parches HiRISE de 20 m y un recorte de Jezero del [modelo HRSC + MOLA de USGS](https://astrogeology.usgs.gov/search/map/mars_mgs_mola_mex_hrsc_blended_dem_global_200m). Para rutas cortas fuera de esas zonas, cuando hay conexión, el planificador solicita muestras del modelo global USGS. La malla global empaquetada de [NASA MOLA](https://pds-geosciences.wustl.edu/missions/mgs/megdr.html) tiene una separación de aproximadamente 7,4 km en el ecuador y da estimaciones regionales.
+- **Tierra.** Parches del visor para rutas cortas y 38 regiones de [Mapzen Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) con máscaras de agua de Natural Earth para rutas más extensas. Las rutas candidatas son trazados topográficos generados. Comprueba el acceso, los caminos y los peligros antes de un ensayo de campo.
+
+Los datos empaquetados permiten buscar sin servicios de red externos. `scripts/export-path-mars.py` y `scripts/export-path-earth.py` reproducen las mallas adicionales. La selección para el ensayo se guarda en el navegador.
 
 ## Sitios destacados
 
