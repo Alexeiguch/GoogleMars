@@ -210,22 +210,18 @@ async function usgsElevation(points: readonly RoutePoint[], distanceKm: number, 
     }
   }
   const missing = [...wanted].filter((index) => !usgsCells.has(index)).sort((a, b) => a - b);
-  const mergeRanges = (maxGap: number) => {
-    const ranges: { first: number; last: number }[] = [];
-    for (const index of missing) {
-      const previous = ranges.at(-1);
-      if (previous && index - previous.last <= maxGap) previous.last = index;
-      else ranges.push({ first: index, last: index });
-    }
-    return ranges;
-  };
-  // For many requests, trade at most 4 MiB for fewer requests. Rows are contiguous.
-  const sparse = mergeRanges(8);
-  const ranges = sparse.length <= 8 ? sparse : mergeRanges(width * 3);
-  if (ranges.reduce((bytes, { first, last }) => bytes + (last - first + 1) * 2, 0) > 4 * 1024 * 1024) return;
+  // Request each DEM row on its own. A range spanning rows also downloads the whole 213 kB row
+  // between them, so a 5 km north–south route would need several MiB and fall back to MOLA.
+  const ranges: { first: number; last: number }[] = [];
+  for (const index of missing) {
+    const previous = ranges.at(-1);
+    if (previous && index - previous.last <= 32) previous.last = index;
+    else ranges.push({ first: index, last: index });
+  }
+  if (ranges.length > 64) return;
 
   const pending = new AbortController();
-  const limit = AbortSignal.any([signal, pending.signal, AbortSignal.timeout(2400)]);
+  const limit = AbortSignal.any([signal, pending.signal, AbortSignal.timeout(5000)]);
   const values = new Map<number, number>();
   for (const index of wanted) {
     const cached = usgsCells.get(index);
@@ -235,7 +231,10 @@ async function usgsElevation(points: readonly RoutePoint[], distanceKm: number, 
     await Promise.all(ranges.map(async ({ first, last }) => {
       const start = dataStart + first * 2;
       const length = (last - first + 1) * 2;
-      const response = await fetch(usgsGlobal.url, { headers: { Range: `bytes=${start}-${start + length - 1}` }, signal: limit });
+      // Bypass the HTTP cache: browsers queue cached requests to one URL, so ranges would load one at a time.
+      const response = await fetch(usgsGlobal.url, {
+        headers: { Range: `bytes=${start}-${start + length - 1}` }, cache: "no-store", signal: limit,
+      });
       const contentLength = response.headers.get("Content-Length");
       const contentRange = response.headers.get("Content-Range");
       if (response.status !== 206 || (contentLength !== null && Number(contentLength) !== length) ||

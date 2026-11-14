@@ -285,7 +285,10 @@ export async function importRouteFile(file: File): Promise<ImportedRoute> {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const encoding = bytes[0] === 0xff && bytes[1] === 0xfe ? "utf-16le"
       : bytes[0] === 0xfe && bytes[1] === 0xff ? "utf-16be"
-      : "utf-8";
+      : format === "geojson" ? "utf-8"
+      // GPX and KML may declare a legacy encoding such as ISO-8859-1 for accented names.
+      : /^\s*<\?xml\b[^>]*\bencoding\s*=\s*["']([\w.:-]+)["']/
+        .exec(new TextDecoder("windows-1252").decode(bytes.subarray(0, 256)))?.[1] ?? "utf-8";
     content = new TextDecoder(encoding, { fatal: true }).decode(bytes);
   } catch {
     throw new RouteFileError("malformed-file");
