@@ -20,7 +20,6 @@
       <header class="masthead">
         <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">Análogos terrestres</span></h1>
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
-          <a href="./" data-i18n="nav.viewer">Visor 3D de Marte</a>
           <a href="./luna-marte.html" data-i18n="nav.map">Mapa Luna y Marte</a>
           <a href="./globos.html" aria-current="page" data-i18n="nav.globes">Globos 3D</a>
           <a href="#sources"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
@@ -37,6 +36,7 @@
           <span id="gl-count" class="gl-count" aria-live="polite"></span>
           <button type="button" class="gl-legend-toggle" id="gl-legend-toggle" aria-expanded="false" aria-controls="gl-legend" data-i18n="gl.legend">Leyenda</button>
         </div>
+        <a class="gl-jump" href="#gl-more"><span data-ui="jump">Comparar terreno de Marte en 3D</span> <span aria-hidden="true">↓</span></a>
         <div class="gl-pickers">
           <label class="gl-field"><span data-i18n="gl.refPicker">Sitio de la Luna o de Marte</span>
             <select id="gl-ref"><option data-i18n="gl.allSites">Todos los sitios</option></select>
@@ -72,6 +72,64 @@
         <aside class="gl-detail" id="gl-detail" aria-live="polite" aria-label="Detalle del punto" data-i18n-attr="aria-label:gl.detailLabel" hidden></aside>
       </div>
     </main>
+    <!-- Comparación de un sitio HiRISE de Marte con sus análogos de la Tierra (antes, el «Visor 3D de Marte»).
+         Siempre visible (Jezero por defecto); también se abre al tocar un parche HiRISE en el globo de Marte. -->
+    <div class="gl-more" id="gl-more">
+      <section class="gl-pick" aria-labelledby="pick-title">
+        <header class="step-head"><span class="step-num" aria-hidden="true">01</span><h2 id="pick-title" data-ui="step.pick">Elige un sitio de Marte</h2></header>
+        <div class="panel gl-pick-panel">
+          <label class="gl-pick-field"><span data-ui="pick.label">Sitio de Marte con relieve HiRISE</span>
+            <select id="hirise-site"></select>
+          </label>
+          <button type="button" id="hirise-show" data-ui="pick.show">Verlo en los globos</button>
+          <p class="gl-pick-note" data-ui="pick.note"></p>
+        </div>
+      </section>
+      <section class="results" aria-labelledby="matches-title">
+        <div class="result-title step-head"><span class="step-num" aria-hidden="true">02</span><h2 id="matches-title" data-i18n="v.matchesTitle">Análogos en la Tierra</h2><a href="#comparison"><span data-i18n="v.compareLink">Comparar terreno</span> <span aria-hidden="true">↓</span></a></div>
+        <p class="gl-more-for" id="gl-more-for"></p>
+        <ol class="match-list" id="match-list" aria-label="Sitios de la Tierra ordenados por terreno, superficie y clima" data-i18n-attr="aria-label:v.matchListLabel"></ol>
+      </section>
+      <section class="comparison" aria-label="Comparación de terreno" data-i18n-attr="aria-label:v.comparisonLabel" id="comparison">
+        <header class="step-head"><span class="step-num" aria-hidden="true">03</span><h2 data-i18n="v.compareLink">Comparar terreno</h2></header>
+        <div class="panel comparison-panel">
+          <div class="toolbar">
+            <div class="modes" role="group" aria-label="Color del terreno" data-i18n-attr="aria-label:v.colorLabel">
+              <button type="button" data-mode="relief" aria-pressed="false" data-i18n="v.relief">Relieve</button>
+              <button type="button" data-mode="slope" aria-pressed="true" data-i18n="v.slope">Pendiente</button>
+            </div>
+            <div class="camera-actions" role="group" aria-label="Cámara compartida" data-i18n-attr="aria-label:v.cameraLabel">
+              <button type="button" id="top-view" data-i18n="v.topView">Vista cenital</button>
+              <button type="button" id="reset-view" data-i18n="v.resetView">Restablecer vista</button>
+            </div>
+          </div>
+          <div class="site-grid ruled" id="site-headings"></div>
+          <div class="stage">
+            <canvas id="terrain" tabindex="0" aria-label="Vistas de terreno sincronizadas. Arrastra o usa las flechas para girar los dos terrenos. Usa la rueda o más y menos para acercar." data-i18n-attr="aria-label:v.terrainCanvas"></canvas>
+            <p id="viewer-error" role="status" hidden></p>
+          </div>
+          <div class="map-footer">
+            <div class="legend" id="legend" aria-label="Pendiente en grados" data-i18n-attr="aria-label:v.legendLabel"></div>
+            <span id="grid-scale"></span>
+          </div>
+        </div>
+      </section>
+      <section class="details" id="details" aria-labelledby="metrics-title">
+        <header class="step-head"><span class="step-num" aria-hidden="true">04</span><h2 id="metrics-title" data-i18n="v.metricsTitle">Medidas del terreno</h2></header>
+        <div class="panel table-panel">
+          <table>
+            <thead><tr><th scope="col" data-i18n="v.measure">Medida</th><th scope="col" data-i18n="planet.mars">Marte</th><th scope="col" data-i18n="planet.earth">Tierra</th></tr></thead>
+            <tbody id="metrics"></tbody>
+          </table>
+        </div>
+        <details id="ranking-method">
+          <summary data-i18n="v.method.summary">Cómo se puntúan los análogos</summary>
+          <p data-i18n="v.method.p1"></p>
+          <p data-i18n-html="v.method.p2"></p>
+          <p data-i18n="v.method.p3"></p>
+        </details>
+      </section>
+    </div>
     <footer id="sources" class="gl-footer">
       <section class="gl-about intro">
         <p class="intro__lede" data-ui="intro.lede"></p>

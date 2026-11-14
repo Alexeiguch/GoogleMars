@@ -1,8 +1,8 @@
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 
-// Tres páginas: el visor 3D de Marte (index.html), el mapa global Luna/Marte (luna-marte.html)
-// y los globos 3D de la Luna, la Tierra y Marte (globos.html).
+// Dos páginas: el mapa global Luna/Marte (luna-marte.html) y los globos 3D de la Luna, la Tierra y Marte
+// (globos.html), que incluyen la comparación 3D de terreno del antiguo visor. index.html solo redirige a globos.html.
 export default defineConfig({
   base: "./",
   build: {

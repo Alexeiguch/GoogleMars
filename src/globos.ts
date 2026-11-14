@@ -12,12 +12,16 @@ import { loadGlobeTexture } from "./globeTexture";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
-import { categoryLabel, type Site } from "./data";
+import {
+  categoryLabel, cellSize, loadTerrain, marsClimate, metricDefinitions, patchWidth, rankEarthSites, weights,
+  type Match, type Site,
+} from "./data";
+import { createViewer, gridSlopes, slopeBands, type Mode as TerrainMode, type ViewerSite } from "./viewer";
 import { getLang, locale, onLangChange, t, tr } from "./i18n";
 import {
   BEST_MIN_SCORE, BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, globeReferences, isHeadlineRef, marsPatches,
   refById, topSite, twinKeyOf, twinsOf,
-  windowName, type Body, type EarthPoint, type EarthRole, type GlobeId, type Reference,
+  windowName, type Body, type EarthPoint, type EarthRole, type EarthSite, type GlobeId, type Reference,
 } from "./globosData";
 import { TileLayer, direction, type TileLayerOptions } from "./tiles";
 
@@ -26,19 +30,51 @@ import { TileLayer, direction, type TileLayerOptions } from "./tiles";
 
 const UI_TEXT: UiText = {
   es: {
-    "intro.lede": "La Luna, la Tierra y Marte, dibujados del mismo tamaño. Los puntos de la Tierra son los lugares que más se parecen a los sitios de referencia de la Luna y de Marte: elige uno para ver su ficha y sus gemelos.",
+    "intro.lede": "La Luna, la Tierra y Marte, dibujados del mismo tamaño. Los puntos de la Tierra son los lugares que más se parecen a los sitios de referencia de la Luna y de Marte: elige uno para ver su ficha y sus gemelos. Los sitios de Marte con relieve HiRISE se comparan además en 3D con sus análogos de la Tierra, al mismo tamaño y escala.",
+    "more.for": "Para {site}, un sitio de Marte con relieve HiRISE de {w} × {w} km. Elige un análogo para compararlo en 3D.",
+    "pick.hirise": "Marte · relieve HiRISE · {cat}",
+    "lg.hirise": "Toca un parche HiRISE de Marte para ver sus análogos y comparar el terreno en 3D.",
+    "detail.compare": "Comparar el terreno en 3D",
+    "step.pick": "Elige un sitio de la Luna o de Marte",
+    "pick.label": "Sitio que se compara con la Tierra",
+    "pick.show": "Verlo en los globos",
+    "pick.note": "Sitios de referencia de la Luna y de Marte (ventanas de 30 km) y parches de Marte con relieve HiRISE (2 km). También puedes tocarlos en los globos.",
+    "pick.refs": "{body} · sitios de referencia (30 km)",
+    "more.forRef": "Para {site} ({body}), una ventana de {w} km: sus {n} gemelos de la Tierra, comparados con la misma ventana y la misma escala.",
+    "flat.scale": "Relieve sombreado en 2D · {w} × {w} km · el relieve 3D de este sitio aún no está exportado",
+    "moon.noAir": "sin atmósfera",
+    "group.terrainGrid": "Terreno · medido en esta cuadrícula (celdas de {c} m; el mapa Luna y Marte mide a 400 m)",
+    "group.climateRef": "Clima · Tierra: ERA5/Meteomatics (Marte: valores típicos)",
+    "jump": "Comparar terreno en 3D",
     "intro.figMoon": "sitios de referencia en la Luna",
     "intro.figMars": "sitios de referencia en Marte",
     "intro.figPatches": "puntos de la Tierra comparados",
   },
   en: {
-    "intro.lede": "The Moon, Earth and Mars, drawn at the same size. The points on Earth are the places that best match the Moon and Mars reference sites: pick one to see its details and its twins.",
+    "intro.lede": "The Moon, Earth and Mars, drawn at the same size. The points on Earth are the places that best match the Moon and Mars reference sites: pick one to see its details and its twins. Mars sites with HiRISE relief are also compared in 3D with their Earth analogs, at the same size and scale.",
+    "more.for": "For {site}, a Mars site with {w} × {w} km of HiRISE relief. Pick an analog to compare it in 3D.",
+    "pick.hirise": "Mars · HiRISE relief · {cat}",
+    "lg.hirise": "Tap a HiRISE patch on Mars to see its analogs and compare the terrain in 3D.",
+    "detail.compare": "Compare the terrain in 3D",
+    "step.pick": "Choose a Moon or Mars site",
+    "pick.label": "Site compared with Earth",
+    "pick.show": "Show it on the globes",
+    "pick.note": "Moon and Mars reference sites (30 km windows) and Mars patches with HiRISE relief (2 km). You can also tap them on the globes.",
+    "pick.refs": "{body} · reference sites (30 km)",
+    "more.forRef": "For {site} ({body}), a {w} km window: its {n} Earth twins, compared with the same window and the same scale.",
+    "flat.scale": "2D shaded relief · {w} × {w} km · the 3D relief for this site has not been exported yet",
+    "moon.noAir": "no atmosphere",
+    "group.terrainGrid": "Terrain · measured on this grid ({c} m cells; the Moon and Mars map measures at 400 m)",
+    "group.climateRef": "Climate · Earth: ERA5/Meteomatics (Mars: typical values)",
+    "jump": "Compare terrain in 3D",
     "intro.figMoon": "Moon reference sites",
     "intro.figMars": "Mars reference sites",
     "intro.figPatches": "Earth points compared",
   },
 };
 bindUiText(UI_TEXT);
+const ui = (key: string, params: Record<string, string | number> = {}) =>
+  UI_TEXT[getLang()][key].replace(/\{(\w+)\}/g, (_, k: string) => String(params[k] ?? ""));
 /**
  * Aviso de la ficha de una referencia sin puntuar (results.json: usable=false). En Marte la causa es siempre la misma
  * (solo hay MOLA de 463 m) y se explica en llano; en la Luna se añade usable_note tal cual.
@@ -238,10 +274,12 @@ function twinRoleOf(point: EarthPoint, ref: Reference) {
 function isVisible(item: Item) {
   switch (item.kind) {
     case "ref": return highlighted.has(item) || (refFilter ? item.ref!.id === refFilter : mode === "all" || isHeadlineRef(item.ref!));
-    case "patch": return mode === "all" && !refFilter;
+    // Los parches HiRISE (lo que antes era el visor 3D de Marte) se ven en los dos modos: tocarlos abre la comparación.
+    case "patch": return highlighted.has(item) || !refFilter;
     case "heat": return mode === "all" && !refFilter;
     case "earth": {
       const point = item.earth!;
+      if (highlighted.has(item)) return true;
       if (refFilter) {
         const ref = refById.get(refFilter)!;
         // Los gemelos de la referencia siguen visibles aunque no lleguen al puntaje de «Mejores».
@@ -859,24 +897,27 @@ function hideFrames() {
  * la que hace que el cuadrado comparado ocupe FRAME_FILL de la vista, y nunca por debajo del mínimo de ninguno
  * de los dos (la Luna no baja de ~17 km: su mosaico tiene 100 m por píxel).
  */
-function focusPair(item: Item, partner?: Item) {
+function focusPair(item: Item, partner?: Item, fixedKm?: number) {
   const pair = partner ? [item, partner] : [item];
-  const side = Math.max(...pair.map(windowKm));
+  const sideOf = (i: Item) => fixedKm ?? windowKm(i);
+  const side = Math.max(...pair.map(sideOf));
   const floor = Math.max(...pair.map((i) => MIN_ALTITUDE[i.globe] * RADIUS_KM[i.globe]));
   const km = Math.max(side / (FRAME_FILL * 2 * VIEW_TAN), floor);
   hideFrames();
   for (const i of pair) {
     flyTo(globes[i.globe], i.vec, 1 + km / RADIUS_KM[i.globe]);
-    showFrame(i, windowKm(i));
+    showFrame(i, sideOf(i));
   }
 }
 
 /**
  * Al elegir un punto (tocándolo, en «Ir a un punto», en el filtro o en el panel) se acercan los dos globos de la
  * pareja a la vez: el punto de la Tierra y su sitio más parecido de la Luna o Marte, o el sitio y su gemelo n.º 1.
- * Los parches HiRISE y las celdas de calor no tienen pareja: solo se acerca su globo.
+ * Un parche HiRISE de Marte se empareja con su mejor análogo de la Tierra (mismo cálculo que el antiguo visor 3D)
+ * y abre debajo la comparación de terreno. Las celdas de calor no tienen pareja: solo se acerca su globo.
  */
 function select(item: Item, reference = refFilter ? refById.get(refFilter) : undefined) {
+  if (item.kind === "patch") refFilter = null;
   selected = item;
   selectedEarthTwin = item.earth && reference ? twinRoleOf(item.earth, reference) : undefined;
   highlighted = new Set([item]);
@@ -885,15 +926,24 @@ function select(item: Item, reference = refFilter ? refById.get(refFilter) : und
     const twins = twinItemsOf(item.ref!);
     twins.forEach((t) => highlighted.add(t));
     partner = twins[0];
+    if (comparableRef(item.ref!)) setComparison(item);
   } else if (item.kind === "earth") {
     const body = selectedEarthTwin?.body ?? bestBody(item.earth!);
     const site = selectedEarthTwin?.site ?? (body ? item.earth!.data[body] : undefined);
     partner = site ? refItem.get(site.best_ref) : undefined;
     if (partner) highlighted.add(partner);
+  } else if (item.kind === "patch") {
+    setComparison(item);
+    for (const analog of compare.analogs) {
+      const earth = earthItemAt(analog.lat, analog.lon);
+      if (earth) highlighted.add(earth);
+    }
+    partner = compare.analog && earthItemAt(compare.analog.lat, compare.analog.lon);
   }
-  focusPair(item, partner);
+  focusPair(item, partner, item.kind === "patch" ? PATCH_KM : undefined);
   refreshPoints();
   renderDetail(item);
+  refSelect.value = item.kind === "patch" ? item.id : (refFilter ?? "");
   detail.scrollTop = 0;
   const goto = $<HTMLSelectElement>("#gl-goto");
   goto.value = item.kind === "heat" ? "" : item.id;
@@ -907,6 +957,7 @@ function clearSelection() {
   detail.hidden = true;
   detail.innerHTML = "";
   $<HTMLSelectElement>("#gl-goto").value = "";
+  refSelect.value = refFilter ?? "";
   refreshPoints();
 }
 
@@ -974,6 +1025,9 @@ function renderDetail(item: Item) {
     if (ref.source_url?.startsWith("https://")) {
       html += `<p class="gl-sub"><a href="${esc(ref.source_url)}" target="_blank" rel="noopener">${esc(t("gl.source"))}</a></p>`;
     }
+    if (comparableRef(ref)) {
+      html += `<p class="gl-sub"><a href="#comparison">${esc(ui("detail.compare"))} <span aria-hidden="true">↓</span></a></p>`;
+    }
     if (twins.length) {
       html += `<h3>${t("gl.twinsTitle")}</h3><ol class="gl-twins">${twins.map((site) => {
         const twin = earthByKey.get(earthKey(site.lat, site.lon));
@@ -1016,6 +1070,12 @@ function renderDetail(item: Item) {
       row(t("gl.medianElev"), num(m?.medianElevation, " m", 0)),
     ].join("");
     if (rows) html += `<h3>${t("gl.terrainTitle")}</h3><dl class="gl-dl">${rows}</dl>`;
+    if (compare.subject?.item === item && compare.analogs.length) {
+      html += `<h3>${t("v.matchesTitle")}</h3><ol class="gl-twins gl-analogs">${compare.analogs.map((analog, index) =>
+        `<li><button type="button" data-match="${index}" aria-pressed="${analog === compare.analog}"><span>${esc(analogName(analog))}<small>${esc(analogOrigin(analog))}</small></span><b>${pct(analog.total)}</b></button></li>`,
+      ).join("")}</ol>`;
+      html += `<p class="gl-sub"><a href="#comparison">${esc(ui("detail.compare"))} <span aria-hidden="true">↓</span></a></p>`;
+    }
     if (patch.sourceUrl) html += `<p class="gl-sub"><a href="${esc(patch.sourceUrl)}" target="_blank" rel="noopener">${esc(patch.source || t("gl.source"))}</a></p>`;
   } else {
     const heat = item.heat!;
@@ -1030,6 +1090,12 @@ function renderDetail(item: Item) {
 detail.addEventListener("click", (event) => {
   const target = event.target as HTMLElement;
   if (target.closest(".gl-close")) { clearSelection(); return; }
+  const matchButton = target.closest<HTMLElement>("[data-match]");
+  if (matchButton) {
+    const analog = compare.analogs[Number(matchButton.dataset.match)];
+    if (analog) void selectAnalog(analog);
+    return;
+  }
   const button = target.closest<HTMLElement>("[data-item]");
   const item = button && itemById.get(button.dataset.item!);
   if (item) { select(item, selected?.ref); detail.scrollTop = 0; }
@@ -1039,6 +1105,429 @@ document.addEventListener("keydown", (event) => {
 });
 // El panel de detalle cambia el tamaño de los globos en escritorio.
 new ResizeObserver(() => requestRender()).observe(stage);
+
+// ---------------------------------------------------------------------------------------------
+// Comparación de terreno con la Tierra (lo que era el «Visor 3D de Marte», ampliado a la Luna):
+// - un parche HiRISE de Marte (2 km) con sus 5 mejores análogos del catálogo (rankEarthSites);
+// - un sitio de referencia de la Luna o de Marte (ventana L0 de 30 km) con sus gemelos de results.json.
+// Tarjetas, los dos terrenos en 3D a la misma escala y la tabla de medidas. Si las alturas L0 aún no están
+// exportadas (public/terrain/l0/), se muestran las imágenes de relieve sombreado en 2D.
+
+const patchNames = new Map<string, number>();
+for (const { name } of marsPatches) patchNames.set(name, (patchNames.get(name) ?? 0) + 1);
+/** Nombre del parche; si hay otro con el mismo nombre, se añaden sus coordenadas. */
+const patchLabel = (site: Site) =>
+  (patchNames.get(site.name) ?? 0) > 1 ? `${tr(site.name)} (${coord(site.latitude, site.longitude)})` : tr(site.name);
+const earthItemAt = (lat: number, lon: number) => earthByKey.get(earthKey(lat, lon));
+
+function originLabel(site: Site) {
+  if (site.origin === "curated") return t("v.origin.curated");
+  return site.knownAnalog ? t("v.origin.near", { name: tr(site.knownAnalog) }) : t("v.origin.new");
+}
+
+/** Lugar de la Tierra que se compara con el sitio elegido (de un parche HiRISE o de una referencia L0). */
+type Analog = {
+  lat: number; lon: number;
+  total: number; terrain: number; surface: number; climate: number;
+  match?: Match;
+  twin?: EarthSite;
+};
+type Subject = { item: Item; patch?: Site; ref?: Reference };
+type GridMetrics = { medianSlope: number; steepSlope: number; relief: number; medianElevation: number };
+
+const analogName = (a: Analog) => {
+  if (a.match) return tr(a.match.site.name);
+  const item = earthItemAt(a.lat, a.lon);
+  return item ? label(item) : windowName(a.lat, a.lon);
+};
+const analogOrigin = (a: Analog) => {
+  if (a.match) return originLabel(a.match.site);
+  const near = a.twin?.known_analog;
+  return near ? t("v.origin.near", { name: tr(near) }) : t("v.origin.new");
+};
+
+/**
+ * Los 5 análogos de un parche: un parche por región escaneada (ids como "g012-34") para que salgan lugares
+ * distintos, y siempre el mejor sitio curado (USGS 3DEP, más resolución). Mismo criterio que tenía el visor.
+ */
+function patchAnalogs(site: Site): [Analog[], number] {
+  const ranked = rankEarthSites(site);
+  const regions = new Set<string>();
+  const shown = ranked.filter(({ site: s }) => {
+    const region = s.origin === "global" ? s.id.split("-")[0] : s.id;
+    if (regions.has(region)) return false;
+    regions.add(region);
+    return true;
+  }).slice(0, 5);
+  const bestCurated = ranked.find(({ site: s }) => s.origin === "curated");
+  if (bestCurated && !shown.includes(bestCurated)) shown[shown.length - 1] = bestCurated;
+  const analogs = shown.map((match) => ({
+    lat: match.site.latitude, lon: match.site.longitude,
+    total: match.total, terrain: match.terrain, surface: match.surface, climate: match.climate, match,
+  }));
+  return [analogs, ranked.length];
+}
+const refAnalogs = (ref: Reference): Analog[] => twinsOf(ref).map((twin) => ({
+  lat: twin.lat, lon: twin.lon, total: twin.score,
+  terrain: twin.scores.terrain, surface: twin.scores.surface, climate: twin.scores.climate, twin,
+}));
+/** Referencias que se pueden comparar: sitios y centros de región que puntúan y tienen gemelos. */
+const comparableRef = (ref: Reference) => isHeadlineRef(ref) && ref.usable !== false && twinsOf(ref).length > 0;
+
+const compare = {
+  subject: null as Subject | null,
+  analogs: [] as Analog[],
+  analog: undefined as Analog | undefined,
+  ranked: 0,
+  pending: undefined as AbortController | undefined,
+  viewer: undefined as ReturnType<typeof createViewer> | undefined,
+  failed: false,
+  flat: false,
+  statusKey: null as string | null,
+  /** Medidas calculadas de las alturas L0 (referencia, Tierra) cuando se han cargado. */
+  gridMetrics: null as [GridMetrics, GridMetrics] | null,
+  /** Referencia cuya ventana se dibuja (la best_ref del gemelo, que en una región puede ser una tesela). */
+  shownRef: null as Reference | null,
+  /** Tamaño de celda de las alturas L0 cargadas (m), para avisar de que las pendientes no son las del mapa. */
+  cellM: 300,
+};
+const matchList = $<HTMLElement>("#match-list");
+const terrainCanvas = $<HTMLCanvasElement>("#terrain");
+const terrainStage = terrainCanvas.parentElement!;
+const terrainStatus = $<HTMLElement>("#viewer-error");
+const terrainLegend = $<HTMLElement>("#legend");
+const terrainButtons = document.querySelectorAll<HTMLButtonElement>(".comparison .toolbar button");
+const flatView = document.createElement("div");
+flatView.className = "gl-flat";
+flatView.hidden = true;
+terrainStage.append(flatView);
+const dec = (v: number, d = 1) => fmt(v, d);
+const share = (v: number) => `${pct(v)}${getLang() === "es" ? " %" : "%"}`;
+const BASE = import.meta.env.BASE_URL;
+
+function setTerrainStatus(key: string | null) {
+  compare.statusKey = key;
+  terrainStatus.hidden = key === null;
+  if (key) terrainStatus.textContent = t(key);
+}
+function showTerrainError() {
+  compare.failed = true;
+  setTerrainStatus("v.viewerError");
+  terrainCanvas.hidden = true;
+  for (const button of terrainButtons) button.disabled = true;
+}
+terrainCanvas.addEventListener("webglcontextlost", showTerrainError);
+
+const terrainModes = document.querySelectorAll<HTMLButtonElement>(".comparison [data-mode]");
+for (const button of terrainModes) {
+  button.addEventListener("click", () => {
+    const value = button.dataset.mode as TerrainMode;
+    compare.viewer?.setMode(value);
+    terrainLegend.style.visibility = value === "slope" ? "visible" : "hidden";
+    for (const option of terrainModes) option.setAttribute("aria-pressed", String(option === button));
+  });
+}
+$("#top-view").addEventListener("click", () => compare.viewer?.setView("top"));
+$("#reset-view").addEventListener("click", () => compare.viewer?.setView("oblique"));
+
+// ---- alturas L0 (public/terrain/l0/, exportadas por el pipeline) ----
+type L0Manifest = { window_km: number; grid: number; cell_m: number; refs: string[]; earth: string[] };
+let manifestPromise: Promise<L0Manifest | null> | undefined;
+function l0Manifest() {
+  manifestPromise ??= fetch(`${BASE}terrain/l0/index.json`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((m) => (m && Array.isArray(m.refs) && Array.isArray(m.earth) && m.grid > 1 && m.cell_m > 0 ? m as L0Manifest : null))
+    .catch(() => null);
+  return manifestPromise;
+}
+const key4 = (lat: number, lon: number) => `${lat.toFixed(4)}_${lon.toFixed(4)}`;
+const l0Cache = new Map<string, Float32Array>();
+async function loadL0(file: string, n: number, signal: AbortSignal) {
+  const hit = l0Cache.get(file);
+  if (hit) return hit;
+  const response = await fetch(`${BASE}terrain/l0/${file}`, { signal });
+  if (!response.ok) throw new Error(`No se pudo cargar ${file}`);
+  const bytes = await response.arrayBuffer();
+  if (bytes.byteLength !== n * n * 4) throw new Error(`Tamaño no válido: ${file}`);
+  const view = new DataView(bytes);
+  const elevation = Float32Array.from({ length: n * n }, (_, i) => view.getFloat32(i * 4, true));
+  if (!elevation.every(Number.isFinite)) throw new Error(`Celdas no válidas: ${file}`);
+  if (l0Cache.size > 24) l0Cache.delete(l0Cache.keys().next().value!);
+  l0Cache.set(file, elevation);
+  return elevation;
+}
+function quantile(sorted: Float32Array | number[], q: number) {
+  return sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))))];
+}
+/** Mismas medidas que el catálogo: pendiente mediana y p90, desnivel p5–p95 y elevación mediana. */
+function gridMetricsOf(elevation: Float32Array, n: number, cell: number): GridMetrics {
+  const slopes = Float32Array.from(gridSlopes(elevation, n, cell)).sort();
+  const heights = Float32Array.from(elevation).sort();
+  return {
+    medianSlope: quantile(slopes, 0.5), steepSlope: quantile(slopes, 0.9),
+    relief: quantile(heights, 0.95) - quantile(heights, 0.05), medianElevation: quantile(heights, 0.5),
+  };
+}
+
+function setComparison(item: Item) {
+  const subject: Subject = { item, patch: item.patch, ref: item.ref };
+  compare.subject = subject;
+  if (subject.patch) [compare.analogs, compare.ranked] = patchAnalogs(subject.patch);
+  else { compare.analogs = refAnalogs(subject.ref!); compare.ranked = 0; }
+  compare.analog = compare.analogs[0];
+  pickSelect.value = item.id;
+  renderComparisonTexts();
+  if (compare.analog) void selectAnalog(compare.analog, false);
+}
+const pickSelect = $<HTMLSelectElement>("#hirise-site");
+pickSelect.addEventListener("change", () => {
+  const item = itemById.get(pickSelect.value);
+  if (!item) return;
+  // Si en los globos ya hay un sitio elegido, se cambia también allí para que ficha y comparación coincidan.
+  if (selected?.kind === "patch" || selected?.kind === "ref") select(item);
+  else setComparison(item);
+});
+$("#hirise-show").addEventListener("click", () => {
+  const item = itemById.get(pickSelect.value);
+  if (!item) return;
+  select(item);
+  stage.scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth", block: "center" });
+});
+
+function showFlat(subject: Subject, analog: Analog) {
+  const ref = compare.shownRef ?? subject.ref!;
+  const px = ref.body === "moon" ? 120 : 200;
+  const la = analog.lat.toFixed(4);
+  const lo = analog.lon.toFixed(4);
+  const figure = (urls: string[], caption: string) => {
+    const fig = document.createElement("figure");
+    const img = document.createElement("img");
+    img.alt = caption;
+    img.decoding = "async";
+    let i = 0;
+    img.addEventListener("error", () => {
+      if (++i < urls.length) { img.src = urls[i]; return; }
+      const empty = document.createElement("div");
+      empty.className = "gl-flat-empty";
+      empty.textContent = t("lm.noImage");
+      img.replaceWith(empty);
+    });
+    img.src = urls[0];
+    fig.append(img);
+    return fig;
+  };
+  flatView.replaceChildren(
+    figure([`${BASE}relieve/ref_${ref.id}_L0.png`, `${BASE}relieve/ref_${ref.id}.png`], tr(ref.name)),
+    figure([`${BASE}relieve/e_${la}_${lo}_L0_${px}m.png`, `${BASE}relieve/e_${la}_${lo}.png`], analogName(analog)),
+  );
+  compare.flat = true;
+  flatView.hidden = false;
+  terrainCanvas.style.visibility = "hidden";
+  terrainLegend.style.visibility = "hidden";
+  for (const button of terrainButtons) button.disabled = true;
+  setTerrainStatus(null);
+  renderScaleText();
+}
+
+/** Elige el análogo que se compara: la Tierra vuela a él (si el sitio está elegido en los globos) y se cargan los terrenos. */
+async function selectAnalog(analog: Analog, fly = true) {
+  const subject = compare.subject;
+  if (!subject) return;
+  compare.analog = analog;
+  compare.gridMetrics = null;
+  compare.shownRef = subject.ref ? (refById.get(analog.twin?.best_ref ?? "") ?? subject.ref) : null;
+  if (fly && selected === subject.item) {
+    focusPair(subject.item, earthItemAt(analog.lat, analog.lon), subject.patch ? PATCH_KM : undefined);
+  }
+  for (const button of document.querySelectorAll<HTMLElement>("#match-list button, .gl-analogs button")) {
+    button.setAttribute("aria-pressed", String(compare.analogs[Number(button.dataset.match)] === analog));
+  }
+  renderTerrainDetails();
+  compare.pending?.abort();
+  const request = new AbortController();
+  compare.pending = request;
+  if (compare.failed) return;
+  compare.flat = false;
+  flatView.hidden = true;
+  terrainCanvas.style.visibility = "hidden";
+  setTerrainStatus("v.loading");
+  for (const button of terrainButtons) button.disabled = true;
+  try {
+    let grids: ViewerSite[];
+    if (subject.patch) {
+      grids = await Promise.all([subject.patch, analog.match!.site].map((s) => loadTerrain(s, request.signal)));
+    } else {
+      const manifest = await l0Manifest();
+      const ref = compare.shownRef!;
+      const refId = manifest?.refs.includes(ref.id) ? ref.id : manifest?.refs.includes(subject.ref!.id) ? subject.ref!.id : null;
+      const earth = key4(analog.lat, analog.lon);
+      if (request.signal.aborted) return;
+      if (!manifest || !refId || !manifest.earth.includes(earth)) { showFlat(subject, analog); return; }
+      if (refId !== ref.id) compare.shownRef = subject.ref!;
+      const { grid: n, cell_m: cell } = manifest;
+      const [a, b] = await Promise.all([
+        loadL0(`ref_${refId}.f32`, n, request.signal), loadL0(`e_${earth}.f32`, n, request.signal),
+      ]);
+      const ma = gridMetricsOf(a, n, cell);
+      const mb = gridMetricsOf(b, n, cell);
+      compare.gridMetrics = [ma, mb];
+      compare.cellM = cell;
+      grids = [
+        { id: `l0:ref:${refId}`, elevation: a, n, cell, metrics: ma },
+        { id: `l0:e:${earth}`, elevation: b, n, cell, metrics: mb },
+      ];
+      renderTerrainDetails();
+    }
+    if (request.signal.aborted || compare.failed) return;
+    if (compare.viewer) {
+      compare.viewer.setSites(grids);
+    } else {
+      try {
+        compare.viewer = createViewer(terrainCanvas, grids);
+      } catch {
+        showTerrainError();
+        return;
+      }
+    }
+    setTerrainStatus(null);
+    terrainCanvas.style.visibility = "visible";
+    const slopeOn = document.querySelector(".comparison [data-mode='slope']")?.getAttribute("aria-pressed") === "true";
+    terrainLegend.style.visibility = slopeOn ? "visible" : "hidden";
+    for (const button of terrainButtons) button.disabled = false;
+    renderScaleText();
+  } catch (error) {
+    if (request.signal.aborted || compare.failed) return;
+    console.error(error);
+    setTerrainStatus("v.loadError");
+  }
+}
+
+const MATCH_METRICS = [
+  { key: "terrain", icon: "M2 13 6 6l2 3 2-5 4 9H2Z" },
+  { key: "surface", icon: "M2 5h12M2 8l4 1 4-1 4 1M2 12h12" },
+  { key: "climate", icon: "M8 2v1m0 10v1M2 8h1m10 0h1M3.75 3.75l.7.7m7.1 7.1.7.7m0-8.5-.7.7m-7.1 7.1-.7.7M11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" },
+] as const;
+
+function renderMatchCards() {
+  matchList.replaceChildren(...compare.analogs.map((analog, index) => {
+    const item = document.createElement("li");
+    item.style.setProperty("--i", String(index)); // retardo de la entrada escalonada (style.css)
+    const best = index === 0 && compare.ranked ? t("v.bestOf", { n: compare.ranked }) : "";
+    const origin = analog.match?.site.origin ?? "global";
+    item.innerHTML = `<button type="button" data-match="${index}" aria-pressed="${analog === compare.analog}">
+      <span class="match-rank" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+      <span class="match-score" aria-hidden="true">${pct(analog.total)}</span>
+      <span class="match-name">${esc(analogName(analog))}</span>
+      <span class="match-origin ${origin}">${esc(analogOrigin(analog))}</span>
+      <span class="match-meta" aria-hidden="true">${esc(best.replace(/[\s·]+$/u, ""))}</span>
+      <span class="match-distance">${esc(best + t("v.score", { v: pct(analog.total) }))}</span>
+      <span class="match-bars">${MATCH_METRICS.map(({ key, icon }) => `
+        <span class="match-metric">
+          <span class="match-metric-label"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="${icon}"/></svg>${t(`v.bar.${key}`)}</span>
+          <i aria-hidden="true" style="--v:${analog[key]}"></i>
+          <span class="match-metric-value">${pct(analog[key])}</span>
+        </span>`).join("")}</span>
+    </button>`;
+    return item;
+  }));
+}
+matchList.addEventListener("click", (event) => {
+  const button = (event.target as HTMLElement).closest<HTMLElement>("[data-match]");
+  const analog = button && compare.analogs[Number(button.dataset.match)];
+  if (analog) void selectAnalog(analog);
+});
+
+function renderScaleText() {
+  const subject = compare.subject;
+  const scale = $("#grid-scale");
+  if (!subject || subject.patch) { scale.textContent = t("v.gridScale", { w: patchWidth / 1000, c: cellSize }); return; }
+  if (compare.flat) { scale.textContent = ui("flat.scale", { w: WINDOW_KM }); return; }
+  void l0Manifest().then((m) => {
+    if (m && compare.subject === subject && !compare.flat) {
+      scale.textContent = t("v.gridScale", { w: fmt(m.window_km, 0), c: fmt(m.cell_m, 0) });
+    }
+  });
+}
+
+/** Cabeceras de los dos terrenos y tabla de medidas, clima y puntuación. */
+function renderTerrainDetails() {
+  const subject = compare.subject;
+  const analog = compare.analog;
+  if (!subject || !analog) return;
+  const body: Body = subject.ref?.body ?? "mars";
+  const where = (lat: number, lon: number, link?: string, title = "") => link?.startsWith("http")
+    ? `<a href="${esc(link)}" title="${esc(title)}" target="_blank" rel="noopener">${coord(lat, lon, 3)}</a>` : `<p>${coord(lat, lon, 3)}</p>`;
+  const shown = compare.shownRef ?? subject.ref;
+  const left = subject.patch
+    ? `<h2>${esc(patchLabel(subject.patch))}</h2>${where(subject.patch.latitude, subject.patch.longitude, subject.patch.raster || subject.patch.sourceUrl, subject.patch.source)}`
+    : `<h2>${refName(shown!.id)}</h2>${where(shown!.lat, shown!.lon, shown!.source_url)}`;
+  const earthLink = analog.match ? analog.match.site.raster || analog.match.site.sourceUrl : undefined;
+  $("#site-headings").innerHTML = `<div class="site is-${body}">${left}</div>`
+    + `<div class="site"><h2>${esc(analogName(analog))}</h2>${where(analog.lat, analog.lon, earthLink, analog.match?.site.source)}</div>`;
+  const bodyHead = $("#details thead th:nth-child(2)");
+  bodyHead.textContent = bodyName(body);
+  bodyHead.classList.toggle("is-moon", body === "moon");
+
+  const tr3 = (label: string, a: string, b: string) => `<tr><th scope="row">${label}</th><td>${a}</td><td>${b}</td></tr>`;
+  const group = (label: string) => `<tr class="group"><th scope="rowgroup" colspan="3">${label}</th></tr>`;
+  const scoreRows = [
+    group(t("v.group.score")),
+    tr3(t("v.terrainSim", { p: share(weights.terrain) }), "", String(pct(analog.terrain))),
+    tr3(t("v.surfaceW", { p: share(weights.surface) }), "", String(pct(analog.surface))),
+    tr3(t("v.climateW", { p: share(weights.climate) }), "", String(pct(analog.climate))),
+    tr3(t("v.total"), "", `<strong>${pct(analog.total)}</strong>`),
+  ];
+
+  if (subject.patch) {
+    const site = subject.patch;
+    const earth = analog.match!.site;
+    const cover = earth.cover;
+    const climate = earth.climate;
+    const polar = site.category === "Ice & polar terrain";
+    $("#metrics").innerHTML = metricDefinitions.map(({ key, label, unit }) =>
+      tr3(t(label), `${dec(site.metrics[key])}${unit}`, `${dec(earth.metrics[key])}${unit}`)).join("") + [
+      group(t("v.group.surface")),
+      tr3(t("v.bare"), polar ? t("v.dustRock") : share(1), cover ? `${share(cover.bare)}${cover.assumed ? t("v.assumed") : ""}` : "—"),
+      tr3(t("v.snowIce"), polar ? t("v.iceRich") : "—", cover ? share(cover.snow_ice) : "—"),
+      tr3(t("v.vegetation"), share(0), cover ? share(cover.vegetation) : "—"),
+      group(t("v.group.climate")),
+      tr3(t("v.tMean"), `${marsClimate.t_mean} °C`, climate ? `${dec(climate.t_mean)} °C` : "—"),
+      tr3(t("v.diurnal"), `~${marsClimate.diurnal_range} °C`, climate ? `${dec(climate.diurnal_range)} °C` : "—"),
+      tr3(t("v.precip"), `${marsClimate.precip_year} mm`, climate ? `${Math.round(climate.precip_year)} mm` : "—"),
+      ...scoreRows,
+    ].join("");
+    return;
+  }
+  // Referencia L0: las medidas del terreno salen de las alturas cargadas (si aún no hay, «—»).
+  const [ma, mb] = compare.gridMetrics ?? [null, null];
+  const climate = analog.twin?.climate;
+  const bodyClimate = (v: string) => (body === "mars" ? v : ui("moon.noAir"));
+  $("#metrics").innerHTML = group(ui("group.terrainGrid", { c: fmt(compare.cellM, 0) })) + metricDefinitions.map(({ key, label, unit }) =>
+    tr3(t(label), ma ? `${dec(ma[key], key === "relief" ? 0 : 1)}${unit}` : "—", mb ? `${dec(mb[key], key === "relief" ? 0 : 1)}${unit}` : "—"),
+  ).join("") + [
+    group(ui("group.climateRef")),
+    tr3(t("v.tMean"), bodyClimate(`${marsClimate.t_mean} °C`), climate ? `${dec(climate.t_mean)} °C` : "—"),
+    tr3(t("v.diurnal"), bodyClimate(`~${marsClimate.diurnal_range} °C`), climate ? `${dec(climate.diurnal_range)} °C` : "—"),
+    tr3(t("v.precip"), bodyClimate(`${marsClimate.precip_year} mm`), climate ? `${Math.round(climate.precip_year)} mm` : "—"),
+    ...scoreRows,
+  ].join("");
+}
+
+/** Textos generados de la comparación (también al cambiar de idioma). */
+function renderComparisonTexts() {
+  terrainLegend.innerHTML = `<span>${t("v.slope")}</span>${slopeBands.map(({ label, color }) =>
+    `<span><i style="background:${color}" aria-hidden="true"></i>${label}</span>`).join("")}`;
+  if (compare.statusKey) setTerrainStatus(compare.statusKey);
+  const subject = compare.subject;
+  renderScaleText();
+  if (!subject) return;
+  $("#gl-more-for").textContent = subject.patch
+    ? ui("more.for", { site: patchLabel(subject.patch), w: patchWidth / 1000 })
+    : ui("more.forRef", { site: tr(subject.ref!.name), body: bodyName(subject.ref!.body), w: WINDOW_KM, n: compare.analogs.length });
+  $<HTMLElement>("#ranking-method").hidden = !subject.patch;
+  renderMatchCards();
+  renderTerrainDetails();
+}
 
 // ---------------------------------------------------------------------------------------------
 // Controles: modo, desplegables y leyenda
@@ -1056,10 +1545,31 @@ const refSelect = $<HTMLSelectElement>("#gl-ref");
 function fillRefs() {
   refSelect.innerHTML = `<option value="">${esc(t("gl.allSites"))}</option>${BODIES.map((body) =>
     `<optgroup label="${esc(bodyName(body))}">${globeReferences.filter((r) => r.body === body)
-      .map((r) => `<option value="${esc(r.id)}">${refName(r.id)}</option>`).join("")}</optgroup>`).join("")}`;
-  refSelect.value = refFilter ?? "";
+      .map((r) => `<option value="${esc(r.id)}">${refName(r.id)}</option>`).join("")}</optgroup>`).join("")}${hiriseOptions()}`;
+  refSelect.value = selected?.kind === "patch" ? selected.id : (refFilter ?? "");
+  pickSelect.innerHTML = BODIES.map((body) => {
+    const refs = globeReferences.filter((r) => r.body === body && comparableRef(r));
+    return refs.length ? `<optgroup label="${esc(ui("pick.refs", { body: bodyName(body) }))}">${refs.map((r) =>
+      `<option value="ref:${esc(r.id)}">${refName(r.id)}</option>`).join("")}</optgroup>` : "";
+  }).join("") + hiriseOptions();
+  if (compare.subject) pickSelect.value = compare.subject.item.id;
+}
+/** Sitios HiRISE de Marte por categoría de terreno (el selector del antiguo visor 3D). */
+function hiriseOptions() {
+  const groups = new Map<string, Item[]>();
+  for (const item of items) {
+    if (item.kind !== "patch") continue;
+    const list = groups.get(item.patch!.category) ?? [];
+    list.push(item);
+    groups.set(item.patch!.category, list);
+  }
+  return [...groups].map(([category, list]) =>
+    `<optgroup label="${esc(ui("pick.hirise", { cat: categoryLabel(category) }))}">${list.map((item) =>
+      `<option value="${esc(item.id)}">${esc(patchLabel(item.patch!))}</option>`).join("")}</optgroup>`).join("");
 }
 refSelect.addEventListener("change", () => {
+  const patch = refSelect.value.startsWith("patch:") ? itemById.get(refSelect.value) : undefined;
+  if (patch) { select(patch); return; }
   refFilter = refSelect.value || null;
   if (refFilter) select(refItem.get(refFilter)!);
   else refreshPoints();
@@ -1104,7 +1614,8 @@ function fillLegend() {
     <span>${swatch("disc", SHAPE_INK)}${t("gl.lg.site", { moon: bodyName("moon"), moonMin: BEST_MIN_SCORE.moon, mars: bodyName("mars"), marsMin: BEST_MIN_SCORE.mars })}</span>
     <span>${swatch("ring", SHAPE_INK)}${t("gl.lg.validation")}</span>
     <span>${swatch("small", SHAPE_INK)}${t("gl.lg.catalog")}</span>
-    <span><i class="gl-ramp" style="--a:${HEAT_RAMP.moon[0]};--b:${HEAT_RAMP.moon[1]}"></i><i class="gl-ramp" style="--a:${HEAT_RAMP.mars[0]};--b:${HEAT_RAMP.mars[1]}"></i>${t("gl.lg.heat")}</span>`;
+    <span><i class="gl-ramp" style="--a:${HEAT_RAMP.moon[0]};--b:${HEAT_RAMP.moon[1]}"></i><i class="gl-ramp" style="--a:${HEAT_RAMP.mars[0]};--b:${HEAT_RAMP.mars[1]}"></i>${t("gl.lg.heat")}</span>
+    <span class="gl-lg-hint">${swatch("disc", PATCH_COLOR)}${esc(ui("lg.hirise"))}</span>`;
 }
 const legendToggle = $<HTMLButtonElement>("#gl-legend-toggle");
 legendToggle.addEventListener("click", () => {
@@ -1122,6 +1633,8 @@ const sources: [string, string][] = [
   ["gl.src.marsRefs", "https://astrogeology.usgs.gov/search/map/mars_mgs_mola_mex_hrsc_blended_dem_global_200m"],
   ["gl.src.hirise", "https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/"],
   ["gl.src.copernicus", "https://planetarycomputer.microsoft.com/dataset/cop-dem-glo-90"],
+  ["src.earth3dep", "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer"],
+  ["src.earthGlo30", "https://planetarycomputer.microsoft.com/dataset/cop-dem-glo-30"],
   ["gl.src.worldcover", "https://planetarycomputer.microsoft.com/dataset/esa-worldcover"],
   ["gl.src.climate", "https://www.meteomatics.com/en/weather-api/"],
   ["gl.src.earthImage", "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/"],
@@ -1163,6 +1676,7 @@ function paintTexts() {
 onLangChange(() => {
   hideTip();
   paintTexts();
+  renderComparisonTexts();
   if (selected && !detail.hidden) {
     const scroll = detail.scrollTop;
     renderDetail(selected);
@@ -1170,3 +1684,5 @@ onLangChange(() => {
   }
 });
 paintTexts();
+const startItem = itemById.get("patch:jezero") ?? items.find((i) => i.kind === "patch");
+if (startItem) setComparison(startItem);

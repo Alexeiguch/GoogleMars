@@ -279,6 +279,74 @@ main.gl {
 .gl-twins small { display: block; color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
 .gl-twins b { color: var(--earth); font-family: var(--font-mono); font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
 
+/* Análogo que se compara en 3D: misma marca de selección que las tarjetas (tinta). */
+.gl-analogs button[aria-pressed="true"] { background: var(--hover); box-shadow: inset 2px 0 0 var(--action); }
+.gl-analogs small { font-family: var(--font-body); }
+.gl-legend .gl-lg-hint { white-space: normal; color: var(--text); }
+
+/* ---- comparación de un parche HiRISE (antes, el visor 3D de Marte) ---- */
+.gl-more { max-width: 1560px; margin: 0 auto; padding: 8px var(--pad) 0; scroll-margin-top: 8px; }
+.gl-pick { margin-top: 32px; }
+.gl-pick-panel { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; padding: 16px 20px; }
+.gl-pick-field { display: grid; gap: 6px; flex: 1 1 320px; max-width: 520px; color: var(--muted); font-size: 14px; }
+.gl-pick-field select, #hirise-show {
+  min-height: 44px;
+  border: 1px solid var(--control-border);
+  background: var(--ground);
+  color: var(--text);
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 15px;
+}
+.gl-pick-field select:hover { border-color: var(--muted); }
+/* Acción principal de la sección: tinta llena, como «Buscar análogos» en el visor. */
+#hirise-show {
+  cursor: pointer;
+  padding-inline: 20px;
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--action-ink);
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+}
+#hirise-show:hover { background: color-mix(in srgb, var(--action) 84%, var(--ground)); }
+#hirise-show:active { transform: scale(.97); }
+.gl-pick-field select:focus-visible, #hirise-show:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gl-pick-note { flex-basis: 100%; margin: 0; color: var(--muted); font-size: 14px; }
+/* Enlace de la barra a la comparación (lo que era el visor 3D): visible sin bajar. */
+.gl-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--mars);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.gl-jump:hover { background: var(--hover); }
+.gl-jump:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gl-more .results { margin-top: 40px; }
+/* Sitio de la Luna en la comparación: su color de cuerpo en la cabecera y en la tabla. */
+.gl-more .site.is-moon h2::before { background: var(--moon); }
+.gl-more .details thead th.is-moon { color: var(--moon); }
+/* Respaldo 2D (relieve sombreado) cuando un sitio aún no tiene alturas exportadas. */
+.gl-flat { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gl-flat figure { margin: 0; display: grid; place-items: center; padding: 16px; min-height: 0; }
+.gl-flat figure + figure { border-left: 1px solid var(--border); }
+.gl-flat img { max-width: 100%; max-height: 100%; aspect-ratio: 1; object-fit: contain; image-rendering: auto; }
+.gl-flat-empty { color: var(--muted); font-size: 14px; }
+.gl-more .results, .gl-more .comparison, .gl-more .details { scroll-margin-top: 16px; }
+.gl-more-for { margin: -4px 0 14px; max-width: 70ch; color: var(--story); font-size: 15px; }
+.gl-more #ranking-method { margin-top: 16px; }
+
 /* ---- pie ---- */
 .gl-footer { max-width: 1560px; margin: 0 auto; padding: 0 var(--pad) 48px; border-top: 0; }
 .gl-about { padding: 32px 0 8px; }
