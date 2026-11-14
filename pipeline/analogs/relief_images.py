@@ -20,7 +20,8 @@ Nombres (nuevos; no pisan los de v1, ref_<id>.png y e_<lat>_<lon>.png):
 
 Entrada: un results.json v2 (PLAN_v2 §6). Se lee a la defensiva; lo que falta se salta:
   references                   referencias L0 {id, body, lat, lon}: se generan todas a L0.
-  reference_points             referencias L1/L2 {id, body, level, lat, lon} (lista o dict por id).
+  reference_points             referencias L1/L2 [id, body, level, group, lat, lon, usable],
+                               o registros {id, body, level, lat, lon} (lista o dict por id).
                                Si falta un id, se busca en data/references_v2.json y, como último
                                recurso, en otro nivel (mismo centro, ventana del nivel pedido).
   bodies[b].sites, .twins[ref] sitios L0 {lat, lon, best_ref} (en twins, best_ref = la clave).
@@ -193,6 +194,9 @@ def _ref_index(res: dict) -> dict[tuple[str, str], dict]:
     if isinstance(pts, dict):
         pts = [dict(v, id=v.get("id", k)) for k, v in pts.items() if isinstance(v, dict)]
     for r in pts:
+        if isinstance(r, list) and len(r) >= 6:
+            rid, body, level, _, lat, lon = r[:6]
+            r = dict(id=rid, body=body, level=level, lat=lat, lon=lon)
         add(r, "L1")
     if REFS_V2.exists():
         try:

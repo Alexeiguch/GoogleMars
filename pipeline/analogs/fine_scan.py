@@ -316,7 +316,15 @@ def run(level: int, items_file: Path, out: Path, part: int = 1, of: int = 1, lim
     items = _load_tiles(items_file) if level == 1 else _load_blocks(items_file)
     name = (lambda it: it["key"]) if level == 1 else (lambda it: it["file"])
     mine = items[part - 1::of]
-    todo = [it for it in mine if not (sub / f"{name(it)}.json").exists()]
+    todo = []
+    for it in mine:
+        path = sub / f"{name(it)}.json"
+        if not path.exists():
+            todo.append(it)
+        elif level == 2:
+            cached = json.loads(path.read_text(encoding="utf-8"))
+            if any(cached.get(k) != it[k] for k in ("lat", "lon", "body", "control")):
+                todo.append(it)
     if limit is not None:
         todo = todo[:limit]
     log(f"== L{level} {items_file} -> {sub} | {len(items)} en el archivo, parte {part}/{of}: {len(mine)}, "

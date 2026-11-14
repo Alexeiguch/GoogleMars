@@ -27,6 +27,8 @@ type Featured = { body: Body; ref: string; lat: number; lon: number; tag: string
 type Results = {
   references: Reference[];
   feature_labels: Record<string, string>;
+  version?: number;
+  groups?: Record<string, { name: string }>;
   bodies: Record<Body, { sites: EarthSite[]; twins: Record<string, EarthSite[]>; heat: [number, number, number][] }>;
   validation: { body: Body; name: string; percentile: number }[];
   featured: Featured[];
@@ -88,7 +90,8 @@ const pct = (v: number) => Math.round(v * 100);
 const coord = (lat: number, lon: number, d = 2) =>
   `${fmt(Math.abs(lat), d)}° ${lat < 0 ? "S" : "N"} · ${fmt(Math.abs(lon), d)}° ${lon < 0 ? (getLang() === "es" ? "O" : "W") : "E"}`;
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-const refById = (id: string) => DATA.references.find((r) => r.id === id)!;
+const refsById = new Map(DATA.references.map((ref) => [ref.id, ref]));
+const refById = (id: string) => refsById.get(id)!;
 const refName = (ref: Reference) => tr(ref.name);
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 
@@ -195,15 +198,15 @@ function render() {
   const twins = $("#twins");
   twins.replaceChildren();
   for (const [rid, list] of Object.entries(B.twins)) {
-    const ref = refById(rid);
+    const name = DATA.groups?.[rid]?.name ?? refById(rid).name;
     const head = document.createElement("h3");
     head.className = "lm-refname";
-    head.textContent = refName(ref);
+    head.textContent = tr(name);
     const ol = document.createElement("ol");
     ol.className = "lm-list";
     list.forEach((s, k) => {
       const { li, button } = listItem(s, rankBadge(k + 1, color, true), tr(s.known_analog) ?? t("lm.noStudies"));
-      register(`twin-${rid}-${k}`, button, (fly) => select(s, t("lm.twinTitle", { k: k + 1, name: refName(ref) }), null, fly));
+      register(`twin-${rid}-${k}`, button, (fly) => select(s, t("lm.twinTitle", { k: k + 1, name: tr(name) }), null, fly));
       ol.append(li);
     });
     twins.append(head, ol);
@@ -315,7 +318,12 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
 
 // ---- comparación lado a lado -------------------------------------------------
 let miniMaps: L.Map[] = [];
-const earthImg = (s: EarthSite) => `${BASE}relieve/e_${s.lat.toFixed(4)}_${s.lon.toFixed(4)}.png`;
+const earthImg = (s: EarthSite, body: Body) => {
+  const scale = DATA.version === 2 ? `_L0_${body === "moon" ? 120 : 200}m` : "";
+  return `${BASE}relieve/e_${s.lat.toFixed(4)}_${s.lon.toFixed(4)}${scale}.png`;
+};
+
+const refImg = (ref: Reference) => `${BASE}relieve/ref_${ref.id}${DATA.version === 2 ? "_L0" : ""}.png`;
 
 function boxBounds(lat: number, lon: number, radiusKm: number): L.LatLngBoundsExpression {
   const dLat = HALF_KM / (Math.PI * radiusKm / 180);
@@ -332,8 +340,8 @@ function showCompare(s: EarthSite, ref: Reference, mode: "relief" | "real") {
   const scale = $("#cmp-scale");
   if (mode === "relief") {
     scale.hidden = false;
-    grid.innerHTML = `<figure><img src="${earthImg(s)}" alt="${t("lm.altEarth")}">${capE}</figure>
-      <figure><img src="${BASE}relieve/ref_${ref.id}.png" alt="${esc(t("lm.altRef", { name: refName(ref) }))}">${capR}</figure>`;
+    grid.innerHTML = `<figure><img src="${earthImg(s, ref.body)}" alt="${t("lm.altEarth")}">${capE}</figure>
+      <figure><img src="${refImg(ref)}" alt="${esc(t("lm.altRef", { name: refName(ref) }))}">${capR}</figure>`;
     for (const img of grid.querySelectorAll("img")) {
       img.addEventListener("error", () => {
         const d = document.createElement("div");

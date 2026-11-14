@@ -451,7 +451,10 @@ def main() -> None:
         if args.solo or args.limite is not None:
             ap.error("--legacy conserva el conjunto de referencias publicado")
         dest = args.salida or DATA / "references.json"
-        refs = json.loads(PUBLISHED_RESULTS.read_text(encoding="utf-8"))["references"]
+        published = json.loads(PUBLISHED_RESULTS.read_text(encoding="utf-8"))
+        refs = published.get("legacy_references", published["references"])
+        if any(r.get("level") is not None for r in refs):
+            ap.error("faltan las referencias v1 en results.json; usa una copia del conjunto publicado original")
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(json.dumps(refs, ensure_ascii=False, indent=1), encoding="utf-8")
         print(f"Escrito {dest} ({len(refs)} referencias publicadas)")
@@ -510,16 +513,18 @@ def main() -> None:
     # posiciones idénticas (p. ej. regiones que comparten mosaico LROC): se avisa en usable_note
     pos = defaultdict(list)
     for r in refs:
-        pos[(r["body"], r["level"], r["lat"], r["lon"])].append(r["id"])
-    for r in refs:
-        otros = [i for i in pos[(r["body"], r["level"], r["lat"], r["lon"])] if i != r["id"]]
-        if otros:
-            r["usable_note"] = "; ".join(x for x in (r["usable_note"], f"misma posición que {', '.join(otros)}") if x)
-            # Solo puntúa la primera de las que coinciden, para que esa posición no cuente dos veces
-            # (Nobile Rim 1 y Mons Mouton comparten mosaico LROC, centro y límites).
-            if r["id"] != pos[(r["body"], r["level"], r["lat"], r["lon"])][0] and r["usable"]:
+        pos[(r["body"], r["level"], r["lat"], r["lon"])].append(r)
+    for coincidentes in pos.values():
+        if len(coincidentes) < 2:
+            continue
+        primera = next((r["id"] for r in coincidentes if r["usable"]), None)
+        for r in coincidentes:
+            otros = [otro["id"] for otro in coincidentes if otro["id"] != r["id"]]
+            notas = [r["usable_note"], f"misma posición que {', '.join(otros)}"]
+            if r["usable"] and r["id"] != primera:
                 r["usable"] = False
-                r["usable_note"] += "; duplicada: no se puntúa (cuenta la primera)"
+                notas.append(f"duplicada de {primera}")
+            r["usable_note"] = "; ".join(filter(None, notas))
 
     args.salida.parent.mkdir(parents=True, exist_ok=True)
     tmp = args.salida.with_name(args.salida.name + ".tmp")

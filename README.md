@@ -42,21 +42,24 @@ Orden de ejecución (cada paso guarda caché y se puede reanudar):
 |---|---|---|---|
 | 1. Referencias Luna/Marte | `python -m analogs.references --legacy` | segundos | `data/references.json` |
 | 2. Escaneo de la Tierra | `python -m analogs.earth_scan` | ~1 h | `data/earth/band_*.json` |
-| 3. Ranking a 30 km | `python -m analogs.rank` | segundos | `../src/data/results.json` |
-| 4. Imágenes de relieve | `python -m analogs.relief_images --legacy` | minutos | `../public/relieve/*.png` |
+| 3. Ranking a 30 km | `python -m analogs.rank --refs data/references.json --climate-budget N` | segundos con cachés | `../src/data/results.json` |
+| 4. Imágenes de relieve | `python -m analogs.relief_images` | minutos | `../public/relieve/*.png` |
 | 5. Parches de 2 km para el visor 3D | `python -m analogs.patches` | lento la primera vez (descarga GLO-30 y WorldCover); luego usa `data/patches/` | `../src/data/catalog.json`, `../public/terrain/g*.f32` |
 | 6. Relieve del polo sur lunar para los globos 3D | `python -m analogs.moon_pole` | ~1 min (lee el DEM LOLA de 78°S al polo) | `../public/imagery/moon_south_pole.webp` |
 
 ### Referencias y escaneo fino (v2)
 
-`python -m analogs.references` genera `data/references_v2.json`. El comando
-`python -m analogs.fine_scan --level 1 --tiles-file <archivo>` lee una lista
-`{"tiles": [{"key": "N23E010", "control": true}]}`. Para L2, usa
-`--level 2 --blocks-file <archivo>` con una lista
-`{"blocks": [{"id": "ejemplo", "lat": 23.5, "lon": 10.5, "body": "both"}]}`.
-El ranking y el mapa publicados usan el conjunto de 30 km de la tabla anterior.
-La selección automática de teselas y el ranking multiescala están descritos en
-[PLAN_v2.md](pipeline/PLAN_v2.md).
+1. `python -m analogs.references` genera `data/references_v2.json`.
+2. `python -m analogs.rank --no-climate` prepara `data/fine_tiles.json`.
+3. `python -m analogs.fine_scan --level 1` lee esa selección y guarda las ventanas L1.
+4. Repite `python -m analogs.rank --no-climate` para preparar `data/fine_l2_blocks.json`.
+5. `python -m analogs.fine_scan --level 2` guarda las ventanas L2. Repite el ranking para incluirlas.
+6. `python -m analogs.rank --climate-budget N` publica el JSON con clima, con hasta `N` consultas nuevas.
+   `python -m analogs.relief_images` genera las imágenes asociadas.
+
+La app muestra el ranking de 30 km. El JSON de v2 incluye las comparaciones finas.
+Para generar imágenes con los nombres originales de un JSON de v1, usa
+`python -m analogs.relief_images --legacy`.
 
 **Pruebas sin gastar consultas ni tocar la app:**
 
@@ -65,14 +68,17 @@ python -m analogs.rank --no-climate                  # -> data/prueba/results.js
 python -m analogs.patches --no-climate --regions 2   # -> data/prueba/catalog.json y data/prueba/terrain/
 ```
 
-Con `--no-climate` o `--regions`, la salida va siempre a `pipeline/data/prueba/`, para que una prueba no borre los datos reales de la app.
+Con `--no-climate` o `--regions`, los resultados de prueba se guardan por defecto en `pipeline/data/prueba/`.
+El ranking también guarda las selecciones L1 y L2 en `pipeline/data/`. Usa `--sel-dir` para indicar otra carpeta.
+
+Pruebas unitarias sin red desde `pipeline/`: `python -m unittest discover -s tests -v`.
 
 ### Consultas a Meteomatics
 
 La cuenta del hackathon permite **1.000 consultas al día** (vence el 22/11/2026). El clima se pide por lotes de 10 puntos (**1 consulta por lote**) y se guarda en `pipeline/data/climate_ecmwf-era5.json`. Solo se piden los puntos que no estén ya en esa caché.
 
-- `analogs.rank`: hoy todos sus puntos ya están en la caché, así que cuesta **0 consultas**.
-- `analogs.patches` completo: 120 regiones + 32 sitios curados = 152 puntos. La primera ejecución con ERA5 (14/11/2026) costó **16 consultas**; ahora todos están en la caché, así que repetirla cuesta 0.
+- `analogs.rank` calcula cuántas consultas necesita a partir de la caché local y aplica el límite de `--climate-budget`.
+- `analogs.patches` completo: hasta 120 regiones y 32 sitios curados (16 consultas con la caché vacía).
 
 Se usa el modelo **ERA5** (`ecmwf-era5`). El modelo por defecto de Meteomatics ("mix") daba lluvias irreales en desiertos: 1.181 mm/año en la Puna frente a 195 con ERA5, y 702 frente a 21 en el Aïr. `pipeline/data/climate.json` es la caché antigua de ese modelo y ya no se usa.
 

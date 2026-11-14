@@ -41,6 +41,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy.spatial import cKDTree
+from scipy.spatial.distance import cdist
 
 from .dem_io import glo90_index, tile_key
 from .reference_sites import MARS_SITES, MOON_REGIONS, MOON_SITES
@@ -160,7 +161,7 @@ def haversine_km(lat1, lon1, lat2, lon2):
     p1, p2 = np.radians(lat1), np.radians(lat2)
     dphi, dlmb = p2 - p1, np.radians(np.asarray(lon2) - np.asarray(lon1))
     a = np.sin(dphi / 2) ** 2 + np.cos(p1) * np.cos(p2) * np.sin(dlmb / 2) ** 2
-    return EARTH_R_KM * 2 * np.arcsin(np.sqrt(a))
+    return EARTH_R_KM * 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
 
 
 def unit_xyz(lat, lon) -> np.ndarray:
@@ -220,14 +221,22 @@ class Percentiles:
 def similarity(QA: np.ndarray, QB: np.ndarray, chunk: int = 20000) -> np.ndarray:
     """exp(-(rms/σ)²) entre cada fila de QA y de QB (rms de la diferencia de percentiles sobre los
     rasgos que tienen las dos; 0 si no comparten ninguno). Por productos de matrices, en trozos."""
+    out = np.empty((len(QA), len(QB)), dtype="float32")
+    if np.isfinite(QA).all() and np.isfinite(QB).all():
+        for a in range(0, len(QA), chunk):
+            ss = cdist(QA[a:a + chunk], QB, metric="sqeuclidean")
+            ss *= -1 / (QA.shape[1] * TERRAIN_SIGMA ** 2)
+            out[a:a + chunk] = np.exp(ss, out=ss)
+        return out
+
     MB = np.isfinite(QB).astype(float)
     B0 = np.where(MB > 0, QB, 0.0)
-    out = np.empty((len(QA), len(QB)), dtype="float32")
+    B2 = B0 ** 2
     for a in range(0, len(QA), chunk):
         A = QA[a:a + chunk]
         MA = np.isfinite(A).astype(float)
         A0 = np.where(MA > 0, A, 0.0)
-        ss = (A0 ** 2) @ MB.T + MA @ (B0 ** 2).T - 2 * A0 @ B0.T
+        ss = (A0 ** 2) @ MB.T + MA @ B2.T - 2 * A0 @ B0.T
         cnt = MA @ MB.T
         with np.errstate(invalid="ignore", divide="ignore"):
             rms = np.sqrt(np.maximum(ss, 0) / cnt)
@@ -259,6 +268,8 @@ def load_earth() -> list[dict]:
 def load_refs(path: Path | None) -> tuple[list[dict], str]:
     """references_v2.json (o la ruta dada); si no existe, la v1 convertida a L0 usable."""
     p = path or (REFS_V2 if REFS_V2.exists() else REFS_V1)
+    if not p.is_file():
+        raise SystemExit(f"Falta {p}; ejecuta python -m analogs.references (v2) o --legacy (v1)")
     refs = json.loads(p.read_text(encoding="utf-8"))
     if refs and "level" not in refs[0]:
         print(f"AVISO: {p.name} es v1; se usa como L0 (sin L1/L2)")
@@ -340,12 +351,26 @@ def known_name(lat: float, lon: float, lit: list[dict] | None = None) -> str | N
     return None
 
 
-def load_fine(fine_dir: Path, level: int) -> list:
-    files = sorted((fine_dir / f"l{level}").glob("*.json"))
+def load_fine(fine_dir: Path, level: int, selection: Path | None = None) -> list:
+    directory = fine_dir / f"l{level}"
+    if selection is None:
+        files = [(path, None) for path in sorted(directory.glob("*.json"))]
+    else:
+        field, key = ("tiles", "key") if level == 1 else ("blocks", "id")
+        chosen = json.loads(selection.read_text(encoding="utf-8"))[field]
+        files = [(directory / f"{row[key]}.json", row) for row in chosen]
     out = []
-    for f in files:
-        d = json.loads(f.read_text(encoding="utf-8"))
-        out.extend(d) if level == 1 else out.append(d)
+    for path, selected in files:
+        if not path.exists():
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if level == 1:
+            if selected is not None:
+                for row in data:
+                    row["control"] = bool(selected.get("control"))
+            out.extend(data)
+        elif selected is None or all(data.get(k) == selected[k] for k in ("lat", "lon", "body", "control")):
+            out.append(data)
     return out
 
 
@@ -370,8 +395,9 @@ def v1_validation(earth: list[dict], refs_v1: list[dict], S_surface: np.ndarray,
         return Q
 
     QX, QR = to_q(X), to_q(R)
-    rms = np.sqrt(((QX[:, None, :] - QR[None, :, :]) ** 2).mean(axis=2))
-    S_terrain = np.exp(-(rms / TERRAIN_SIGMA) ** 2)
+    S_terrain = cdist(QX, QR, metric="sqeuclidean")
+    S_terrain *= -1 / (QX.shape[1] * TERRAIN_SIGMA ** 2)
+    np.exp(S_terrain, out=S_terrain)
     out = {}
     for body in ("moon", "mars"):
         idx = [i for i, r in enumerate(refs_v1) if r["body"] == body]
@@ -453,22 +479,8 @@ def build_l1(body: str, refs: list[dict], L0: dict, feats: list[str]) -> dict | 
 
 # ---------------------------------------------------------------- clima
 
-def climate_module(offline: bool):
-    """Importa analogs.climate. Sin red (--no-climate) se sustituye el cliente de Meteomatics por uno
-    que falla, para no cargar credenciales ni gastar consultas por error."""
-    if offline and "meteomatics_client" not in sys.modules:
-        stub = types.ModuleType("meteomatics_client")
-
-        def get_raw(*a, **k):
-            raise RuntimeError("--no-climate: no se consulta Meteomatics")
-        stub.get_raw = get_raw
-        sys.modules["meteomatics_client"] = stub
-    from . import climate
-    return climate
-
-
 def get_climate(points: list[tuple[float, float]], offline: bool, budget: int) -> dict:
-    climate = climate_module(offline)
+    from . import climate
     pts = list(dict.fromkeys((round(la, 4), round(lo, 4)) for la, lo in points))
     if offline:  # pruebas rápidas sin gastar consultas
         dummy = {"t_mean": 15, "t_min": 0, "t_max": 30, "diurnal_range": 0, "precip_year": 1000, "wind_mean": 0}
@@ -489,6 +501,8 @@ def get_climate(points: list[tuple[float, float]], offline: bool, budget: int) -
 def earth_l0() -> types.SimpleNamespace:
     """Ventanas L0 de la Tierra con sus percentiles, superficie y un árbol para buscar la más cercana."""
     rows = load_earth()
+    if not rows:
+        raise SystemExit("Faltan ventanas terrestres; ejecuta python -m analogs.earth_scan")
     lat = np.array([s["lat"] for s in rows])
     lon = np.array([s["lon"] for s in rows])
     surf = np.array([surface_score(s) for s in rows])
@@ -503,6 +517,8 @@ def run_l0(refs: list[dict], E) -> dict[str, dict]:
     for body in ("moon", "mars"):
         refs0 = [r for r in refs if r["body"] == body and r["level"] == "L0" and r.get("usable")
                  and r.get("features")]
+        if not refs0:
+            raise SystemExit(f"Faltan referencias L0 usables para {body}; ejecuta analogs.references para ambos cuerpos")
         B = score_l0(body, refs0, E.Q, E.pct)
         S = B["S"]
         B["t"], B["best"] = S.max(axis=1), S.argmax(axis=1)
@@ -554,7 +570,7 @@ def select_tiles(L0: dict, E, version: str, dest: Path) -> None:
     ck = sorted(cnt)
     w = np.array([cnt[k] for k in ck], float)
     rng = np.random.default_rng(SEED)
-    for c in rng.choice(len(ck), size=min(N_CONTROL_TILES, len(ck)), replace=False, p=w / w.sum()):
+    for c in (rng.choice(len(ck), size=min(N_CONTROL_TILES, len(ck)), replace=False, p=w / w.sum()) if ck else []):
         add(ck[c], "control", control=True)
     tl = sorted(tiles.values(), key=lambda t: t["key"])
     n_ctrl = sum(t["control"] for t in tl)
@@ -667,9 +683,8 @@ def select_blocks(F1: dict, dest: Path) -> None:
         b["control"], b["body"] = True, "both"
         b["reasons"].append("control")
     bl = sorted(blocks.values(), key=lambda b: (b["reasons"] == ["control"], -b["lat"], b["lon"]))
-    for n, b in enumerate(bl):
-        b["id"] = f"{'control' if b['reasons'] == ['control'] else 'cand'}_{n + 1:03d}"
-    bl = [{"id": b["id"], **{k: v for k, v in b.items() if k != "id"}} for b in bl]
+    for b in bl:
+        b["id"] = f"block_{b['lat']:.5f}_{b['lon']:.5f}_{b['body']}_{int(b['control'])}"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps({"created_by": "rank", "created": time.strftime("%Y-%m-%d %H:%M"), "seed": SEED,
                                 "shape_features_adopted": {b: r["decision"]["adopted"] for b, r in F1.items()},
@@ -912,8 +927,8 @@ def validation_table(before: dict, after: dict, fine: dict) -> tuple[list, list]
             print(f"  {body:6s} {name[:32]:32s} {f(b0)} {f(a0):>8s} "
                   f"{(f'{delta:+6.1f}' if delta is not None else f(None))} {f(f0):>8s}"
                   f"{'   sin ventana a <50 km' if a0 is None else ''}")
-        vals = [x for x in ok if x["body"] == body]
-        if vals and before:
+        vals = [x for x in ok if x["body"] == body and x["before"] is not None]
+        if vals:
             print(f"  {body:6s} media de {len(vals)}: antes {np.mean([x['before'] for x in vals]):.1f}, "
                   f"después {np.mean([x['after'] for x in vals]):.1f}")
     return ok, missing
@@ -923,13 +938,13 @@ def check_featured(bodies: dict) -> list[dict]:
     out = []
     for f in FEATURED:
         tw = bodies[f["body"]]["twins"].get(f["ref"])
-        if tw is None:
+        if not tw:
             print(f"AVISO: historia destacada '{f['title']}': no existe la clave de gemelos '{f['ref']}'; se quita")
             continue
         dmin = min(float(haversine_km(f["lat"], f["lon"], s["lat"], s["lon"])) for s in tw)
-        if dmin > 100:
-            print(f"AVISO: historia destacada '{f['ref']}': ningún gemelo L0 a <100 km de su punto (el más cercano "
-                  f"a {dmin:.0f} km); la app mostrará otro lugar y el texto puede no corresponder")
+        if dmin > 0.1:
+            print(f"AVISO: historia destacada '{f['ref']}': el gemelo más cercano está a {dmin:.1f} km; se quita")
+            continue
         out.append(f)
     return out
 
@@ -950,6 +965,8 @@ def main(argv=None) -> None:
     sel_dir = a.sel_dir or a.fine_dir or DATA
     t_start = time.time()
 
+    from .climate import climate_scores
+
     refs, version = load_refs(a.refs)
     refs_by_id = {r["id"]: r for r in refs}
     lit = load_literature(a.literatura)
@@ -959,33 +976,37 @@ def main(argv=None) -> None:
 
     L0 = run_l0(refs, E)
     before = {}
-    if REFS_BEFORE.exists():
-        before = v1_validation(E.rows, json.loads(REFS_BEFORE.read_text(encoding="utf-8")), E.surf, E.lat, E.lon)
+    refs_before = REFS_BEFORE if REFS_BEFORE.exists() else REFS_V1
+    legacy_refs = json.loads(refs_before.read_text(encoding="utf-8")) if refs_before.exists() else []
+    if legacy_refs:
+        before = v1_validation(E.rows, legacy_refs, E.surf, E.lat, E.lon)
     else:
-        print(f"AVISO: no existe {REFS_BEFORE}; sin validación 'antes'")
+        print("AVISO: faltan referencias v1 para la validación 'antes'")
     after = {b: validate(B["pre"], E.lat, E.lon, None) for b, B in L0.items()}
     select_tiles(L0, E, version, sel_dir / "fine_tiles.json")
 
-    l1 = load_fine(fine_dir, 1)
+    l1 = load_fine(fine_dir, 1, sel_dir / "fine_tiles.json")
     F1 = {}
     if l1:
         print(f"\n== L1: {len(l1)} ventanas de {fine_dir / 'l1'}")
         F1 = run_l1(l1, refs, L0, E)
         if F1:
             select_blocks(F1, sel_dir / "fine_l2_blocks.json")
-    l2 = load_fine(fine_dir, 2)
+    l2_selection = sel_dir / "fine_l2_blocks.json" if F1 else None
+    l2 = load_fine(fine_dir, 2, l2_selection)
     F2 = {}
     if l2:
         print(f"\n== L2: {len(l2)} bloques de {fine_dir / 'l2'}")
         F2 = run_l2(l2, refs, refs_by_id, F1, L0, E)
 
     clim = get_climate(climate_points(L0, F1, F2, E), a.no_climate, a.climate_budget)
-    bodies = build_sites(L0, F1, F2, E, refs_by_id, clim, climate_module(a.no_climate).climate_scores, lit)
+    bodies = build_sites(L0, F1, F2, E, refs_by_id, clim, climate_scores, lit)
     print_sites(bodies)
     valid, missing = validation_table(before, after, {b: r["valid"] for b, r in F1.items()})
 
     groups = group_info(refs)
-    out_refs = [{**r, "note": r.get("note") or r.get("source_note") or ""} for r in refs if r["level"] == "L0"]
+    out_refs = [{**r, "twin_key": twin_key(r), "note": r.get("note") or r.get("source_note") or ""}
+                for r in refs if r["level"] == "L0"]
     for k, g in groups.items():  # claves sin referencia propia (malla_polar): entrada de grupo para la app
         if g["n_refs"] and k not in refs_by_id:
             out_refs.append({"id": k, "body": g["body"], "level": "L0", "kind": "grupo", "name": g["name"],
@@ -994,6 +1015,7 @@ def main(argv=None) -> None:
     out = {"version": 2, "references_version": version, "references": out_refs,
            "feature_labels": {k: feature_labels(SCALES[("moon", "L0")][1])[k] for k in FEATURES},
            "bodies": bodies, "validation": valid, "validation_no_window": missing,
+           **({"legacy_references": legacy_refs} if legacy_refs else {}),
            "ref_quantiles": {r["id"]: dict(zip(FEATURES, map(float, B["QR"][j])))
                              for B in L0.values() for j, r in enumerate(B["refs"])},
            "featured": check_featured(bodies), "groups": groups,

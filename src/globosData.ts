@@ -7,7 +7,7 @@ import { getLang, locale, t } from "./i18n";
 export type Body = "moon" | "mars";
 export type GlobeId = "moon" | "earth" | "mars";
 type Climate = { t_mean: number; t_min: number; t_max: number; diurnal_range: number; precip_year: number };
-export type Reference = { id: string; body: Body; name: string; lat: number; lon: number; note: string };
+export type Reference = { id: string; body: Body; name: string; lat: number; lon: number; note: string; twin_key?: string };
 export type EarthSite = {
   lat: number; lon: number; score: number;
   scores: { terrain: number; surface: number; climate: number };
@@ -53,7 +53,8 @@ export type EarthPoint = {
 
 const keyOf = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(2)}`;
 
-export const refById = new Map(DATA.references.map((r) => [r.id, r]));
+export const globeReferences = DATA.references.filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon));
+export const refById = new Map(globeReferences.map((r) => [r.id, r]));
 
 /** Puntaje mínimo (0–100) para que un punto de la Tierra salga en «Mejores». */
 export const BEST_MIN_SCORE = 80;
@@ -128,7 +129,8 @@ export const marsPatches = catalogSites.filter((s) => s.planet === "Mars");
 
 /** Mejor sitio del ranking (mayor puntuación entre los dos cuerpos). */
 export function topSite() {
-  return BODIES.map((b) => DATA.bodies[b].sites[0]).reduce((a, b) => (b.score > a.score ? b : a));
+  return BODIES.flatMap((body) => DATA.bodies[body].sites.slice(0, 1))
+    .reduce<EarthSite | undefined>((a, b) => (!a || b.score > a.score ? b : a), undefined);
 }
 
 export const fmt = (v: number, d = 1) => v.toLocaleString(locale(), { minimumFractionDigits: d, maximumFractionDigits: d });

@@ -8,13 +8,14 @@ import "./globos.css";
 import "./prefs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { loadGlobeTexture } from "./globeTexture";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { categoryLabel, type Site } from "./data";
 import { locale, onLangChange, t, tr } from "./i18n";
 import {
-  BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, marsPatches, refById, topSite,
+  BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, globeReferences, marsPatches, refById, topSite,
   windowName, type Body, type EarthPoint, type EarthRole, type GlobeId, type Reference,
 } from "./globosData";
 import { TileLayer, direction, type TileLayerOptions } from "./tiles";
@@ -134,7 +135,7 @@ function add(item: Omit<Item, "vec" | "visible">) {
   return full;
 }
 
-for (const ref of DATA.references) {
+for (const ref of globeReferences) {
   const item = add({
     id: `ref:${ref.id}`, globe: ref.body, kind: "ref", lat: ref.lat, lon: ref.lon, raw: ref.name, named: true,
     shape: Shape.Diamond, size: SIZE.ref, color: rgb(COLOR[ref.body]), priority: 5, ref,
@@ -190,8 +191,9 @@ let selected: Item | null = null;
 let highlighted = new Set<Item>();
 
 function matchesRef(point: EarthPoint, refId: string) {
-  const body = refById.get(refId)!.body;
-  return point.data[body]?.best_ref === refId || point.roles.some((r) => r.kind === "twin" && r.ref === refId);
+  const ref = refById.get(refId)!;
+  return point.data[ref.body]?.best_ref === refId ||
+    point.roles.some((r) => r.kind === "twin" && r.body === ref.body && r.ref === (ref.twin_key ?? refId));
 }
 
 function isVisible(item: Item) {
@@ -204,7 +206,9 @@ function isVisible(item: Item) {
       if (refFilter) {
         if (!matchesRef(point, refFilter)) return false;
         // Con un sitio elegido se ven siempre sus 3 gemelos, aunque no lleguen al puntaje de «Mejores».
-        return mode === "all" || point.best || point.roles.some((r) => r.kind === "twin" && r.ref === refFilter);
+        const ref = refById.get(refFilter)!;
+        return mode === "all" || point.best ||
+          point.roles.some((r) => r.kind === "twin" && r.body === ref.body && r.ref === (ref.twin_key ?? refFilter));
       }
       return mode === "all" || point.best;
     }
@@ -363,7 +367,6 @@ const TILE_SOURCES: Record<GlobeId, Omit<TileLayerOptions, "onLoad">> = {
   },
 };
 
-const loader = new THREE.TextureLoader();
 const lightOffset = new THREE.Vector3(-2, 2, 1);
 const globes = {} as Record<GlobeId, Globe>;
 
@@ -414,8 +417,7 @@ function southPoleCap(onLoad: () => void) {
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.visible = false;                // hasta que llegue la imagen
-  loader.load(`${import.meta.env.BASE_URL}imagery/${POLE_TEXTURE}`, (map) => {
-    map.colorSpace = THREE.SRGBColorSpace;
+  loadGlobeTexture(`${import.meta.env.BASE_URL}imagery/${POLE_TEXTURE}`, (map) => {
     map.anisotropy = renderer ? Math.min(8, renderer.capabilities.getMaxAnisotropy()) : 1;
     material.map = map;
     material.needsUpdate = true;
@@ -427,9 +429,12 @@ function southPoleCap(onLoad: () => void) {
 
 function homeDirection(id: GlobeId) {
   if (id === "moon") return direction(-89, 0);                          // polo sur lunar
-  if (id === "mars") { const j = refById.get("jezero")!; return direction(j.lat, j.lon); }
+  if (id === "mars") {
+    const site = refById.get("jezero") ?? globeReferences.find((ref) => ref.body === "mars");
+    return site ? direction(site.lat, site.lon) : direction(0, 0);
+  }
   const top = topSite();
-  return direction(top.lat, top.lon);
+  return top ? direction(top.lat, top.lon) : direction(0, 0);
 }
 
 for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
@@ -444,8 +449,7 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
   scene.add(light, new THREE.AmbientLight(0xffffff, 1.05));
   const texture = TEXTURES[id];
   if (texture && renderer) {
-    loader.load(`${import.meta.env.BASE_URL}imagery/${texture}`, (map) => {
-      map.colorSpace = THREE.SRGBColorSpace;
+    loadGlobeTexture(`${import.meta.env.BASE_URL}imagery/${texture}`, (map) => {
       map.anisotropy = Math.min(8, renderer!.capabilities.getMaxAnisotropy());
       const gain = id === "moon" ? MOON_BASE_GAIN : 1;   // en valores sRGB, como se midió
       material.color.setRGB(gain, gain, gain, THREE.SRGBColorSpace);
@@ -741,7 +745,7 @@ function bestBody(point: EarthPoint): Body | null {
 }
 
 function twinItemsOf(ref: Reference) {
-  return (DATA.bodies[ref.body].twins[ref.id] ?? [])
+  return (DATA.bodies[ref.body].twins[ref.twin_key ?? ref.id] ?? [])
     .map((t) => earthByKey.get(earthKey(t.lat, t.lon)))
     .filter((i): i is Item => !!i);
 }
@@ -915,7 +919,7 @@ function renderDetail(item: Item) {
   let html = "";
   if (item.kind === "ref") {
     const ref = item.ref!;
-    const twins = DATA.bodies[ref.body].twins[ref.id] ?? [];
+    const twins = DATA.bodies[ref.body].twins[ref.twin_key ?? ref.id] ?? [];
     html = header(t("gl.refKicker", { body: bodyName(ref.body) }), label(item), ref.lat, ref.lon);
     html += `<ul class="gl-roles"><li>${t(`gl.refRole.${ref.body}`)}</li></ul>`;
     if (ref.note) html += `<p class="gl-note">${esc(tr(ref.note))}</p>`;
@@ -999,7 +1003,7 @@ for (const button of modeButtons) {
 const refSelect = $<HTMLSelectElement>("#gl-ref");
 function fillRefs() {
   refSelect.innerHTML = `<option value="">${esc(t("gl.allSites"))}</option>${BODIES.map((body) =>
-    `<optgroup label="${esc(bodyName(body))}">${DATA.references.filter((r) => r.body === body)
+    `<optgroup label="${esc(bodyName(body))}">${globeReferences.filter((r) => r.body === body)
       .map((r) => `<option value="${esc(r.id)}">${refName(r.id)}</option>`).join("")}</optgroup>`).join("")}`;
   refSelect.value = refFilter ?? "";
 }
