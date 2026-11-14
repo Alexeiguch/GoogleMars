@@ -347,6 +347,9 @@ main.gl {
 }
 
 /* Path Planner shares the globe canvas and the app's existing controls. */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* The legend and the intro figures describe the browse view. */
+.is-planning :is(.gl-toolbar, .gl-legend), main.gl.is-planning + .gl-footer .gl-about { display: none; }
 main.gl.is-planning {
   height: auto;
   min-height: 0;
@@ -407,6 +410,7 @@ main.gl.is-planning {
 .is-planning .gl-panel.is-drawing:active { cursor: grabbing; }
 .is-planning .gl-credit { font-size: 11px; }
 .path-zoom { position: absolute; top: 50px; right: 8px; display: grid; gap: 3px; }
+.path-zoom[hidden] { display: none; }
 .path-zoom button { min-width: 36px; min-height: 36px; padding: 0; background: var(--overlay); color: var(--text); font-size: 19px; }
 .path-zoom button:hover { background: var(--hover); }
 .path-crosshair { display: none; position: absolute; top: 50%; left: 50%; width: 18px; height: 18px; transform: translate(-50%, -50%); pointer-events: none; }

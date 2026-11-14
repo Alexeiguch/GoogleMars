@@ -7,6 +7,7 @@ import {
   MAX_PLANNER_DISTANCE_KM, MIN_PLANNER_DISTANCE_KM, PathTerrainError, plannerDistanceRange, searchPathTerrain, type PathTerrainResult,
 } from "./pathTerrain";
 
+// No element has this id: opening the link must not scroll the page past the header.
 const HASH = "#path-planner";
 const STORAGE_KEY = "analogs-path-rehearsal-v1";
 const MIN_WAYPOINT_GAP_KM = .001;
@@ -41,7 +42,7 @@ function readSavedDraft(): Draft | null {
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 export function mountPathPlanner(globe: PathGlobe) {
-  const planner = $("path-planner");
+  const planner = $("path-tools");
   const plannerLink = $<HTMLAnchorElement>("path-link");
   const browseLink = $<HTMLAnchorElement>("gl-browse-link");
   const sourcesLink = $<HTMLAnchorElement>("gl-sources-link");
