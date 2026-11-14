@@ -104,7 +104,7 @@ html { scrollbar-color: var(--border) transparent; }
 @media (prefers-reduced-motion: reduce) {
   /* Las animaciones propias de Leaflet y three.js (JS) no se tocan. */
   :not([class*="leaflet"]), :not([class*="leaflet"])::before, :not([class*="leaflet"])::after {
-    transition-duration: 1ms !important; animation-duration: 1ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important; animation: none !important;
   }
   html { scroll-behavior: auto !important; }
 }
@@ -618,11 +618,12 @@ button.globe-pin:hover::before, button.globe-pin:focus-visible::before { backgro
 /* La frase completa de la puntuación queda para lectores de pantalla; a la vista va la cifra grande. */
 .match-distance { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .match-bars { grid-area: bars; display: grid; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-.match-bars > span { display: grid; grid-template-columns: 78px minmax(0, 1fr) 38px; align-items: center; gap: 10px; }
-.match-bars b { color: var(--muted); font-size: 13px; font-weight: 500; }
-.match-bars i { height: 6px; background: var(--hover); position: relative; }
-.match-bars i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: calc(var(--v) * 100%); background: var(--earth); transform-origin: left; animation: grow var(--t-enter) var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms + 80ms); }
-.match-bars em { color: var(--text); font-family: var(--font-mono); font-size: 12px; font-style: normal; text-align: right; font-variant-numeric: tabular-nums; }
+.match-metric { display: grid; grid-template-columns: 92px minmax(0, 1fr) 42px; align-items: center; gap: 8px; }
+.match-metric-label { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 13px; }
+.match-metric-label svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+.match-metric-value { color: var(--text); font: 400 12px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.match-metric i { height: 6px; background: var(--hover); position: relative; }
+.match-metric i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: clamp(0%, calc(var(--v) * 100%), 100%); background: var(--earth); transform-origin: left; animation: grow var(--t-enter) var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms + 80ms); }
 @keyframes grow { from { transform: scaleX(0); } }
 
 @media (max-width: 640px) {

@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 // Tres páginas: el visor 3D de Marte (index.html), el mapa global Luna/Marte (luna-marte.html)
 // y los globos 3D de la Luna, la Tierra y Marte (globos.html).
 export default defineConfig({
+  base: "./",
   build: {
     rolldownOptions: {
       input: {

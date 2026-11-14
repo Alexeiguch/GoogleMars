@@ -6,7 +6,7 @@ proyección azimutal equidistante centrada en el polo sur, desde 78°S hasta el 
 con el DEM LOLA de 118 m y el mismo sombreado que analogs.relief_images.
 
 Ejecutar desde pipeline/:  python -m analogs.moon_pole
-Escribe ../public/imagery/moon_south_pole.jpg (≈240 m por píxel).
+Escribe ../public/imagery/moon_south_pole.webp (≈240 m por píxel).
 
 Geometría (la misma que usa src/globos.ts para colocar la imagen):
   rho = distancia al polo en grados (90 + lat), x = rho·sin(lon), y = rho·cos(lon)
@@ -36,8 +36,8 @@ COL_STEP = 4             # en longitud sobra resolución cerca del polo
 THREADS = 16
 
 PROJECT = Path(__file__).resolve().parent.parent.parent
-OUT = PROJECT / "public" / "imagery" / "moon_south_pole.jpg"
-GLOBAL_IMAGE = PROJECT / "public" / "imagery" / "moon.jpg"
+OUT = PROJECT / "public" / "imagery" / "moon_south_pole.webp"
+GLOBAL_IMAGE = PROJECT / "public" / "imagery" / "moon.webp"
 
 
 def read_polar_rows() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -112,7 +112,7 @@ def main() -> None:
     ring = (rho > EDGE_DEG - 2) & (rho <= EDGE_DEG)
     v = v * (photo_tone() / float(v[ring].mean()))
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    Image.fromarray((np.clip(v, 0, 1) * 255).astype("uint8"), mode="L").save(OUT, quality=88, optimize=True)
+    Image.fromarray((np.clip(v, 0, 1) * 255).astype("uint8"), mode="L").save(OUT, quality=85, method=6)
     print(f"Escrito {OUT} ({SIZE}×{SIZE}, {px:.0f} m por píxel, {OUT.stat().st_size / 1e6:.1f} MB)")
 
 

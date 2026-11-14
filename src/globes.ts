@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { loadGlobeTexture } from "./globeTexture";
 import type { Site } from "./data";
 
 // SphereGeometry starts at the antimeridian; east longitude increases toward -Z.
@@ -13,7 +14,6 @@ export function createGlobes(canvas: HTMLCanvasElement, target: Site, markers: {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setClearColor(0x000000, 0);
-  const loader = new THREE.TextureLoader();
   const size = new THREE.Vector2();
   const point = new THREE.Vector3();
   const forward = new THREE.Vector3();
@@ -27,8 +27,7 @@ export function createGlobes(canvas: HTMLCanvasElement, target: Site, markers: {
     const light = new THREE.DirectionalLight(0xfff3e7, 1.35);
     const fill = new THREE.AmbientLight(0xffffff, 1.05);
     scene.add(light, fill);
-    loader.load(`${import.meta.env.BASE_URL}imagery/${name}.jpg`, (map) => {
-      map.colorSpace = THREE.SRGBColorSpace;
+    loadGlobeTexture(`${import.meta.env.BASE_URL}imagery/${name}.webp`, (map) => {
       map.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
       material.color.set(0xffffff);
       material.map = map;

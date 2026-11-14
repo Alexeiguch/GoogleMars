@@ -21,7 +21,7 @@ type Quality = { effres_p50?: number | null; effres_p90?: number | null; R400?: 
 type Reference = {
   id: string; body: Body; name: string; lat?: number | null; lon?: number | null; note?: string | null;
   features?: Features | null; shape?: Features | null; level?: string; group?: string | null; region?: string | null;
-  kind?: string | null; source_url?: string | null; source_note?: string | null; coord_quality?: string | null;
+  kind?: string | null; source_url?: string | null; source_note?: string | null; coord_quality?: string | null; dem?: string | null;
   quality?: Quality | null; usable?: boolean; usable_note?: string | null; group_only?: boolean;
 };
 type Literature = { status?: string | null; url?: string | null; note?: string | null; name?: string | null; km?: number | null };
@@ -63,8 +63,6 @@ type Results = {
   validation: ValidationRow[];
   validation_no_window?: ValidationRow[] | null;
   featured?: Featured[] | null;
-  n_windows: number;
-  n_fine?: Partial<Record<Level, number>> | null;
   groups?: Record<string, Group> | null;
   levels?: Partial<Record<Level, Partial<Record<Body, LevelInfo>>>> | null;
   reference_points?: RefPoint[] | null;
@@ -210,19 +208,12 @@ for (const b of ["moon", "mars"] as Body[]) {
   }
 }
 
-// ---- introducción ---------------------------------------------------------------------
-function renderIntro() {
-  let text = t("lm.intro", { n: DATA.n_windows.toLocaleString(locale()) });
-  const nf = DATA.n_fine;
-  if (nf && (nf.L1 || nf.L2)) text += t("lm.introFine", { l1: (nf.L1 ?? 0).toLocaleString(locale()), l2: (nf.L2 ?? 0).toLocaleString(locale()) });
-  $("#intro").textContent = text;
-}
-renderIntro();
-
 // ---- mapa principal ---------------------------------------------------------------------
 let body: Body = "moon";
 let baseLayer: L.LayerGroup | undefined;
 let rankLayer: L.LayerGroup | undefined;
+let heatLayer: L.LayerGroup | undefined;
+let heatBody: Body | undefined;
 const map = L.map("map", { worldCopyJump: true, minZoom: 2, preferCanvas: true }).setView([10, 0], 2);
 let attribution = t("lm.attribution");
 L.tileLayer(EARTH_TILES, { attribution, maxZoom: 13 }).addTo(map);
@@ -296,7 +287,11 @@ let rankMode: RankMode = "final";
 const rankModes = document.querySelectorAll<HTMLButtonElement>("[data-rank]");
 for (const b of rankModes) {
   b.addEventListener("click", () => {
-    rankMode = b.dataset.rank as RankMode;
+    const next = b.dataset.rank as RankMode;
+    if (next === rankMode) return;
+    rankMode = next;
+    for (const key of openers.keys()) if (key.startsWith("rank-")) openers.delete(key);
+    if (currentKey?.startsWith("rank-")) currentKey = null;
     renderRanking();
     reopen();
   });
@@ -408,7 +403,7 @@ function renderTwins() {
 /** Selección del minimapa: "g:<clave de gemelos>" o "r:<id de referencia>". */
 let refSel: string | null = null;
 const MOON_VIEW = 10.6;   // grados al polo que muestra el minimapa de la Luna (hasta ~79,4°S)
-const MOON_EDGE = 12;     // la imagen moon_south_pole.jpg llega a 78°S (EDGE_DEG en moon_pole.py)
+const MOON_EDGE = 12;     // la imagen moon_south_pole.webp llega a 78°S (EDGE_DEG en moon_pole.py)
 /** Proyección del minimapa. Luna: azimutal equidistante polar (moon_pole.py; fila 0 = y +12°). Marte: equirectangular. */
 function proj(b: Body, lat: number, lon: number): [number, number] {
   if (b === "moon") {
@@ -498,8 +493,8 @@ function renderRefs() {
   const vb = moon ? [-MOON_VIEW, -MOON_VIEW, 2 * MOON_VIEW, 2 * MOON_VIEW] : [0, 0, 360, 180];
   const u = vb[2] / 400;   // unidades del viewBox por píxel de pantalla (aprox.)
   const img = moon
-    ? `<image href="${BASE}imagery/moon_south_pole.jpg" x="${-MOON_EDGE}" y="${-MOON_EDGE}" width="${2 * MOON_EDGE}" height="${2 * MOON_EDGE}" preserveAspectRatio="none"/>`
-    : `<image href="${BASE}imagery/mars.jpg" x="0" y="0" width="360" height="180" preserveAspectRatio="none"/>`;
+    ? `<image href="${BASE}imagery/moon_south_pole.webp" x="${-MOON_EDGE}" y="${-MOON_EDGE}" width="${2 * MOON_EDGE}" height="${2 * MOON_EDGE}" preserveAspectRatio="none"/>`
+    : `<image href="${BASE}imagery/mars.webp" x="0" y="0" width="360" height="180" preserveAspectRatio="none"/>`;
   let grat = "";
   if (moon) {
     for (const r of [2, 4, 6, 8, 10]) {
@@ -614,7 +609,7 @@ function highlight(ids: Reference[]) {
   if (!g) return;
   const moon = body === "moon";
   const u = (moon ? 2 * MOON_VIEW : 360) / 400;
-  g.innerHTML = ids.filter((r) => r.lat != null && r.lon != null).map((r) => {
+  g.innerHTML = ids.filter((r) => r.lat != null && r.lon != null && (!moon || r.lat <= -78)).map((r) => {
     const [x, y] = proj(body, r.lat!, r.lon!);
     const rad = (ids.length > 20 ? 3.4 : 7.5) * u;
     return `<circle cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${rad.toFixed(3)}" fill="none" stroke="#000" stroke-opacity=".7" stroke-width="${(3.4 * u).toFixed(3)}"/>` +
@@ -762,6 +757,7 @@ function renderValidation() {
   const nw = (DATA.validation_no_window ?? []).filter((x) => x.body === body);
   const v2 = v.some((x) => x.after != null || x.before != null || "fine" in x);
   const table = $("#validation");
+  table.classList.toggle("lm-valid3", v2);
   if (!v2) {
     table.innerHTML = `<thead><tr><th scope="col">${t("lm.knownAnalog")}</th><th scope="col">${t("lm.percentile")}</th></tr></thead><tbody>` +
       v.map((x) => `<tr><th scope="row">${esc(tr(x.name))}</th><td>${fmt(x.percentile, 0)}</td></tr>`).join("") +
@@ -771,7 +767,6 @@ function renderValidation() {
   }
   const delta = (d: number | null | undefined) =>
     d == null || !Number.isFinite(d) || Math.abs(d) < 0.05 ? "" : ` <small class="${d > 0 ? "up" : "down"}">${d > 0 ? "+" : "−"}${fmt(Math.abs(d), 1)}</small>`;
-  table.className = "lm-valid3";
   table.innerHTML = `<thead><tr><th scope="col">${t("lm.knownAnalog")}</th><th scope="col">${t("lm.before")}</th>` +
     `<th scope="col">${t("lm.after")}</th><th scope="col">${t("lm.fine")}</th></tr></thead><tbody>` +
     v.map((x) => `<tr><th scope="row">${esc(tr(x.name))}</th><td>${fmt(x.before, 0)}</td><td>${fmt(x.after ?? x.percentile, 0)}${delta(x.delta)}</td><td>${fmt(x.fine, 0)}</td></tr>`).join("") +
@@ -792,15 +787,23 @@ function render() {
   baseLayer = L.layerGroup().addTo(map);
   openers.clear();
   selectedEl = null;
-  const color = BODY_COLOR[body];
-  for (const [la, lo, s] of DATA.bodies[body].heat ?? []) {
-    L.circleMarker([la, lo], { radius: 2.5, stroke: false, fillColor: color, fillOpacity: 0.15 + 0.5 * s }).addTo(baseLayer);
+  if (heatBody !== body) {
+    if (heatLayer) map.removeLayer(heatLayer);
+    heatLayer = L.layerGroup().addTo(map);
+    heatBody = body;
+    const color = BODY_COLOR[body];
+    for (const [la, lo, s] of DATA.bodies[body].heat ?? []) {
+      L.circleMarker([la, lo], {
+        radius: 2.5, stroke: false, fillColor: color, fillOpacity: 0.15 + 0.5 * s, interactive: false,
+      }).addTo(heatLayer);
+    }
   }
   renderRanking();
   renderTwins();
   renderRefs();
   const firstFeatured = renderFeatured();
   renderValidation();
+  $("#lm-results").hidden = false;
   // Reabre lo que estaba abierto (cambio de idioma) o, si no, la primera historia destacada / el n.º 1.
   reopen(firstFeatured);
 }
@@ -820,8 +823,8 @@ function siteWindows(s: EarthSite): Partial<Record<Level, Win>> {
   else {
     const w1 = lvls.L1 ?? (lv === "L1" ? { lat: s.lat, lon: s.lon } : null);
     const found = w1 ? L1_PARENT.get(`${body}|${key4(w1.lat, w1.lon)}`) : undefined;
-    const parent = s.parent_L0 ?? found?.parent ?? null;
-    let ref = s.best_ref_L0 ?? found?.ref ?? null;
+    const parent = lvls.L0 ?? s.parent_L0 ?? found?.parent ?? null;
+    let ref = s.best_ref_L0 ?? parent?.best_ref ?? found?.ref ?? null;
     if (!ref && s.twin_key && REFS.get(s.twin_key)?.features) ref = s.twin_key;
     if (parent && Number.isFinite(parent.lat)) out.L0 = { lat: parent.lat, lon: parent.lon, best_ref: ref };
   }
@@ -888,8 +891,9 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
   const mainRef = REFS.get(s.best_ref) ?? (wins.L0?.best_ref ? REFS.get(wins.L0.best_ref) : undefined);
   const name = likeName(s) || (mainRef ? tr(mainRef.name) : "—");
   if (fly) {
-    map.flyTo([s.lat, s.lon], 8, { duration: 1.2 });
-    $("#panel").scrollTo({ top: $("#detail").offsetTop - $("#panel").offsetTop - 8, behavior: "smooth" });
+    const animate = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    map.flyTo([s.lat, s.lon], 8, { animate, duration: 1.2 });
+    $("#detail").scrollIntoView({ block: "start", behavior: animate ? "smooth" : "instant" });
   }
 
   // Tabla de rasgos: los del nivel del sitio, con sus etiquetas (la rugosidad cambia de escala).
@@ -1058,12 +1062,13 @@ function showCompare(s: EarthSite, wins: Partial<Record<Level, Win>>, lv: Level,
 
   // Texto de escala y fuente del dato de este nivel.
   const li = levelInfo(body, lv);
+  const refData = w.best_ref && REFS.get(w.best_ref)?.dem === "sldem" ? t("lm.sldemData") : li?.ref_data;
   const lines: string[] = [];
   if (li?.px_m != null) {
     lines.push(t("lm.cmpWindow", { w: fmt(W, 0), p: fmt(li.px_m, 0) }));
   }
-  if (li?.earth_data || li?.ref_data) {
-    lines.push(t("lm.cmpData", { earth: tr(li.earth_data ?? "—"), body: bodyName(body), ref: tr(li.ref_data ?? "—") }));
+  if (li?.earth_data || refData) {
+    lines.push(t("lm.cmpData", { earth: tr(li?.earth_data ?? "—"), body: bodyName(body), ref: tr(refData ?? "—") }));
   }
   if (lv === "L2" && s.l2_scope) lines.push(t("lm.scope", { km: fmt(W, 0), s: scopeText(s.l2_scope) }));
   info.innerHTML = lines.map((x) => `<span>${esc(x)}</span>`).join("");
@@ -1131,7 +1136,6 @@ setBody(new URLSearchParams(location.search).get("cuerpo") === "marte" ? "mars" 
 
 // Cambio de idioma: se repinta todo lo generado y se reabre el mismo sitio sin mover el mapa.
 onLangChange(() => {
-  renderIntro();
   renderMapText();
   render();
 });

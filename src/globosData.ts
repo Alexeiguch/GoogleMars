@@ -11,11 +11,14 @@ export type Reference = {
   id: string; body: Body; name: string; lat: number; lon: number; note: string;
   /** results.json v2: tipo de referencia ("sitio", "region_centro", "region_tesela", "malla"…), región y grupo. */
   kind?: string;
+  twin_key?: string;
   region?: string | null;
   group?: string;
   /** false: no puntúa (p. ej. en Marte solo hay MOLA de 463 m); usable_note explica por qué, en español. */
   usable?: boolean;
   usable_note?: string;
+  source_url?: string;
+  window_km?: number;
 };
 export type EarthSite = {
   lat: number; lon: number; score: number;
@@ -34,12 +37,7 @@ type Results = {
   featured: Featured[];
 };
 
-const RAW = rawResults as unknown as Results;
-/** Solo referencias con posición: results.json v2 incluye entradas de grupo (p. ej. "malla_polar") sin lat/lon. */
-export const DATA: Results = {
-  ...RAW,
-  references: RAW.references.filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon)),
-};
+export const DATA = rawResults as unknown as Results;
 export const BODIES: Body[] = ["moon", "mars"];
 export const bodyName = (id: GlobeId) => t(`planet.${id}`);
 
@@ -50,6 +48,7 @@ export const bodyName = (id: GlobeId) => t(`planet.${id}`);
  * Nobile Rim 1 comparte mosaico con Mons Mouton y puntúa junto con ella.
  */
 export function twinKeyOf(ref: Reference): string {
+  if (ref.twin_key) return ref.twin_key;
   if (ref.body === "mars") return ref.id;
   if (ref.id === "nobile_rim_1") return "mons_mouton";
   if (ref.group === "malla_polar") return "malla_polar";
@@ -71,7 +70,7 @@ export const isHeadlineRef = (ref: Reference) => ref.kind !== "malla" && ref.kin
 
 export type EarthRole =
   | { kind: "site"; body: Body; rank: number }
-  | { kind: "twin"; body: Body; ref: string; rank: number }
+  | { kind: "twin"; body: Body; ref: string; rank: number; site: EarthSite }
   | { kind: "featured"; body: Body; ref: string; tag: string; title: string; story: string }
   | { kind: "validation"; body: Body; name: string; percentile: number }
   | { kind: "catalog"; origin: "curated" | "global"; name: string; site: Site };
@@ -93,7 +92,8 @@ export type EarthPoint = {
 
 const keyOf = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(2)}`;
 
-export const refById = new Map(DATA.references.map((r) => [r.id, r]));
+export const globeReferences = DATA.references.filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon));
+export const refById = new Map(globeReferences.map((r) => [r.id, r]));
 
 /**
  * Puntaje mínimo (0–100) para que un punto de la Tierra salga en «Mejores», por cuerpo: la Luna puntúa más bajo
@@ -122,8 +122,9 @@ export function buildEarthPoints(): EarthPoint[] {
     for (const [ref, twins] of Object.entries(DATA.bodies[body].twins)) {
       twins.forEach((site, index) => {
         const point = at(site.lat, site.lon);
-        point.roles.push({ kind: "twin", body, ref, rank: index + 1 });
-        point.data[body] ??= site;
+        point.roles.push({ kind: "twin", body, ref, rank: index + 1, site });
+        const hasOverallRank = point.roles.some((role) => role.kind === "site" && role.body === body);
+        if (!hasOverallRank && (!point.data[body] || site.score > point.data[body]!.score)) point.data[body] = site;
       });
     }
   }
@@ -140,7 +141,11 @@ export function buildEarthPoints(): EarthPoint[] {
     // «Mejores»: top 20, gemelo o historia destacada, y además con el puntaje mínimo de su cuerpo o más
     // (redondeado como se muestra en la página, para que un 80 en pantalla cuente).
     const listed = point.roles.some((r) => r.kind === "site" || r.kind === "twin" || r.kind === "featured");
-    const strong = BODIES.some((b) => point.data[b] && Math.round(point.data[b]!.score * 100) >= BEST_MIN_SCORE[b]);
+    const strong = BODIES.some((body) => {
+      const threshold = BEST_MIN_SCORE[body];
+      return Math.round((point.data[body]?.score ?? 0) * 100) >= threshold || point.roles.some((role) =>
+        role.kind === "twin" && role.body === body && Math.round(role.site.score * 100) >= threshold);
+    });
     point.best = listed && strong;
     point.color = colorBody(point);
     point.name = earthName(point);
@@ -171,7 +176,8 @@ export const marsPatches = catalogSites.filter((s) => s.planet === "Mars");
 
 /** Mejor sitio del ranking (mayor puntuación entre los dos cuerpos). */
 export function topSite() {
-  return BODIES.map((b) => DATA.bodies[b].sites[0]).reduce((a, b) => (b.score > a.score ? b : a));
+  return BODIES.flatMap((body) => DATA.bodies[body].sites.slice(0, 1))
+    .reduce<EarthSite | undefined>((a, b) => (!a || b.score > a.score ? b : a), undefined);
 }
 
 export const fmt = (v: number, d = 1) => v.toLocaleString(locale(), { minimumFractionDigits: d, maximumFractionDigits: d });
