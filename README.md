@@ -35,16 +35,23 @@ python -m venv .venv
 
 Credenciales de Meteomatics: copia `pipeline/.env.example` como `pipeline/.env` y rellena `METEOMATICS_USER` y `METEOMATICS_PASSWORD`. El archivo `.env` está en `.gitignore`.
 
-Orden de ejecución (cada paso guarda caché y se puede reanudar):
+Orden de ejecución, versión 2 (cada paso guarda caché y se puede reanudar). Plan y resultados: [`pipeline/PLAN_v2.md`](pipeline/PLAN_v2.md) e [`pipeline/INFORME_v2.md`](pipeline/INFORME_v2.md).
 
 | Paso | Comando | Tarda | Escribe |
 |---|---|---|---|
-| 1. Referencias Luna/Marte | `python -m analogs.references` | ~3 min | `data/references.json` |
-| 2. Escaneo de la Tierra | `python -m analogs.earth_scan` | ~1 h | `data/earth/band_*.json` |
-| 3. Ranking a 30 km | `python -m analogs.rank` | segundos | `../src/data/results.json` |
-| 4. Imágenes de relieve | `python -m analogs.relief_images` | minutos | `../public/relieve/*.png` |
-| 5. Parches de 2 km para el visor 3D | `python -m analogs.patches` | lento la primera vez (descarga GLO-30 y WorldCover); luego usa `data/patches/` | `../src/data/catalog.json`, `../public/terrain/g*.f32` |
-| 6. Relieve del polo sur lunar para los globos 3D | `python -m analogs.moon_pole` | ~1 min (lee el DEM LOLA de 78°S al polo) | `../public/imagery/moon_south_pole.jpg` |
+| 0. Caché del DEM lunar polar (LOLA PGDA 40 m + EFFRES, 1,7 GB, una vez) | `python -m analogs.dem_io --moon-cache` | ~30 min | `data/cache/moon/` |
+| 1. Referencias Luna/Marte (L0 30 km, L1 10 km, L2 5/2 km; sitios con fuente en `analogs/reference_sites.py`) | `python -m analogs.references` | ~25 min la primera vez | `data/references_v2.json` |
+| 2. Escaneo de la Tierra a 30 km (ya hecho; no relanzar) | `python -m analogs.earth_scan` | ~1 h | `data/earth/band_*.json` |
+| 3. Ranking L0 y selección de tiles para el escaneo fino | `python -m analogs.rank --no-climate` | ~10 s | `data/fine_tiles.json` |
+| 4. Escaneo fino L1 (ventanas de 10 km en ~1.900 tiles) | `python -m analogs.fine_scan --level 1` | ~30 min, ~7 GB | `data/fine/l1/` |
+| 5. Ranking L1 y selección de bloques L2 | `python -m analogs.rank --no-climate` | ~1 min | `data/fine_l2_blocks.json` |
+| 6. Escaneo fino L2 (Luna 5 km a 60 m, Marte 2 km a 30 m, GLO-30) | `python -m analogs.fine_scan --level 2` | ~5 min | `data/fine/l2/` |
+| 7. Ranking final con clima (solo finalistas; `--climate-budget` es el máximo de consultas) | `python -m analogs.rank --climate-budget 60` | ~1 min | `../src/data/results.json` |
+| 8. Imágenes de relieve (píxel del dato más grueso de cada comparación) | `python -m analogs.relief_images` | minutos | `../public/relieve/*_L0/L1/L2*.png` |
+| 9. Parches de 2 km para el visor 3D | `python -m analogs.patches` | lento la primera vez | `../src/data/catalog.json`, `../public/terrain/g*.f32` |
+| 10. Relieve del polo sur lunar para los globos 3D | `python -m analogs.moon_pole` | ~1 min | `../public/imagery/moon_south_pole.jpg` |
+
+La bibliografía de los candidatos está en `pipeline/analogs/literature_v2.json` (la lee `rank`). La versión 1 (11 referencias, solo 30 km) quedó en `data/references.json` y `data/backup_v1/`.
 
 **Pruebas sin gastar consultas ni tocar la app:**
 
@@ -65,6 +72,13 @@ La cuenta del hackathon permite **1.000 consultas al día** (vence el 22/11/2026
 Se usa el modelo **ERA5** (`ecmwf-era5`). El modelo por defecto de Meteomatics ("mix") daba lluvias irreales en desiertos: 1.181 mm/año en la Puna frente a 195 con ERA5, y 702 frente a 21 en el Aïr. `pipeline/data/climate.json` es la caché antigua de ese modelo y ya no se usa.
 
 ## Método
+
+> **Versión 2 (14/11/2026).** Lo que sigue describe la versión 1. La v2 añade:
+> - Referencias con fuente: 140 ventanas del polo sur lunar con las 16 regiones de Artemis III (mosaicos LROC) y una malla de 84–90°S, y 43 sitios de Marte.
+> - Búsqueda de grueso a fino: 30 km → 10 km → 5 km (Luna) o 2 km (Marte, parches HiRISE), siempre con la misma ventana y el mismo píxel que el dato más grueso de cada comparación.
+> - Validación antes y después, y revisión bibliográfica de los candidatos nuevos.
+>
+> Detalles y resultados en [`pipeline/INFORME_v2.md`](pipeline/INFORME_v2.md).
 
 ### Mapa Luna y Marte (ventanas de 30 km)
 

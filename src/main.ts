@@ -2,7 +2,7 @@ import "@fontsource/barlow/latin-400.css";
 import "@fontsource/barlow/latin-500.css";
 import "@fontsource/barlow/latin-600.css";
 import "./style.css";
-import "./prefs";
+import { bindUiText, type UiText } from "./prefs";
 import {
   categoryLabel, cellSize, loadTerrain, marsClimate, metricDefinitions, patchWidth, rankEarthSites, sites, weights,
   type Match, type Site,
@@ -12,6 +12,30 @@ import { decimal, getLang, onLangChange, t, tr } from "./i18n";
 import { createViewer, slopeBands, type Mode } from "./viewer";
 
 const marsSites = sites.filter(({ planet }) => planet === "Mars");
+
+// Franja de introducción y títulos de sección: textos propios de esta página (no están en i18n.ts)
+// y cifras sacadas del catálogo que ya usa el visor.
+const UI_TEXT: UiText = {
+  es: {
+    "intro.lede": "Elige un sitio de Marte con relieve de alta resolución y busca los lugares de la Tierra cuyo terreno, superficie y clima más se le parecen. Los dos terrenos se comparan en 3D al mismo tamaño y escala.",
+    "intro.figMars": "sitios de Marte con relieve HiRISE",
+    "intro.figEarth": "parches de la Tierra en el catálogo",
+    "intro.figPatch": "por parche, en celdas de {cell} m",
+    "step.pick": "Elige un sitio de Marte",
+  },
+  en: {
+    "intro.lede": "Pick a Mars site with high-resolution relief and find the places on Earth whose terrain, surface and climate match it best. Both terrains are compared in 3D at the same size and scale.",
+    "intro.figMars": "Mars sites with HiRISE relief",
+    "intro.figEarth": "Earth patches in the catalog",
+    "intro.figPatch": "per patch, in {cell} m cells",
+    "step.pick": "Choose a Mars site",
+  },
+};
+bindUiText(UI_TEXT, { cell: cellSize });
+const patchKm = patchWidth / 1000;
+document.querySelector("#fig-mars")!.textContent = String(marsSites.length);
+document.querySelector("#fig-earth")!.textContent = String(sites.length - marsSites.length);
+document.querySelector("#fig-patch")!.textContent = `${patchKm}×${patchKm} km`;
 let target = marsSites.find(({ id }) => id === "jezero")!;
 let pending: AbortController | undefined;
 const picker = document.querySelector<HTMLSelectElement>("#mars-site")!;
@@ -256,10 +280,24 @@ function renderMatchList() {
   matchList.replaceChildren(...shownMatches.map((match, index) => {
     const { site: candidate } = match;
     const item = document.createElement("li");
+    item.style.setProperty("--i", String(index)); // retardo de la entrada escalonada (style.css)
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.site = candidate.id;
     button.setAttribute("aria-pressed", String(currentMatch?.site === candidate));
+    // Tarjeta: posición y puntuación grande arriba (decorativas: la frase completa va en .match-distance).
+    const rank = document.createElement("span");
+    rank.className = "match-rank";
+    rank.setAttribute("aria-hidden", "true");
+    rank.textContent = String(index + 1).padStart(2, "0");
+    const big = document.createElement("span");
+    big.className = "match-score";
+    big.setAttribute("aria-hidden", "true");
+    big.textContent = num(match.total);
+    const meta = document.createElement("span");
+    meta.className = "match-meta";
+    meta.setAttribute("aria-hidden", "true");
+    meta.textContent = index === 0 ? t("v.bestOf", { n: rankedCount }).replace(/[\s·]+$/u, "") : "";
     const name = document.createElement("span");
     name.className = "match-name";
     name.textContent = candidate.name;
@@ -276,10 +314,10 @@ function renderMatchList() {
     bars.innerHTML = ([["v.bar.terrain", match.terrain], ["v.bar.surface", match.surface], ["v.bar.climate", match.climate]] as const)
       .map(([key, value]) => {
         const label = t(key);
-        return `<span title="${label} ${num(value)}"><b>${label[0]}</b><i style="--v:${Math.max(0, value)}"></i></span>`;
+        return `<span title="${label} ${num(value)}"><b>${label}</b><i style="--v:${Math.max(0, value)}"></i><em>${num(value)}</em></span>`;
       })
       .join("");
-    button.append(name, origin, score, bars);
+    button.append(rank, big, name, origin, meta, score, bars);
     button.addEventListener("click", () => void selectMatch(match));
     item.append(button);
     return item;

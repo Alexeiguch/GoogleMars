@@ -25,7 +25,12 @@ type Results = {
   featured: Featured[];
 };
 
-export const DATA = rawResults as unknown as Results;
+const RAW = rawResults as unknown as Results;
+/** Solo referencias con posición: results.json v2 incluye entradas de grupo (p. ej. "malla_polar") sin lat/lon. */
+export const DATA: Results = {
+  ...RAW,
+  references: RAW.references.filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon)),
+};
 export const BODIES: Body[] = ["moon", "mars"];
 export const bodyName = (id: GlobeId) => t(`planet.${id}`);
 

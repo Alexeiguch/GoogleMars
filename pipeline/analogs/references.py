@@ -66,7 +66,7 @@ SCALES = {("moon", "L0"): (30, 400), ("moon", "L1"): (10, 120), ("moon", "L2"): 
           ("mars", "L0"): (30, 400), ("mars", "L1"): (10, 200), ("mars", "L2"): (2, 30)}
 BIG_REGION_KM = 40        # regiones mayores: también teselas de 30 km en L0
 L2_MAX_EXTENT_KM = 20     # L2 de la Luna: solo el cuadrado central de 20 km de cada región
-PARENT_KM = 21            # padre L0 de una ventana L1/L2: el centro L0 más cercano a < 21 km
+PARENT_KM = 32            # padre L0 de una ventana L1/L2: el centro L0 más cercano a < 32 km (malla L0 de 30 km: hasta ~21 km dentro y algo más en el borde de 84°S)
 HIRISE_PARENT_KM = 100    # padre de un parche HiRISE: sitio de Marte a < 100 km
 HIRISE_N, HIRISE_PX = 100, 20.0
 MOON_THREADS = 4          # la Luna se lee del disco: no cuenta para el límite por servidor
