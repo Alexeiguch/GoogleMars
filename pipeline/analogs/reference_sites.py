@@ -203,6 +203,69 @@ MOON_SITES: list[dict] = [
           "(planetográfica, +Este; cotejado el 14/11/2026). Mismo id que la referencia de la v1."),
 ]
 
+# ---------------------------------------------------------------- Luna fuera del polo
+# El reto habla de "candidate permanent Moon-base locations" sin limitarse al polo sur. Estos sitios
+# se comparan solo como gemelos (no entran en el ranking ni en la validación del polo sur) y con
+# SLDEM2015 (59 m, 60°S–60°N), no con el LOLA global de 118 m, que cerca del ecuador tiene huecos de
+# 1–4 km entre trazas rellenados por interpolación.
+LROC_OBJECTS = "https://data.lroc.im-ldi.com/lroc/view_rdr/SHAPEFILE_ANTHROPOGENIC_OBJECTS"
+LROC_PITS = "https://data.lroc.im-ldi.com/lroc/view_rdr/SHAPEFILE_LUNAR_PIT_LOCATIONS"
+
+
+def _np_site(id, name, kind, lat, lon, source_url, source_note):
+    return dict(id=id, name=name, group="luna_fuera_del_polo", subgroup=kind, lat=lat, lon=lon,
+                coord_quality="publicada_lroc", verified=True, source_url=source_url, source_note=source_note)
+
+
+_OBJ = ("Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; "
+        "mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: ")
+_PIT = ("Lunar Pit Locations de LROC (LUNAR_PIT_LOCATIONS.CSV, PDS LROLRC_2001/EXTRAS; Atlas de fosos de "
+        "LROC), leído el 14/11/2026: ")
+
+MOON_NONPOLAR_SITES: list[dict] = [
+    _np_site("apollo11", "Apollo 11 (Mare Tranquillitatis)", "apollo", 0.67416, 23.47314, LROC_OBJECTS,
+             _OBJ + "A11_LM, módulo lunar Eagle, 0.67416, 23.47314."),
+    _np_site("apollo12", "Apollo 12 (Oceanus Procellarum)", "apollo", -3.0128, -23.4219, LROC_OBJECTS,
+             _OBJ + "A12_LM, módulo lunar Intrepid, -3.0128, -23.4219."),
+    _np_site("apollo14", "Apollo 14 (Fra Mauro)", "apollo", -3.64589, -17.47194, LROC_OBJECTS,
+             _OBJ + "A14_LM, módulo lunar Antares, -3.64589, -17.47194."),
+    _np_site("apollo15", "Apollo 15 (Hadley–Apeninos)", "apollo", 26.13239, 3.6333, LROC_OBJECTS,
+             _OBJ + "A15_LM, módulo lunar Falcon, 26.13239, 3.6333."),
+    _np_site("apollo16", "Apollo 16 (tierras altas de Descartes)", "apollo", -8.9734, 15.5011, LROC_OBJECTS,
+             _OBJ + "A16_LM, módulo lunar Orion, -8.9734, 15.5011."),
+    _np_site("apollo17", "Apollo 17 (Taurus–Littrow)", "apollo", 20.1911, 30.7723, LROC_OBJECTS,
+             _OBJ + "A17_LM, módulo lunar Challenger, 20.1911, 30.7723."),
+    _np_site("change3", "Chang'e 3 (Mare Imbrium)", "change", 44.1214, -19.5117, LROC_OBJECTS,
+             _OBJ + "ChangE3, módulo de aterrizaje, 44.1214, -19.5117."),
+    _np_site("change4", "Chang'e 4 (cráter Von Kármán, cara oculta)", "change", -45.4562, 177.5886, LROC_OBJECTS,
+             _OBJ + "ChangE4, módulo de aterrizaje, -45.4562, 177.5886."),
+    _np_site("change5", "Chang'e 5 (Oceanus Procellarum, Mons Rümker)", "change", 43.0576, -51.9161, LROC_OBJECTS,
+             _OBJ + "ChangE5, módulo de aterrizaje, 43.0576, -51.9161."),
+    _np_site("change6", "Chang'e 6 (cuenca Apollo, cara oculta)", "change", -41.6383, -153.9857, LROC_OBJECTS,
+             _OBJ + "ChangE6, módulo de aterrizaje, -41.6383, -153.9857."),
+    _np_site("foso_marius_hills", "Foso de Marius Hills (posible tubo de lava)", "foso", 14.0917, -56.7701, LROC_PITS,
+             _PIT + "Marius Hills Pit, 14.0917, -56.7701 (303.2299 E); 40 m de profundidad."),
+    _np_site("foso_mare_tranquillitatis", "Foso de Mare Tranquillitatis (posible tubo de lava)", "foso", 8.3355,
+             33.222, LROC_PITS, _PIT + "Mare Tranquillitatis Pit, 8.3355, 33.222; 105 m de profundidad interior."),
+    _np_site("foso_mare_ingenii", "Foso de Mare Ingenii (posible tubo de lava, cara oculta)", "foso", -35.9494,
+             166.0559, LROC_PITS, _PIT + "Mare Ingenii Pit, -35.9494, 166.0559."),
+]
+
+
+def moon_site_tiles(site: dict, spacing_km: float = 10, n: int = 3) -> list[dict]:
+    """Como mars_site_tiles, pero en la esfera lunar (para los sitios fuera del polo)."""
+    offs = _offsets(n * spacing_km, spacing_km)
+    out = []
+    for y in reversed(offs):
+        for x in offs:
+            lat, lon = _aeqd_inverse(site["lat"], site["lon"], x, y, MOON_R_KM)
+            out.append(dict(id=f"{site['id']}_t{len(out)}", lat=round(lat, 5), lon=round(lon, 5),
+                            group=site["group"], site=site["id"], spacing_km=spacing_km, east_km=x, north_km=y,
+                            source_url=site["source_url"],
+                            source=f"ventana {len(out)} de {n}×{n} (paso {spacing_km:g} km) alrededor de {site['id']}"))
+    return out
+
+
 MARS_SITES: list[dict] = [
     dict(
         id="viking1", name="Viking 1 (Chryse Planitia)", group="aterrizaje",

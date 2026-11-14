@@ -8,7 +8,8 @@ de sup×sup subpuntos interpolados (bilineal) a ≤ el píxel nativo del dato.
 - Luna: LOLA ajustado de Barker et al. 2023 (PGDA, 80–90°S, 40 m, estereográfica polar sur)
   y su capa EFFRES (resolución efectiva). Se descargan una vez a data/cache/moon/.
 - Marte: blend HRSC+MOLA 200 m y MOLA 463 m del USGS (GeoTIFF sin comprimir, una fila por
-  strip). Se leen por rangos de bytes solo las columnas necesarias; los recortes leídos se
+  strip). El mismo lector sirve para la Luna fuera del polo (SLDEM2015, 59 m, 60°S–60°N).
+  Se leen por rangos de bytes solo las columnas necesarias; los recortes leídos se
   guardan en data/cache/mars/ y se reutilizan.
 - Tierra: Copernicus GLO-90 / GLO-30 y ESA WorldCover 2021 (Planetary Computer).
   Índice de tiles GLO-90 en data/cache/glo90_index.json; WorldCover a ~120 m por tile de 3°
@@ -61,7 +62,11 @@ MOON_PX = 40.0
 MARS_R = 3_396_190.0
 MARS_BLEND_URL = "https://planetarymaps.usgs.gov/mosaic/Mars/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2.tif"
 MARS_MOLA_URL = "https://planetarymaps.usgs.gov/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif"
-MARS_SOURCES = {"blend": MARS_BLEND_URL, "mola": MARS_MOLA_URL}
+# Luna fuera del polo: SLDEM2015 (LOLA + estéreo Kaguya TC, GSFC/JAXA), 60°S–60°N, 512 px/grado (59,2 m),
+# mismo formato que los de Marte (int16 sin comprimir, una fila por strip): se lee con el mismo lector por rangos.
+MOON_SLDEM_URL = "https://planetarymaps.usgs.gov/mosaic/LolaKaguya_Topo/Lunar_LRO_LOLAKaguya_DEMmerge_60N60S_512ppd.tif"
+MARS_SOURCES = {"blend": MARS_BLEND_URL, "mola": MARS_MOLA_URL, "sldem": MOON_SLDEM_URL}
+SOURCE_R = {"blend": MARS_R, "mola": MARS_R, "sldem": MOON_R}   # radio de la esfera de cada fuente
 MARS_MARGIN_KM = 10.0     # margen del recorte guardado alrededor de la ventana pedida
 
 EARTH_R = 6_371_008.8     # radio medio de la Tierra (esfera)
@@ -342,8 +347,9 @@ def _mars_meta(source: str) -> dict:
                      scale=src.scales[0], offset=src.offsets[0], base=base)
         m["byteorder"] = "<" if _http_range(url, 0, 1) == b"II" else ">"
         tr = m["transform"]
-        m["px_m"] = abs(tr[4]) * (math.pi * MARS_R / 180 if m["geographic"] else 1.0)
+        m["px_m"] = abs(tr[4]) * (math.pi * SOURCE_R[source] / 180 if m["geographic"] else 1.0)
         path.write_text(json.dumps(m, indent=1), encoding="utf-8")
+    m["R"] = SOURCE_R[source]
     _MARS_META[source] = m
     return m
 
@@ -351,7 +357,7 @@ def _mars_meta(source: str) -> dict:
 def _mars_rowcol(m: dict, la: np.ndarray, lo: np.ndarray, lon_c: float):
     """lat/lon -> fila/columna (centro de píxel); columnas desenvueltas cerca de la del centro."""
     a, _, c, _, e, f = m["transform"]
-    k = 1.0 if m["geographic"] else math.pi * MARS_R / 180
+    k = 1.0 if m["geographic"] else math.pi * m["R"] / 180
     cols = (lo * k - c) / a - 0.5
     rows = (la * k - f) / e - 0.5
     cc = (lon_c * k - c) / a - 0.5
@@ -424,7 +430,7 @@ def _mars_values(source: str, la: np.ndarray, lo: np.ndarray, lat: float, lon: f
     if info is None:
         # recorte con margen: malla gruesa (~1 km) de la ventana + MARS_MARGIN_KM por lado
         wk = window_km + 2 * MARS_MARGIN_KM
-        _, gla, glo = _grid(lat, lon, wk, wk * 1000 / 101, 1, MARS_R)
+        _, gla, glo = _grid(lat, lon, wk, wk * 1000 / 101, 1, m["R"])
         grows, gcols = _mars_rowcol(m, gla, glo, lon)
         pad = int(math.ceil(1500 / m["px_m"]))
         mr0 = max(min(r0, int(np.floor(grows.min())) - pad), 0)
@@ -464,9 +470,16 @@ def sample_mars(lat: float, lon: float, window_km: float, px: float, sup: int | 
     """Ventana local de Marte a `px` m: source="blend" (HRSC+MOLA 200 m) o "mola" (463 m)."""
     m = _mars_meta(source)
     sup = sup or max(1, math.ceil(px / m["px_m"] - 1e-6))
-    n, la, lo = _grid(lat, lon, window_km, px, sup, MARS_R)
+    n, la, lo = _grid(lat, lon, window_km, px, sup, m["R"])
     v = _mars_values(source, la.ravel(), lo.ravel(), lat, lon, window_km)
     return _block_mean(v, n, sup)
+
+
+def sample_moon_sldem(lat: float, lon: float, window_km: float, px: float, sup: int | None = None) -> np.ndarray:
+    """Ventana local de la Luna fuera del polo (60°S–60°N) a `px` m con SLDEM2015 (59,2 m)."""
+    if abs(lat) > 59:
+        raise ValueError(f"SLDEM2015 solo cubre 60°S–60°N (lat {lat})")
+    return sample_mars(lat, lon, window_km, px, sup, source="sldem")
 
 
 def _hf(z: np.ndarray, sigma_px: float) -> float:

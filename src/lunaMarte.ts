@@ -430,7 +430,7 @@ function markerClass(r: Reference): MarkerClass {
   if (r.group === "malla_polar") return "grid";
   if (r.group === "artemis_2024") return r.kind === "region_tesela" ? "a24t" : "a24";
   if (r.group === "artemis_2022_retirada") return "a22";
-  if (r.group === "sitios_polo_sur") return "site";
+  if (r.group === "sitios_polo_sur" || r.group === "luna_fuera_del_polo") return "site";
   return "a24";   // v1: las 6 referencias de la Luna
 }
 function markerSvg(c: MarkerClass, x: number, y: number, u: number, extra: string) {
@@ -508,12 +508,16 @@ function renderRefs() {
     }
   }
   let fine = "";
+  // El minimapa de la Luna es el polo sur: los sitios fuera del polo (Apollo, Chang'e, fosos) no caben.
+  const inMap = (lat: number | null | undefined) => !moon || (lat != null && lat <= -78);
   for (const p of POINTS) {
-    if (p.body !== body || p.level === "L0") continue;
+    if (p.body !== body || p.level === "L0" || !inMap(p.lat)) continue;
     const [x, y] = proj(body, p.lat, p.lon);
     fine += `<circle cx="${x.toFixed(3)}" cy="${y.toFixed(3)}" r="${((p.level === "L2" ? 1.3 : 1) * u).toFixed(3)}" fill="#fff" fill-opacity="${p.level === "L2" ? 0.6 : 0.4}"/>`;
   }
-  const l0 = DATA.references.filter((r) => r.body === body && !r.group_only && r.lat != null && r.lon != null);
+  const l0all = DATA.references.filter((r) => r.body === body && !r.group_only && r.lat != null && r.lon != null);
+  const l0 = l0all.filter((r) => inMap(r.lat));
+  const outside = l0all.length - l0.length;
   // Malla y teselas primero (debajo), los sitios con nombre encima.
   const order: MarkerClass[] = ["grid", "a24t", "a22", "unusable", "mola", "usable", "site", "a24"];
   l0.sort((a, b) => order.indexOf(markerClass(a)) - order.indexOf(markerClass(b)));
@@ -568,6 +572,7 @@ function renderRefs() {
 
   box.innerHTML = `
     <p class="lm-note">${esc(summary)}</p>
+    ${outside ? `<p class="lm-note">${esc(t("lm.refsOutside", { n: outside }))}</p>` : ""}
     <table class="lm-table lm-counts"><thead><tr><th scope="col">${t("lm.refsGroup")}</th>${head}</tr></thead><tbody>${body_}</tbody></table>
     <figure class="lm-minimap">${svg}
       <figcaption><ul class="lm-mm-legend">${lg.map(([sw, txt]) => `<li>${sw}<span>${esc(txt)}</span></li>`).join("")}</ul></figcaption>

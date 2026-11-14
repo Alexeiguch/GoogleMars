@@ -104,6 +104,48 @@ de CO₂ de Marte ni su radiación. El terreno de los análogos lo modelan el vi
 los impactos. Ningún lugar llega al frío lunar ni al marciano. Y la superficie está saturada (1,00 en casi todo
 el top): WorldCover solo dice "desnudo", no qué roca es.
 
+## 3 bis. Luna fuera del polo (añadido después, solo gemelos)
+
+El texto oficial del reto pide análogos de "candidate permanent Moon-base locations", sin limitarse al polo
+sur. Por eso se añadieron 13 sitios con coordenadas publicadas por LROC:
+
+- **Coordenadas:** los módulos de Apollo 11, 12, 14, 15, 16 y 17 y de Chang'e 3, 4, 5 y 6 vienen del shapefile
+  "Anthropogenic Objects", actualizado en 2025. Los fosos de Marius Hills, Mare Tranquillitatis y Mare Ingenii,
+  posibles tragaluces de tubos de lava, vienen del Atlas de fosos.
+- **Dato:** SLDEM2015 (LOLA + estéreo Kaguya TC, 59 m, 60°S–60°N; 22,6 GB en el USGS, leído por rangos de
+  bytes). No se usa el LOLA global de 118 m porque cerca del ecuador tiene huecos de 1–4 km entre trazas
+  rellenados por interpolación. Frente al LOLA en Apollo 11: diferencia media de −0,18 m, correlación 0,9986.
+- **Escalas:** 30 km a 400 m (L0) y 3×3 ventanas de 10 km a 120 m (L1). No hay L2: falta un producto con
+  resolución real ≤ 60 m comprobada fuera del polo.
+- **Solo gemelos:** estos sitios no entran en el ranking ni en la validación del polo sur. Se comprobó que la
+  validación y el top 5 final de la Luna quedan idénticos.
+- **Coste:** 13 sitios en ~13 min, 24 tiles L1 más (87 MB) y 8 consultas más a Meteomatics.
+
+| Sitio | Mejor gemelo a 30 km | Total | Terreno | Clima | Estado |
+|---|---|---|---|---|---|
+| Apollo 11 (Mare Tranquillitatis) | 43,87, 101,99 (Gobi, Mongolia) | 0,78 | 0,93 | 0,26 | sin revisar |
+| Apollo 12 (Oceanus Procellarum) | 22,50, 14,21 (Sáhara) | 0,71 | 0,74 | 0,37 | sin revisar |
+| Apollo 14 (Fra Mauro) | 22,50, 11,88 (Sáhara) | 0,80 | 0,94 | 0,33 | sin revisar |
+| Apollo 15 (Hadley–Apeninos) | −21,87, −68,37 (Andes) | 0,78 | 0,91 | 0,32 | sin revisar |
+| Apollo 16 (Descartes) | 23,13, 6,62 (Sáhara) | 0,81 | 0,98 | 0,29 | sin revisar |
+| Apollo 17 (Taurus–Littrow) | 38,87, 89,55 (Qaidam) | 0,81 | 0,96 | 0,32 | conocido (Qaidam) |
+| Chang'e 3 (Mare Imbrium) | 20,87, 32,74 (Sudán) | 0,79 | 0,90 | 0,36 | sin revisar |
+| Chang'e 4 (Von Kármán) | 24,87, 22,03 (Libia) | 0,75 | 0,82 | 0,35 | sin revisar |
+| Chang'e 5 (Mons Rümker) | 25,13, 5,11 (Argelia) | 0,79 | 0,93 | 0,29 | sin revisar |
+| Chang'e 6 (cuenca Apollo) | 25,87, 17,06 (Libia) | 0,82 | 0,96 | 0,37 | sin revisar |
+| Foso de Marius Hills | 29,50, 33,38 (Sinaí) | 0,81 | 0,96 | 0,31 | sin revisar |
+| Foso de Mare Tranquillitatis | 23,87, 3,68 (Argelia) | 0,81 | 0,96 | 0,34 | sin revisar |
+| Foso de Mare Ingenii | 23,50, 44,26 (Arabia) | 0,80 | 0,97 | 0,27 | sin revisar |
+
+**Dónde falla:**
+- Los mares lunares son llanuras volcánicas muy planas; sus gemelos son llanuras desérticas cálidas
+  (medias de 20–28 °C), parecidas en pendiente pero no en origen ni en temperatura.
+- Los fosos miden decenas de metros, así que a 30 y 10 km se compara el terreno que los rodea, no la cueva.
+  Para eso harían falta análogos de tubos de lava (Lanzarote, Hawái, Idaho), que este método topográfico no
+  detecta a esta escala.
+- Los nombres de lugar de la tabla vienen de las coordenadas (país o región), no de un geocodificador
+  verificado uno a uno.
+
 ## 4. Validación (12 análogos fijados antes de ver resultados)
 
 Percentil global de la mejor ventana a menos de 50 km de cada análogo.
@@ -146,8 +188,8 @@ un análogo baja 10,9; en Marte la media baja (88,7 a 88,0) y un análogo baja 1
 
 ## 5. Consultas a Meteomatics, tiempos y descarga
 
-- **Meteomatics:** 24 consultas (238 puntos nuevos en lotes de 10), de un presupuesto de 300. La caché pasa de 247
-  a 485 puntos. Solo se pidió clima para los finalistas; todo lo demás, con `--no-climate`.
+- **Meteomatics:** 32 consultas en total, de un presupuesto de 300: 24 para la v2 (238 puntos nuevos en lotes de
+  10) y 8 para los gemelos de la Luna fuera del polo (71 puntos). La caché pasa de 247 a 556 puntos. Solo se pidió clima para los finalistas; todo lo demás, con `--no-climate`.
 
 | Paso | Tiempo | Descarga |
 |---|---|---|
@@ -182,9 +224,8 @@ No verificado:
 
 Siguientes pasos:
 1. Terminar la revisión bibliográfica de los 15 candidatos pendientes (después del 15/11 a las 07:00).
-2. Añadir referencias lunares fuera del polo (sitios Apollo y Chang'e, fosos de tubos de lava, mares, polo
-   norte) con el LOLA global de 118 m. El reto habla de "candidate permanent Moon-base locations", sin limitarse
-   al polo sur.
+2. Luna fuera del polo: hecho para 13 sitios (sección 3 bis). Faltan el polo norte (SLDEM2015 llega solo a
+   60°N) y la revisión bibliográfica de sus gemelos.
 3. Separar superficie por mineralogía (EMIT, frente a CRISM en Marte), porque la superficie está saturada.
 4. Iluminación y sombra a partir del DEM para las crestas del polo sur.
 5. Polígonos oficiales de Artemis III cuando se puedan descargar.

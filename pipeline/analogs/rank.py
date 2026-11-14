@@ -43,7 +43,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 from .dem_io import glo90_index, tile_key
-from .reference_sites import MARS_SITES, MOON_REGIONS, MOON_SITES
+from .reference_sites import MARS_SITES, MOON_NONPOLAR_SITES, MOON_REGIONS, MOON_SITES
 from .references import SCALES
 from .terrain import FEATURES, SHAPE_FEATURES, feature_labels
 
@@ -293,6 +293,8 @@ def twin_key(r: dict) -> str:
     if r["body"] == "moon":
         if r.get("group") == "malla_polar":
             return "malla_polar"
+        if r.get("kind") == "sitio_tesela":  # teselas de 10 km de un sitio fuera del polo
+            return r.get("parent") or r["id"].rsplit("_t", 1)[0]
         if r.get("kind") == "sitio" or not r.get("region"):
             return r["id"]
         return r["region"]
@@ -307,6 +309,7 @@ def group_info(refs: list[dict]) -> dict:
     names = {r["id"]: (r["name"], "region") for r in MOON_REGIONS}
     names.update({s["id"]: (s["name"], "sitio") for s in MOON_SITES})
     names.update({s["id"]: (s["name"], "sitio") for s in MARS_SITES})
+    names.update({s["id"]: (s["name"], "fuera_del_polo") for s in MOON_NONPOLAR_SITES})
     names["malla_polar"] = ("Malla polar de 84–90°S (generada, no es un sitio publicado)", "malla")
     # Nobile Rim 1 comparte mosaico LROC (centro y límites) con Mons Mouton: se puntúan juntas.
     names["mons_mouton"] = ("Mons Mouton y Nobile Rim 1 (comparten mosaico LROC)", "region")
@@ -319,6 +322,8 @@ def group_info(refs: list[dict]) -> dict:
         g = out.setdefault(k, {"name": name, "body": r["body"], "kind": kind, "n_refs": 0,
                                "n_refs_levels": {"L0": 0, "L1": 0, "L2": 0}})
         g["n_refs_levels"][r["level"]] += 1
+        if r.get("twin_only"):  # solo gemelos: no entra en el ranking ni en la validación
+            g["twin_only"] = True
         if r["level"] == "L0":
             g["n_refs"] += 1
     return out
@@ -473,6 +478,7 @@ def l1_terrain(L: dict, QE: np.ndarray, pe: np.ndarray, S0: np.ndarray, chunk: i
     """T(e, r) = sqrt(T1 · T0(padre(e), padre(r))) (0 si falta un padre: sin dos escalas no hay terreno multiescala), reducido por ventana:
     máximo y su referencia, T0 y T1 de esa pareja y máximo por clave de gemelos."""
     QR, pcol, gcols = L["QR"], L["pcol"], L["gcols"]
+    rank = L.get("rank")  # referencias que entran en el máximo general (None = todas)
     n, K = len(QE), len(gcols)
     best = np.zeros(n, "float32")
     arg = np.zeros(n, int)
@@ -491,7 +497,7 @@ def l1_terrain(L: dict, QE: np.ndarray, pe: np.ndarray, S0: np.ndarray, chunk: i
             blk[:, has_r] = sub
             T0[okw] = blk
         T = np.where(np.isfinite(T0), np.sqrt(T1 * np.nan_to_num(T0)), 0.0)  # sin padre en algún nivel: no puntúa
-        j = T.argmax(axis=1)
+        j = (T if rank is None else np.where(rank[None, :], T, -1.0)).argmax(axis=1)
         rows = np.arange(len(T))
         best[a:a + chunk], arg[a:a + chunk] = T[rows, j], j
         t0b[a:a + chunk], t1b[a:a + chunk] = T0[rows, j], T1[rows, j]
@@ -508,7 +514,10 @@ def build_l1(body: str, refs: list[dict], L0: dict, feats: list[str]) -> dict | 
     keys = [twin_key(r) for r in refs1]
     kl = sorted(set(keys), key=keys.index)
     gcols = [np.array([j for j, k in enumerate(keys) if k == g]) for g in kl]
-    return {"refs": refs1, "pcol": pcol, "keys": keys, "key_list": kl, "gcols": gcols,
+    rank = np.array([not r.get("twin_only") for r in refs1])
+    twin_only_keys = {k for k, r in zip(keys, refs1) if r.get("twin_only")}
+    return {"refs": refs1, "pcol": pcol, "keys": keys, "key_list": kl, "gcols": gcols, "rank": rank,
+            "twin_only_keys": twin_only_keys,
             "R": np.array([vec({**r["features"], **(r.get("shape") or {})}, feats) for r in refs1])}
 
 
@@ -566,7 +575,11 @@ def run_l0(refs: list[dict], E) -> dict[str, dict]:
                  and r.get("features")]
         B = score_l0(body, refs0, E.Q, E.pct)
         S = B["S"]
-        B["t"], B["best"] = S.max(axis=1), S.argmax(axis=1)
+        # El ranking, el mapa de calor y la validación usan solo las referencias que puntúan; las de
+        # "solo gemelos" (Luna fuera del polo) solo cuentan para sus propios gemelos.
+        rc = np.array([j for j, r in enumerate(refs0) if not r.get("twin_only")])
+        B["rank_cols"] = rc
+        B["t"], B["best"] = S[:, rc].max(axis=1), rc[S[:, rc].argmax(axis=1)]
         B["pre"] = B["t"] ** 0.6 * E.surf ** 0.4
         B["key_max"] = {k: S[:, cols].max(axis=1) for k, cols in B["groups"].items()}
         # gemelos por clave: los mejores lugares de la Tierra para CADA clave de referencias
@@ -575,7 +588,8 @@ def run_l0(refs: list[dict], E) -> dict[str, dict]:
         # preselección con supresión de vecinos (para no listar 20 ventanas del mismo desierto)
         B["chosen"] = nms(B["pre"], E.lat, E.lon, SHORTLIST, NMS_KM)
         L0[body] = B
-        print(f"L0 {body}: {len(refs0)} referencias usables en {len(B['groups'])} claves de gemelos")
+        print(f"L0 {body}: {len(refs0)} referencias usables en {len(B['groups'])} claves de gemelos"
+              f" ({len(refs0) - len(rc)} solo para gemelos)")
     return L0
 
 
@@ -702,7 +716,10 @@ def select_blocks(F1: dict, dest: Path) -> None:
     blocks: dict[tuple[float, float], dict] = {}
     for body, r in F1.items():
         seed: list[int] = []
-        for idx in r["twin_idx"].values():
+        skip = r["L"].get("twin_only_keys", set())  # L2 solo tiene referencias del polo sur
+        for key, idx in r["twin_idx"].items():
+            if key in skip:
+                continue
             if idx and (not seed or haversine_km(r["lat"][idx[0]], r["lon"][idx[0]], r["lat"][seed],
                                                  r["lon"][seed]).min() >= L2_NMS):
                 seed.append(idx[0])
@@ -872,7 +889,8 @@ def build_sites(L0: dict, F1: dict, F2: dict, E, refs_by_id: dict, clim: dict, c
             j, t, t0, t1 = int(r["arg"][i]), float(r["T"][i]), float(r["T0"][i]), float(r["T1"][i])
         else:  # gemelo de la clave g: la mejor pareja con las referencias de esa clave
             cols = L["gcols"][g]
-            sub = l1_terrain({**L, "QR": L["QR"][cols], "pcol": L["pcol"][cols], "gcols": [np.arange(len(cols))]},
+            sub = l1_terrain({**L, "QR": L["QR"][cols], "pcol": L["pcol"][cols], "gcols": [np.arange(len(cols))],
+                              "rank": None},
                              r["QE"][i:i + 1], r["pe"][i:i + 1], L0[body]["S"])
             j, t, t0, t1 = int(cols[sub["arg"][0]]), float(sub["T"][0]), float(sub["T0"][0]), float(sub["T1"][0])
         w, ref, pe = r["W"][i], L["refs"][j], int(r["pe"][i])
