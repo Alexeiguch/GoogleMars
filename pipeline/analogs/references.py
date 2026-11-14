@@ -242,8 +242,11 @@ def mars_usable(spec: dict, v: dict, site_q: dict | None = None) -> tuple[bool, 
     extra = f"; sitio: {site_q['clase']}" if site_q else ""
     if spec["level"] == "L0":
         if clase == "solo_mola":
-            return True, (f"solo MOLA según hrsc_check a 40 km ({desc}): 463 m o peor, más grueso que el píxel "
-                          "de 400 m; se excluye de L1")
+            # El blend aquí solo tiene MOLA (463 m, interpolado entre trazas): compararlo a 400 m
+            # aparenta una precisión que no tiene (estas zonas salen artificialmente lisas y llenaban
+            # el ranking de llanuras). Se conserva como referencia descrita, pero no puntúa.
+            return False, (f"solo MOLA según hrsc_check a 40 km ({desc}): 463 m o peor, más grueso que el píxel "
+                           "de 400 m; no se puntúa en L0 ni se tesela en L1")
         if clase == "dudoso":
             return True, f"cobertura HRSC dudosa según hrsc_check a 40 km ({desc})"
         return True, ""
@@ -500,6 +503,11 @@ def main() -> None:
         otros = [i for i in pos[(r["body"], r["level"], r["lat"], r["lon"])] if i != r["id"]]
         if otros:
             r["usable_note"] = "; ".join(x for x in (r["usable_note"], f"misma posición que {', '.join(otros)}") if x)
+            # Solo puntúa la primera de las que coinciden, para que esa posición no cuente dos veces
+            # (Nobile Rim 1 y Mons Mouton comparten mosaico LROC, centro y límites).
+            if r["id"] != pos[(r["body"], r["level"], r["lat"], r["lon"])][0] and r["usable"]:
+                r["usable"] = False
+                r["usable_note"] += "; duplicada: no se puntúa (cuenta la primera)"
 
     args.salida.parent.mkdir(parents=True, exist_ok=True)
     tmp = args.salida.with_name(args.salida.name + ".tmp")
