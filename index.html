@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#171719">
+    <title>Terrain Analogs</title>
+  </head>
+  <body>
+    <main>
+      <header class="masthead">
+        <h1><span class="mark" aria-hidden="true"></span>Terrain Analogs</h1>
+        <a href="#sources">Data sources <span aria-hidden="true">↘</span></a>
+      </header>
+      <section class="globe-section" aria-label="Planet globes">
+        <div class="globe-headings">
+          <div><h2>Mars <span id="mars-count"></span></h2><div class="site-controls"><select id="mars-site" aria-label="Mars terrain site"></select><button id="find-matches" type="button">Find matches</button></div></div>
+          <div><h2>Earth</h2><span id="earth-site" aria-live="polite"></span></div>
+        </div>
+        <div class="globe-stage">
+          <canvas id="globes" aria-label="Mars and Earth globes. Drag Mars to rotate it."></canvas>
+          <div id="mars-drag" aria-hidden="true"></div>
+          <div id="mars-pins"></div>
+          <span class="globe-pin" id="earth-pin" aria-hidden="true" hidden></span>
+          <p id="globe-error" role="status" hidden>Globe unavailable. Select a Mars site above to compare terrain.</p>
+        </div>
+      </section>
+      <section class="results" id="results" aria-labelledby="matches-title" hidden>
+        <div class="result-title"><h2 id="matches-title">Earth matches</h2><a href="#comparison">Compare terrain <span aria-hidden="true">↓</span></a></div>
+        <ol class="match-list" id="match-list" aria-label="Earth sites ranked by terrain similarity"></ol>
+      </section>
+      <section class="comparison" aria-label="Terrain comparison" id="comparison" hidden>
+        <div class="toolbar">
+          <div class="modes" role="group" aria-label="Terrain coloring">
+            <button type="button" data-mode="relief" aria-pressed="false">Relief</button>
+            <button type="button" data-mode="slope" aria-pressed="true">Slope</button>
+          </div>
+          <div class="camera-actions" role="group" aria-label="Shared camera">
+            <button type="button" id="top-view">Top view</button>
+            <button type="button" id="reset-view">Reset view</button>
+          </div>
+        </div>
+        <div class="site-grid" id="site-headings"></div>
+        <div class="stage">
+          <canvas id="terrain" tabindex="0" aria-label="Synchronized terrain views. Drag or use the arrow keys to rotate both terrains. Scroll or use plus and minus to zoom."></canvas>
+          <p id="viewer-error" role="status" hidden></p>
+        </div>
+        <div class="map-footer">
+          <div class="legend" id="legend" aria-label="Slope in degrees"></div>
+          <span id="grid-scale"></span>
+        </div>
+      </section>
+      <section class="details" id="details" aria-labelledby="metrics-title" hidden>
+        <h2 id="metrics-title">Terrain measurements</h2>
+        <table>
+          <thead><tr><th scope="col">Metric</th><th scope="col">Mars</th><th scope="col">Earth</th></tr></thead>
+          <tbody id="metrics"></tbody>
+        </table>
+      </section>
+      <footer id="sources">
+        <h2>Data sources</h2><ul id="source-list"></ul>
+        <details id="ranking-method" hidden>
+          <summary>How terrain distance is calculated</summary>
+          <p>The viewer ranks Earth sites in the selected terrain category. For each metric, divide the absolute difference by the sum of both values, then average the three results. Lower distances indicate more similar topography at a 2 km scale.</p>
+        </details>
+      </footer>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
