@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#171719">
+    <script>
+      // Idioma y tema antes de pintar (sin parpadeo). Ver src/prefs.ts e src/i18n.ts.
+      (function () {
+        var d = document.documentElement, l = null, t = null;
+        try { l = localStorage.getItem("analogs-lang"); t = localStorage.getItem("analogs-theme"); } catch (e) {}
+        d.lang = l === "en" || l === "es" ? l : (/^es\b/i.test(navigator.language || "") ? "es" : "en");
+        d.dataset.theme = t === "light" || t === "dark" ? t : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      })();
+    </script>
+    <title data-i18n="gl.docTitle">Análogos terrestres · Globos 3D</title>
+  </head>
+  <body>
+    <main class="gl">
+      <header class="masthead">
+        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">Análogos terrestres</span></h1>
+        <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
+          <a href="./" data-i18n="nav.viewer">Visor 3D de Marte</a>
+          <a href="./luna-marte.html" data-i18n="nav.map">Mapa Luna y Marte</a>
+          <a href="./globos.html" aria-current="page" data-i18n="nav.globes">Globos 3D</a>
+          <a href="#sources"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
+        </nav>
+      </header>
+
+      <div class="gl-toolbar">
+        <div class="gl-mode">
+          <div class="gl-seg" role="group" aria-label="Puntos que se muestran" data-i18n-attr="aria-label:gl.modeLabel">
+            <button type="button" data-mode="best" aria-pressed="true" data-i18n="gl.best">Mejores</button>
+            <button type="button" data-mode="all" aria-pressed="false" data-i18n="gl.all">Todos</button>
+          </div>
+          <span id="gl-count" class="gl-count" aria-live="polite"></span>
+          <button type="button" class="gl-legend-toggle" id="gl-legend-toggle" aria-expanded="false" aria-controls="gl-legend" data-i18n="gl.legend">Leyenda</button>
+        </div>
+        <div class="gl-pickers">
+          <label class="gl-field"><span data-i18n="gl.refPicker">Sitio de la Luna o de Marte</span>
+            <select id="gl-ref"><option data-i18n="gl.allSites">Todos los sitios</option></select>
+          </label>
+          <label class="gl-field"><span data-i18n="gl.goto">Ir a un punto</span>
+            <select id="gl-goto"><option data-i18n="gl.choosePoint">Elige un punto</option></select>
+          </label>
+        </div>
+      </div>
+
+      <div class="gl-body">
+        <section class="gl-stage" id="gl-stage" aria-label="Globos de la Luna, la Tierra y Marte" data-i18n-attr="aria-label:gl.stageLabel">
+          <canvas id="gl-canvas" aria-hidden="true"></canvas>
+          <div class="gl-panel" data-globe="moon">
+            <p class="gl-label"><b data-i18n="planet.moon">Luna</b> <span data-i18n="gl.radius.moon">radio 1.737 km</span></p>
+            <button type="button" class="gl-reset" data-i18n="gl.reset">Restablecer vista</button>
+            <p class="gl-credit">LRO WAC: NASA/GSFC/ASU · NASA Moon Trek</p>
+          </div>
+          <div class="gl-panel" data-globe="earth">
+            <p class="gl-label"><b data-i18n="planet.earth">Tierra</b> <span data-i18n="gl.radius.earth">radio 6.371 km</span></p>
+            <button type="button" class="gl-reset" data-i18n="gl.reset">Restablecer vista</button>
+            <p class="gl-credit">Esri, Vantor, Earthstar Geographics</p>
+          </div>
+          <div class="gl-panel" data-globe="mars">
+            <p class="gl-label"><b data-i18n="planet.mars">Marte</b> <span data-i18n="gl.radius.mars">radio 3.390 km</span></p>
+            <button type="button" class="gl-reset" data-i18n="gl.reset">Restablecer vista</button>
+            <p class="gl-credit">Viking: NASA Mars Trek · CTX: NASA/JPL/MSSS/Caltech Murray Lab/Esri</p>
+          </div>
+          <div class="gl-tip" id="gl-tip" role="tooltip" hidden></div>
+          <p class="gl-error" id="gl-error" role="status" data-i18n="gl.error" hidden>Los globos 3D no están disponibles en este navegador. Usa los desplegables de arriba para consultar los puntos.</p>
+          <div class="gl-legend" id="gl-legend" aria-label="Leyenda" data-i18n-attr="aria-label:gl.legend"></div>
+        </section>
+        <aside class="gl-detail" id="gl-detail" aria-live="polite" aria-label="Detalle del punto" data-i18n-attr="aria-label:gl.detailLabel" hidden></aside>
+      </div>
+    </main>
+    <footer id="sources" class="gl-footer">
+      <h2 data-i18n="sources.title">Fuentes de datos</h2>
+      <ul id="source-list"></ul>
+      <p class="gl-howto" data-i18n="gl.howto">Arrastra un globo para girarlo; usa la rueda o pellizca con dos dedos para acercar. Los globos se dibujan del mismo tamaño: el radio real va en la etiqueta de cada uno.</p>
+    </footer>
+    <script type="module" src="/src/globos.ts"></script>
+  </body>
+</html>
