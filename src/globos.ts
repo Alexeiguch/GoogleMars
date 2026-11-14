@@ -22,9 +22,9 @@ import { TileLayer, direction, type TileLayerOptions } from "./tiles";
 // ---------------------------------------------------------------------------------------------
 // Constantes
 
-/** Textura de la Luna (public/imagery/moon.jpg). Si es null, la Luna se dibuja como esfera gris lisa. */
-const MOON_TEXTURE: string | null = "moon.jpg";
-const TEXTURES: Record<GlobeId, string | null> = { moon: MOON_TEXTURE, earth: "earth.jpg", mars: "mars.jpg" };
+/** Textura de la Luna (public/imagery/moon.webp). Si es null, la Luna se dibuja como esfera gris lisa. */
+const MOON_TEXTURE: string | null = "moon.webp";
+const TEXTURES: Record<GlobeId, string | null> = { moon: MOON_TEXTURE, earth: "earth.webp", mars: "mars.webp" };
 const BASE_COLOR: Record<GlobeId, number> = { moon: 0x8d8c8a, earth: 0x315b79, mars: 0xb76845 };
 const HOME_DISTANCE = 3.7;
 /**
@@ -53,7 +53,7 @@ const MOON_BASE_GAIN = 0.66;
 /** CTX es gris: se tiñe con el color medio de Marte (media RGB de Viking / media de CTX). */
 const MARS_CTX_TINT: [number, number, number] = [0.934, 0.74, 0.727];
 /** Relieve del polo sur (pipeline/analogs/moon_pole.py): imagen azimutal equidistante hasta 90° - POLE_EDGE_DEG. */
-const POLE_TEXTURE = "moon_south_pole.jpg";
+const POLE_TEXTURE = "moon_south_pole.webp";
 const POLE_EDGE_DEG = 12;   // igual que EDGE_DEG en moon_pole.py
 const POLE_FADE_DEG = 2;    // fundido con la imagen global entre 78°S y 80°S
 /** El relieve es gris neutro; la imagen global es algo cálida (media RGB / luminancia entre 78°S y 80°S). */
@@ -87,11 +87,6 @@ function rgb(color: string): [number, number, number] {
   const n = Number.parseInt(color.replace("#", ""), 16);
   return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255];
 }
-function mix(a: string, b: string, t: number): [number, number, number] {
-  const [x, y] = [rgb(a), rgb(b)];
-  return [0, 1, 2].map((i) => x[i] + (y[i] - x[i]) * t) as [number, number, number];
-}
-
 // direction(lat, lon) viene de src/tiles.ts: la misma convención para puntos, mosaicos y capa polar.
 
 // ---------------------------------------------------------------------------------------------
@@ -170,11 +165,13 @@ for (const body of BODIES) {
   const heat = DATA.bodies[body].heat;
   const scores = heat.map(([, , s]) => s);
   const [lo, hi] = [Math.min(...scores), Math.max(...scores)];
+  const [low, high] = HEAT_RAMP[body].map(rgb);
   heat.forEach(([lat, lon, score], index) => {
     const t = hi > lo ? (score - lo) / (hi - lo) : 1;
     heatItems[body].push(add({
       id: `heat:${body}:${index}`, globe: "earth", kind: "heat", lat, lon, raw: null, named: false,
-      shape: Shape.Soft, size: SIZE.heat, color: mix(HEAT_RAMP[body][0], HEAT_RAMP[body][1], t), priority: 0,
+      shape: Shape.Soft, size: SIZE.heat, priority: 0,
+      color: [0, 1, 2].map((i) => low[i] + (high[i] - low[i]) * t) as Item["color"],
       heat: { body, score },
     }));
   });
@@ -222,14 +219,15 @@ const stage = $<HTMLElement>("#gl-stage");
 const tip = $<HTMLElement>("#gl-tip");
 const errorBox = $<HTMLElement>("#gl-error");
 
+const pixelRatio = Math.min(devicePixelRatio, 2);
 let renderer: THREE.WebGLRenderer | null = null;
 try {
   renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(pixelRatio);
 } catch {
   errorBox.hidden = false;
 }
 
-const pixelRatio = Math.min(devicePixelRatio, 2);
 const pointUniforms = { pr: { value: pixelRatio } };
 
 const vertexShader = /* glsl */ `
@@ -463,7 +461,7 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
   const own = items.filter((item) => item.globe === id);
   const layers: Layer[] = [];
   if (id === "earth") {
-    for (const body of BODIES) layers.push(makeLayer([...heatItems[body]]));
+    for (const body of BODIES) layers.push(makeLayer(heatItems[body]));
     layers.push(makeLayer(own.filter((i) => i.kind !== "heat")));
   } else {
     layers.push(makeLayer(own));
@@ -547,13 +545,12 @@ function render() {
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
   if (!width || !height) return;
-  renderer.setPixelRatio(pixelRatio);
   renderer.getSize(size);
   if (size.x !== width || size.y !== height) renderer.setSize(width, height, false);
   const box = canvas.getBoundingClientRect();
-  renderer.setScissorTest(true);
-  renderer.setClearColor(0x000000, 0);
+  renderer.setScissorTest(false);
   renderer.clear();
+  renderer.setScissorTest(true);
   for (const globe of Object.values(globes)) {
     const r = globe.panel.getBoundingClientRect();
     const rect = { x: r.left - box.left, y: r.top - box.top, w: r.width, h: r.height };
@@ -595,12 +592,19 @@ function refreshPoints() {
     item.visible = isVisible(item);
     if (item.visible) count++;
     const { layer, index } = item;
-    if (!layer || index === undefined) continue;
+    if (!layer || index === undefined || item.kind === "heat") continue;
     layer.size.setX(index, item.visible ? item.size : 0);
     layer.hl.setX(index, highlighted.has(item) ? 1 : 0);
   }
   for (const globe of Object.values(globes)) {
-    for (const layer of globe.layers) { layer.size.needsUpdate = true; layer.hl.needsUpdate = true; }
+    for (const layer of globe.layers) {
+      if (layer.items[0]?.kind === "heat") {
+        layer.points.visible = layer.items[0].visible;
+      } else {
+        layer.size.needsUpdate = true;
+        layer.hl.needsUpdate = true;
+      }
+    }
   }
   $("#gl-count").textContent = t("gl.count", { n: count.toLocaleString(locale()) });
   fillGoto();

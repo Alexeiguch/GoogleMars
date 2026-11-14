@@ -51,6 +51,8 @@ from PIL import Image
 from scipy import ndimage
 
 from . import dem_io
+from .references import MARS_DEM, MARS_R, MOON_DEM, MOON_R
+from .terrain import sample_planet_dem
 
 ROOT = Path(__file__).resolve().parent.parent       # pipeline/
 PROJECT = ROOT.parent
@@ -234,21 +236,22 @@ def _fine_windows(site: dict, hint: str | None):
     yield lv, *ll, ref, hir
 
 
-def plan_jobs(res: dict, out: Path) -> tuple[list[dict], list[str]]:
+def plan_jobs(res: dict, out: Path, legacy: bool = False) -> tuple[list[dict], list[str]]:
     """Lista de imágenes a generar (sin las que ya existen) y avisos."""
     idx = _ref_index(res)
     jobs: dict[str, dict] = {}
     warn: list[str] = []
 
     def want_ref(body, level, rid):
-        name = ref_name(rid, level)
+        name = f"ref_{rid}.png" if legacy else ref_name(rid, level)
         if name in jobs:
             return
         if body == "mars" and level == "L2":
-            if not (TERRAIN / f"{rid}.f32").exists():
+            patch = rid.removeprefix("hirise_")
+            if not (TERRAIN / f"{patch}.f32").exists():
                 warn.append(f"Marte L2: no hay parche HiRISE {rid}.f32")
                 return
-            jobs[name] = dict(kind="ref", body=body, level=level, id=rid, lat=None, lon=None, name=name)
+            jobs[name] = dict(kind="ref", body=body, level=level, id=patch, lat=None, lon=None, name=name)
             return
         r = _find_ref(idx, rid, level, body)
         if r is None:
@@ -260,7 +263,7 @@ def plan_jobs(res: dict, out: Path) -> tuple[list[dict], list[str]]:
         if (body, level) not in SCALES:
             return
         px = SCALES[(body, level)][1]
-        name = earth_name(lat, lon, level, px)
+        name = f"e_{lat:.4f}_{lon:.4f}.png" if legacy else earth_name(lat, lon, level, px)
         jobs.setdefault(name, dict(kind="earth", body=body, level=level, lat=lat, lon=lon, name=name))
         if rid:
             want_ref(body, level, rid)
@@ -278,7 +281,7 @@ def plan_jobs(res: dict, out: Path) -> tuple[list[dict], list[str]]:
             for s, hint in _entries(B.get(key)):
                 want_site(body, "L0", *_latlon(s), s.get("best_ref") or hint)
         fine = B.get("fine")
-        if not isinstance(fine, dict):
+        if legacy or not isinstance(fine, dict):
             continue
         for key in ("sites", "twins", "final"):
             for s, hint in _entries(fine.get(key)):
@@ -293,14 +296,22 @@ def plan_jobs(res: dict, out: Path) -> tuple[list[dict], list[str]]:
 
 # ---------------------------------------------------------------- principal
 
-def run_job(j: dict, out: Path) -> tuple[dict, str, float]:
+def run_job(j: dict, out: Path, legacy: bool = False) -> tuple[dict, str, float]:
     t = time.time()
     try:
-        if j["kind"] == "ref":
-            z = sample_ref(j["body"], j["level"], j["id"], j["lat"], j["lon"])
+        if legacy:
+            px = 100
+            if j["kind"] == "ref":
+                url, radius = (MOON_DEM, MOON_R) if j["body"] == "moon" else (MARS_DEM, MARS_R)
+                z = sample_planet_dem(url, radius, j["lat"], j["lon"], window_km=30, px=px, sup=1)
+            else:
+                z = dem_io.sample_earth(j["lat"], j["lon"], 30, px)
         else:
-            z = sample_earth_level(j["body"], j["level"], j["lat"], j["lon"])
-        px = SCALES[(j["body"], j["level"])][1]
+            px = SCALES[(j["body"], j["level"])][1]
+            if j["kind"] == "ref":
+                z = sample_ref(j["body"], j["level"], j["id"], j["lat"], j["lon"])
+            else:
+                z = sample_earth_level(j["body"], j["level"], j["lat"], j["lon"])
         if z is None:
             msg = "sin dato"
         elif render(z, px, out / j["name"]):
@@ -318,13 +329,14 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=IMG)
     ap.add_argument("--threads", type=int, default=MAX_THREADS)
     ap.add_argument("--dry-run", action="store_true", help="solo lista lo que falta")
+    ap.add_argument("--legacy", action="store_true", help="genera los PNG de 30 km usados por el mapa publicado")
     a = ap.parse_args()
     threads = max(1, min(MAX_THREADS, a.threads))
     dem_io.set_max_per_server(threads)
 
     res = json.loads(a.results.read_text(encoding="utf-8"))
     a.out.mkdir(parents=True, exist_ok=True)
-    todo, warn = plan_jobs(res, a.out)
+    todo, warn = plan_jobs(res, a.out, a.legacy)
     for w in warn:
         print("aviso:", w, flush=True)
     print(f"{len(todo)} imágenes por generar en {a.out} ({threads} hilos)", flush=True)
@@ -340,7 +352,7 @@ def main() -> None:
     t0, fails, k = time.time(), 0, 0
     with ThreadPoolExecutor(threads) as ex:
         for phase in (first, rest):
-            for j, msg, dt in ex.map(lambda j: run_job(j, a.out), phase):
+            for j, msg, dt in ex.map(lambda j: run_job(j, a.out, a.legacy), phase):
                 k += 1
                 fails += not msg[0].isdigit()
                 print(f"{k}/{len(todo)} {j['name']}: {msg} ({dt:.1f} s)", flush=True)

@@ -302,16 +302,29 @@ def _http_range(url: str, a: int, b: int, tries: int = 6) -> bytes:
     s = getattr(_tls, "s", None)
     if s is None:
         s = _tls.s = requests.Session()
+    err = "sin intentos"
     for k in range(tries):
         try:
             with _sem("usgs"):
-                r = s.get(url, headers={"Range": f"bytes={a}-{b}"}, timeout=60)
-            if r.status_code == 206 and len(r.content) == b - a + 1:
-                return r.content
-            err = f"HTTP {r.status_code}, {len(r.content)} B"
+                with s.get(url, headers={"Range": f"bytes={a}-{b}", "Accept-Encoding": "identity"},
+                           stream=True, timeout=60) as r:
+                    content_range = r.headers.get("Content-Range", "")
+                    if r.status_code == 206 and content_range.startswith(f"bytes {a}-{b}/"):
+                        size = b - a + 1
+                        data = bytearray()
+                        for chunk in r.iter_content(min(size + 1, 64 * 1024)):
+                            data.extend(chunk)
+                            if len(data) > size:
+                                break
+                        if len(data) == size:
+                            return bytes(data)
+                        err = f"tamaño de rango incorrecto ({len(data)} B; se esperaban {size})"
+                    else:
+                        err = f"HTTP {r.status_code}, Content-Range: {content_range}"
         except requests.RequestException as exc:
             err = repr(exc)
-        time.sleep(1.5 * (k + 1))
+        if k + 1 < tries:
+            time.sleep(1.5 * (k + 1))
     raise IOError(f"rango {a}-{b} de {url}: {err}")
 
 
@@ -343,7 +356,9 @@ def _mars_meta(source: str) -> dict:
         m["byteorder"] = "<" if _http_range(url, 0, 1) == b"II" else ">"
         tr = m["transform"]
         m["px_m"] = abs(tr[4]) * (math.pi * MARS_R / 180 if m["geographic"] else 1.0)
-        path.write_text(json.dumps(m, indent=1), encoding="utf-8")
+        tmp = path.with_suffix(f".{os.getpid()}_{threading.get_ident()}.tmp")
+        tmp.write_text(json.dumps(m, indent=1), encoding="utf-8")
+        os.replace(tmp, path)
     _MARS_META[source] = m
     return m
 
@@ -442,7 +457,9 @@ def _mars_values(source: str, la: np.ndarray, lo: np.ndarray, lat: float, lon: f
         tmp = d / f"{stem}.{os.getpid()}_{threading.get_ident()}.tmp.npy"
         np.save(tmp, arr)
         os.replace(tmp, d / info["file"])
-        (d / (stem + ".json")).write_text(json.dumps(info), encoding="utf-8")
+        tmp = tmp.with_suffix(".json")
+        tmp.write_text(json.dumps(info), encoding="utf-8")
+        os.replace(tmp, d / (stem + ".json"))
         _MARS_CROPS.get(info["file"], lambda: arr)
         shift = None if info["nc"] >= W else 0
     raw = _MARS_CROPS.get(info["file"], lambda: np.load(CACHE / "mars" / info["file"]))
@@ -516,14 +533,18 @@ _GLO90: dict[str, dict] | None = None
 _GLO90_LOCK = threading.Lock()
 
 
-def glo90_index() -> list[dict]:
-    """Todos los tiles de cop-dem-glo-90 (id, key, bbox, lat0, lon0, href sin firmar),
-    guardados una vez en data/cache/glo90_index.json."""
+def _glo90_items() -> dict[str, dict]:
     global _GLO90
     with _GLO90_LOCK:
         if _GLO90 is None:
             _GLO90 = {it["key"]: it for it in _load_glo90_index()}
-    return list(_GLO90.values())
+        return _GLO90
+
+
+def glo90_index() -> list[dict]:
+    """Todos los tiles de cop-dem-glo-90 (id, key, bbox, lat0, lon0, href sin firmar),
+    guardados una vez en data/cache/glo90_index.json."""
+    return list(_glo90_items().values())
 
 
 def _load_glo90_index() -> list[dict]:
@@ -562,16 +583,14 @@ def _read_cog(href: str, window=None, out_shape=None, resampling=Resampling.near
                 st.enter_context(_sem("pc"))
                 st.enter_context(rasterio.Env(**GDAL_HTTP))
                 with rasterio.open(planetary_computer.sign(href)) as src:
-                    if callable(window):
-                        window = window(src)
-                    if callable(out_shape):
-                        out_shape = out_shape(src)
-                    arr = src.read(1, window=window, out_shape=out_shape, resampling=resampling)
-                    tr = src.window_transform(window) if window is not None else src.transform
-                    if out_shape is not None:
-                        h, w = out_shape
-                        sh = (window.height, window.width) if window is not None else (src.height, src.width)
-                        tr = tr * tr.scale(sh[1] / w, sh[0] / h)
+                    win = window(src) if callable(window) else window
+                    shape = out_shape(src) if callable(out_shape) else out_shape
+                    arr = src.read(1, window=win, out_shape=shape, resampling=resampling)
+                    tr = src.window_transform(win) if win is not None else src.transform
+                    if shape is not None:
+                        h, w = shape
+                        sh = (win.height, win.width) if win is not None else (src.height, src.width)
+                        tr = tr @ tr.scale(sh[1] / w, sh[0] / h)
                     return arr, tr, src.nodata, src.bounds
         except rasterio.errors.RasterioIOError as exc:
             if k == 3:
@@ -587,8 +606,7 @@ def read_glo90_tile(key_or_item):
     """Tile GLO-90 entero (un único bloque COG) -> (z float32 con NaN, transform), o None si no
     existe (océano). Acepta la clave ('N23E010'), una entrada de glo90_index() o un pystac.Item."""
     if isinstance(key_or_item, str):
-        glo90_index()
-        it = _GLO90.get(key_or_item)
+        it = _glo90_items().get(key_or_item)
         if it is None:
             return None
         key, href = it["key"], it["href"]
@@ -662,7 +680,7 @@ def sample_earth(lat: float, lon: float, window_km: float, px: float,
         cols, rows = ~tr * (lo[idx], la[idx])
         return idx, ndimage.map_coordinates(arr, [rows - 0.5, cols - 0.5], order=1, mode="nearest")
     if collection == "cop-dem-glo-90":
-        glo90_index()
+        _glo90_items()
     for idx, vals in _pool("pc").map(job, list(groups)):
         if vals is not None:
             v[idx] = vals

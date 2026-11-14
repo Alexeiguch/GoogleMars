@@ -415,8 +415,8 @@ def run(level: int, items_file: Path, out: Path, part: int = 1, of: int = 1, lim
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Escaneo fino de la Tierra (L1: GLO-90, L2: GLO-30).")
     ap.add_argument("--level", type=int, choices=(1, 2), required=True)
-    ap.add_argument("--tiles-file", type=Path, default=TILES_FILE, help="L1: archivo de tiles (rank)")
-    ap.add_argument("--blocks-file", type=Path, default=BLOCKS_FILE, help="L2: archivo de bloques (rank)")
+    ap.add_argument("--tiles-file", type=Path, default=TILES_FILE, help="L1: archivo de tiles GLO-90")
+    ap.add_argument("--blocks-file", type=Path, default=BLOCKS_FILE, help="L2: archivo de bloques GLO-30")
     ap.add_argument("--out", type=Path, default=OUT_DIR, help="carpeta de salida (se crean l1/ y l2/)")
     ap.add_argument("--part", type=int, default=1, help="parte i (de 1 a N), con --of N")
     ap.add_argument("--of", type=int, default=1)
@@ -432,7 +432,7 @@ def main(argv=None) -> int:
         ap.error("--threads debe ir de 1 a 8 (límite por servidor)")
     src = a.tiles_file if a.level == 1 else a.blocks_file
     if not src.exists():
-        ap.error(f"no existe {src} (lo escribe rank)")
+        ap.error(f"no existe {src}; indica el archivo de entrada (ver README.md)")
     return 1 if run(a.level, src, a.out, a.part, a.of, a.limit, a.threads, a.procs, a.log) else 0
 
 

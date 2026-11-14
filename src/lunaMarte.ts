@@ -30,7 +30,6 @@ type Results = {
   bodies: Record<Body, { sites: EarthSite[]; twins: Record<string, EarthSite[]>; heat: [number, number, number][] }>;
   validation: { body: Body; name: string; percentile: number }[];
   featured: Featured[];
-  n_windows: number;
 };
 
 const DATA = rawResults as unknown as Results;
@@ -93,12 +92,11 @@ const refById = (id: string) => DATA.references.find((r) => r.id === id)!;
 const refName = (ref: Reference) => tr(ref.name);
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 
-const renderIntro = () => { $("#intro").textContent = t("lm.intro", { n: DATA.n_windows.toLocaleString(locale()) }); };
-renderIntro();
-
 // ---- mapa principal ---------------------------------------------------------
 let body: Body = "moon";
 let layer: L.LayerGroup | undefined;
+let heatLayer: L.LayerGroup | undefined;
+let heatBody: Body | undefined;
 const map = L.map("map", { worldCopyJump: true, minZoom: 2, preferCanvas: true }).setView([10, 0], 2);
 let attribution = t("lm.attribution");
 L.tileLayer(EARTH_TILES, { attribution, maxZoom: 13 }).addTo(map);
@@ -160,8 +158,15 @@ function render() {
   layer = L.layerGroup().addTo(map);
   const color = BODY_COLOR[body];
   const B = DATA.bodies[body];
-  for (const [la, lo, s] of B.heat) {
-    L.circleMarker([la, lo], { radius: 2.5, stroke: false, fillColor: color, fillOpacity: 0.15 + 0.5 * s }).addTo(layer);
+  if (heatBody !== body) {
+    if (heatLayer) map.removeLayer(heatLayer);
+    heatLayer = L.layerGroup().addTo(map);
+    heatBody = body;
+    for (const [la, lo, s] of B.heat) {
+      L.circleMarker([la, lo], {
+        radius: 2.5, stroke: false, fillColor: color, fillOpacity: 0.15 + 0.5 * s, interactive: false,
+      }).addTo(heatLayer);
+    }
   }
 
   // Cada elemento abrible se registra con una clave estable para poder reabrirlo tras cambiar de idioma.
@@ -234,6 +239,7 @@ function render() {
   // Reabre lo que estaba abierto (cambio de idioma) o, si no, la primera historia destacada / el n.º 1.
   const open = (currentKey && openers.get(currentKey)) || (firstKey && openers.get(firstKey)) || openers.get("rank-0");
   open?.(false);
+  $("#lm-results").hidden = false;
 }
 
 function bar(label: string, v: number, color: string) {
@@ -370,7 +376,6 @@ setBody(new URLSearchParams(location.search).get("cuerpo") === "marte" ? "mars" 
 
 // Cambio de idioma: se repinta todo lo generado y se reabre el mismo sitio sin mover el mapa.
 onLangChange(() => {
-  renderIntro();
   renderMapText();
   render();
 });

@@ -58,7 +58,7 @@ const matchList = document.querySelector("#match-list")!;
 
 const sources = [
   ["src.marsElev", "https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/"],
-  ["src.earth3dep", sites.find(({ origin }) => origin === "curated")!.sourceUrl],
+  ["src.earth3dep", "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer"],
   ["src.earthGlo30", "https://planetarycomputer.microsoft.com/dataset/cop-dem-glo-30"],
   ["src.cover", "https://planetarycomputer.microsoft.com/dataset/esa-worldcover"],
   ["src.climate", "https://www.meteomatics.com/en/weather-api/"],
@@ -240,13 +240,22 @@ async function selectMatch(match: Match) {
   try {
     const grids = await Promise.all(pair.map((site) => loadTerrain(site, request.signal)));
     if (request.signal.aborted || viewerFailed) return;
-    if (viewer) viewer.setSites(grids);
-    else viewer = createViewer(canvas, grids);
+    if (viewer) {
+      viewer.setSites(grids);
+    } else {
+      try {
+        viewer = createViewer(canvas, grids);
+      } catch {
+        showTerrainError();
+        return;
+      }
+    }
     setStatus(null);
     canvas.style.visibility = "visible";
     for (const button of terrainButtons) button.disabled = false;
   } catch (error) {
     if (request.signal.aborted || viewerFailed) return;
+    request.abort();
     console.error(error);
     setStatus("v.loadError");
   }

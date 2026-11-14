@@ -15,7 +15,6 @@
 #map { position: absolute; inset: 0; background: #000; }
 .leaflet-container { font: inherit; font-size: 14px; }
 
-.lm-intro { padding: 14px 20px 4px; color: var(--muted); font-size: 14px; }
 .lm-tabs { display: flex; gap: 18px; padding: 0 20px; border-bottom: 1px solid var(--border); }
 .lm-tabs button, .lm-cmp-modes button {
   border: 0;
@@ -153,7 +152,7 @@
   .lm-panel { border-right: 0; overflow: visible; }
 }
 @media (max-width: 640px) {
-  .lm-intro, .lm-detail, .lm-section, .lm-refname, .lm-valid { padding-inline: 12px; }
+  .lm-detail, .lm-section, .lm-refname, .lm-valid { padding-inline: 12px; }
   .lm-tabs { padding-inline: 12px; }
   .lm-cards { margin-inline: 12px; }
   .lm-list { padding-inline: 2px; }

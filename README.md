@@ -4,11 +4,12 @@ Proyecto para el reto **"Identify Earth Locations that Analog the Permanent Moon
 
 Buscamos en **toda la Tierra** lugares que se parecen a las zonas candidatas para una base lunar permanente (polo sur, regiones de Artemis III) y a sitios de exploración de Marte. Para cada lugar explicamos **en qué se parece y en qué no**, dimensión por dimensión: terreno, superficie y clima.
 
-La app tiene dos vistas, enlazadas desde la cabecera:
+La app tiene tres vistas, enlazadas desde la cabecera:
 
 | Vista | Página | Qué muestra |
 |---|---|---|
 | **Visor 3D de Marte** | `index.html` | 116 parches de Marte (HiRISE, 2 × 2 km a 20 m) frente a candidatos terrestres al mismo tamaño y escala, en 3D y con cámara compartida. |
+| **Globos 3D** | `globos.html` | Luna, Tierra y Marte con sitios y análogos del mapa y del visor. |
 | **Mapa Luna y Marte** | `luna-marte.html` | Mapa 2D global con pestañas Luna/Marte, historias destacadas, gemelos por sitio, ranking general, validación con análogos conocidos y comparación lado a lado (relieve a la misma escala e imagen real). |
 
 ## Cómo se ejecuta
@@ -39,12 +40,23 @@ Orden de ejecución (cada paso guarda caché y se puede reanudar):
 
 | Paso | Comando | Tarda | Escribe |
 |---|---|---|---|
-| 1. Referencias Luna/Marte | `python -m analogs.references` | ~3 min | `data/references.json` |
+| 1. Referencias Luna/Marte | `python -m analogs.references --legacy` | segundos | `data/references.json` |
 | 2. Escaneo de la Tierra | `python -m analogs.earth_scan` | ~1 h | `data/earth/band_*.json` |
 | 3. Ranking a 30 km | `python -m analogs.rank` | segundos | `../src/data/results.json` |
-| 4. Imágenes de relieve | `python -m analogs.relief_images` | minutos | `../public/relieve/*.png` |
+| 4. Imágenes de relieve | `python -m analogs.relief_images --legacy` | minutos | `../public/relieve/*.png` |
 | 5. Parches de 2 km para el visor 3D | `python -m analogs.patches` | lento la primera vez (descarga GLO-30 y WorldCover); luego usa `data/patches/` | `../src/data/catalog.json`, `../public/terrain/g*.f32` |
-| 6. Relieve del polo sur lunar para los globos 3D | `python -m analogs.moon_pole` | ~1 min (lee el DEM LOLA de 78°S al polo) | `../public/imagery/moon_south_pole.jpg` |
+| 6. Relieve del polo sur lunar para los globos 3D | `python -m analogs.moon_pole` | ~1 min (lee el DEM LOLA de 78°S al polo) | `../public/imagery/moon_south_pole.webp` |
+
+### Referencias y escaneo fino (v2)
+
+`python -m analogs.references` genera `data/references_v2.json`. El comando
+`python -m analogs.fine_scan --level 1 --tiles-file <archivo>` lee una lista
+`{"tiles": [{"key": "N23E010", "control": true}]}`. Para L2, usa
+`--level 2 --blocks-file <archivo>` con una lista
+`{"blocks": [{"id": "ejemplo", "lat": 23.5, "lon": 10.5, "body": "both"}]}`.
+El ranking y el mapa publicados usan el conjunto de 30 km de la tabla anterior.
+La selección automática de teselas y el ranking multiescala están descritos en
+[PLAN_v2.md](pipeline/PLAN_v2.md).
 
 **Pruebas sin gastar consultas ni tocar la app:**
 
@@ -129,9 +141,10 @@ La puntuación de los parches de 2 km existe dos veces: en Python (`patches.py`,
 ## Estructura
 
 ```
-index.html, luna-marte.html   las dos páginas (vite.config.ts las declara)
+index.html, luna-marte.html, globos.html      entradas declaradas en vite.config.ts
 src/main.ts, viewer.ts, globes.ts, data.ts   visor 3D
 src/lunaMarte.ts, lunaMarte.css              mapa Luna/Marte (Leaflet)
+src/globos.ts, globosData.ts, tiles.ts       globos y mosaicos 3D
 src/data/catalog.json         sitios del visor 3D (lo escribe analogs.patches)
 src/data/results.json         ranking a 30 km (lo escribe analogs.rank)
 public/terrain/*.f32          rejillas de 100 × 100 del visor 3D

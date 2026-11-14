@@ -27,7 +27,7 @@ export function createGlobes(canvas: HTMLCanvasElement, target: Site, markers: {
     const light = new THREE.DirectionalLight(0xfff3e7, 1.35);
     const fill = new THREE.AmbientLight(0xffffff, 1.05);
     scene.add(light, fill);
-    loader.load(`${import.meta.env.BASE_URL}imagery/${name}.jpg`, (map) => {
+    loader.load(`${import.meta.env.BASE_URL}imagery/${name}.webp`, (map) => {
       map.colorSpace = THREE.SRGBColorSpace;
       map.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
       material.color.set(0xffffff);

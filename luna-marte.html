@@ -27,24 +27,23 @@
       </header>
       <section class="lm-layout" aria-label="Análogos de la Luna y Marte en toda la Tierra" data-i18n-attr="aria-label:lm.layoutLabel">
         <aside class="lm-panel" id="panel">
-          <div class="lm-intro">
-            <p id="intro"></p>
-          </div>
           <div class="lm-tabs" role="tablist" aria-label="Cuerpo de referencia" data-i18n-attr="aria-label:lm.tabsLabel">
             <button type="button" role="tab" data-body="moon" aria-selected="true" data-i18n="lm.tabMoon">Luna · polo sur</button>
             <button type="button" role="tab" data-body="mars" aria-selected="false" data-i18n="lm.tabMars">Marte</button>
           </div>
-          <div id="detail" class="lm-detail" aria-live="polite"></div>
-          <h2 class="lm-section" data-i18n="lm.featured">Historias destacadas</h2>
-          <div id="featured" class="lm-cards"></div>
-          <h2 class="lm-section" data-i18n="lm.twins">Gemelos terrestres de cada sitio</h2>
-          <div id="twins"></div>
-          <h2 class="lm-section" data-i18n="lm.ranking">Ranking general</h2>
-          <ol class="lm-list" id="ranking"></ol>
-          <h2 class="lm-section" data-i18n="lm.validation">Validación con análogos conocidos</h2>
-          <div class="lm-valid">
-            <table id="validation"></table>
-            <p class="lm-note" data-i18n="lm.validationNote">Percentil global (entre todas las ventanas de 30 km de tierra firme) del mejor punto a menos de 50 km de cada análogo ya conocido. Cuanto más alto, mejor detecta el método los lugares que la ciencia ya usa.</p>
+          <div id="lm-results" hidden>
+            <div id="detail" class="lm-detail" aria-live="polite"></div>
+            <h2 class="lm-section" data-i18n="lm.featured">Historias destacadas</h2>
+            <div id="featured" class="lm-cards"></div>
+            <h2 class="lm-section" data-i18n="lm.twins">Gemelos terrestres de cada sitio</h2>
+            <div id="twins"></div>
+            <h2 class="lm-section" data-i18n="lm.ranking">Ranking general</h2>
+            <ol class="lm-list" id="ranking"></ol>
+            <h2 class="lm-section" data-i18n="lm.validation">Validación con análogos conocidos</h2>
+            <div class="lm-valid">
+              <table id="validation"></table>
+              <p class="lm-note" data-i18n="lm.validationNote">Percentil global (entre todas las ventanas de 30 km de tierra firme) del mejor punto a menos de 50 km de cada análogo ya conocido. Cuanto más alto, mejor detecta el método los lugares que la ciencia ya usa.</p>
+            </div>
           </div>
         </aside>
         <div class="lm-map-wrap">

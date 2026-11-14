@@ -175,7 +175,6 @@ const messages: Record<Lang, Record<string, string>> = {
     // Mapa Luna/Marte (luna-marte.html, lunaMarte.ts)
     "lm.docTitle": "Análogos de la Luna y Marte",
     "lm.layoutLabel": "Análogos de la Luna y Marte en toda la Tierra",
-    "lm.intro": "Búsqueda en toda la Tierra ({n} ventanas de 30 km) de lugares que se parecen a las zonas de base lunar del polo sur y a sitios de exploración de Marte. Para cada lugar se dice en qué se parece y en qué no.",
     "lm.tabsLabel": "Cuerpo de referencia",
     "lm.tabMoon": "Luna · polo sur",
     "lm.tabMars": "Marte",
@@ -397,7 +396,6 @@ const messages: Record<Lang, Record<string, string>> = {
 
     "lm.docTitle": "Moon and Mars analogs",
     "lm.layoutLabel": "Moon and Mars analogs across the whole Earth",
-    "lm.intro": "A search of the whole Earth ({n} windows of 30 km) for places that resemble the lunar south-pole base zones and Mars exploration sites. For each place we say how it is similar and how it is not.",
     "lm.tabsLabel": "Reference body",
     "lm.tabMoon": "Moon · south pole",
     "lm.tabMars": "Mars",

@@ -48,7 +48,7 @@ from .reference_sites import (MARS_R_KM, MARS_SITES, MOON_R_KM, MOON_REGIONS, MO
                               mars_site_tiles, moon_polar_grid, region_tiles, regions_containing)
 from .terrain import FEATURES, SHAPE_FEATURES, shape_features, terrain_features
 
-# Constantes de la v1 (las usan relief_images, moon_pole y la autoprueba de dem_io).
+# Constantes de la v1 para el mapa publicado y la autoprueba de dem_io.
 MOON_DEM = "https://planetarymaps.usgs.gov/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
 MOON_R = 1_737_400.0
 MARS_DEM = "https://planetarymaps.usgs.gov/mosaic/Mars/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2.tif"
@@ -59,6 +59,7 @@ DATA = PIPE / "data"
 OUT = DATA / "references_v2.json"
 CACHE = DATA / "cache" / "refs_v2"
 CATALOG = PIPE.parent / "src" / "data" / "catalog.json"
+PUBLISHED_RESULTS = CATALOG.with_name("results.json")
 TERRAIN = PIPE.parent / "public" / "terrain"
 
 # (ventana km, píxel m) por cuerpo y nivel
@@ -443,8 +444,19 @@ def main() -> None:
                     help="calcula solo esta parte (repetible); por defecto, todo")
     ap.add_argument("--limite", type=int, default=None, help="prueba: primeras N ventanas por cuerpo y nivel")
     ap.add_argument("--hilos", type=int, default=8, help="lecturas simultáneas por servidor (≤ 8)")
-    ap.add_argument("--salida", type=Path, default=OUT)
+    ap.add_argument("--salida", type=Path)
+    ap.add_argument("--legacy", action="store_true", help="exporta las referencias de 30 km del mapa publicado")
     args = ap.parse_args()
+    if args.legacy:
+        if args.solo or args.limite is not None:
+            ap.error("--legacy conserva el conjunto de referencias publicado")
+        dest = args.salida or DATA / "references.json"
+        refs = json.loads(PUBLISHED_RESULTS.read_text(encoding="utf-8"))["references"]
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(refs, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"Escrito {dest} ({len(refs)} referencias publicadas)")
+        return
+    args.salida = args.salida or OUT
     partes = set(args.solo or ["luna", "marte", "hirise"])
     if args.salida.resolve() == (DATA / "references.json").resolve():
         raise SystemExit("data/references.json es la v1 y no se sobrescribe")
