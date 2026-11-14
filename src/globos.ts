@@ -5,19 +5,55 @@ import "@fontsource/barlow/latin-500.css";
 import "@fontsource/barlow/latin-600.css";
 import "./style.css";
 import "./globos.css";
-import "./prefs";
+import { bindUiText, type UiText } from "./prefs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { categoryLabel, type Site } from "./data";
-import { locale, onLangChange, t, tr } from "./i18n";
+import { getLang, locale, onLangChange, t, tr } from "./i18n";
 import {
-  BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, marsPatches, refById, topSite,
+  BEST_MIN_SCORE, BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, isHeadlineRef, marsPatches, refById, topSite, twinKeyOf, twinsOf,
   windowName, type Body, type EarthPoint, type EarthRole, type GlobeId, type Reference,
 } from "./globosData";
 import { TileLayer, direction, type TileLayerOptions } from "./tiles";
+
+// ---------------------------------------------------------------------------------------------
+// Franja de introducción: textos propios de esta página (no están en i18n.ts) y cifras de los datos ya cargados.
+
+const UI_TEXT: UiText = {
+  es: {
+    "intro.lede": "La Luna, la Tierra y Marte, dibujados del mismo tamaño. Los puntos de la Tierra son los lugares que más se parecen a los sitios de referencia de la Luna y de Marte: elige uno para ver su ficha y sus gemelos.",
+    "intro.figMoon": "sitios de referencia en la Luna",
+    "intro.figMars": "sitios de referencia en Marte",
+    "intro.figPatches": "puntos de la Tierra comparados",
+  },
+  en: {
+    "intro.lede": "The Moon, Earth and Mars, drawn at the same size. The points on Earth are the places that best match the Moon and Mars reference sites: pick one to see its details and its twins.",
+    "intro.figMoon": "Moon reference sites",
+    "intro.figMars": "Mars reference sites",
+    "intro.figPatches": "Earth points compared",
+  },
+};
+bindUiText(UI_TEXT);
+/**
+ * Aviso de la ficha de una referencia sin puntuar (results.json: usable=false). En Marte la causa es siempre la misma
+ * (solo hay MOLA de 463 m) y se explica en llano; en la Luna se añade usable_note tal cual.
+ */
+const UNSCORED = {
+  es: { title: "No puntúa.", mars: "Aquí solo hay relieve MOLA de 463 m, demasiado grueso para compararlo a 400 m: este sitio no tiene gemelos en la Tierra." },
+  en: { title: "Not scored.", mars: "Only 463 m MOLA relief is available here, too coarse to compare at 400 m, so this site has no Earth twins." },
+} as const;
+const introEarthPoints = buildEarthPoints().length;
+function renderIntroFigures() {
+  const count = (body: Body) => DATA.references.filter((r) => r.body === body).length;
+  document.querySelector("#fig-moon")!.textContent = String(count("moon"));
+  document.querySelector("#fig-mars")!.textContent = String(count("mars"));
+  document.querySelector("#fig-patches")!.textContent = introEarthPoints.toLocaleString(locale());
+}
+renderIntroFigures();
+onLangChange(renderIntroFigures);
 
 // ---------------------------------------------------------------------------------------------
 // Constantes
@@ -193,13 +229,15 @@ let selected: Item | null = null;
 let highlighted = new Set<Item>();
 
 function matchesRef(point: EarthPoint, refId: string) {
-  const body = refById.get(refId)!.body;
-  return point.data[body]?.best_ref === refId || point.roles.some((r) => r.kind === "twin" && r.ref === refId);
+  const ref = refById.get(refId)!;
+  // Los gemelos v2 se guardan por clave de grupo (twinKeyOf), no por id de referencia.
+  const key = twinKeyOf(ref);
+  return point.data[ref.body]?.best_ref === refId || point.roles.some((r) => r.kind === "twin" && r.ref === key);
 }
 
 function isVisible(item: Item) {
   switch (item.kind) {
-    case "ref": return !refFilter || item.ref!.id === refFilter;
+    case "ref": return refFilter ? item.ref!.id === refFilter : mode === "all" || isHeadlineRef(item.ref!);
     case "patch": return mode === "all" && !refFilter;
     case "heat": return mode === "all" && !refFilter;
     case "earth": {
@@ -737,7 +775,7 @@ function bestBody(point: EarthPoint): Body | null {
 }
 
 function twinItemsOf(ref: Reference) {
-  return (DATA.bodies[ref.body].twins[ref.id] ?? [])
+  return twinsOf(ref)
     .map((t) => earthByKey.get(earthKey(t.lat, t.lon)))
     .filter((i): i is Item => !!i);
 }
@@ -911,9 +949,15 @@ function renderDetail(item: Item) {
   let html = "";
   if (item.kind === "ref") {
     const ref = item.ref!;
-    const twins = DATA.bodies[ref.body].twins[ref.id] ?? [];
+    const twins = twinsOf(ref);
     html = header(t("gl.refKicker", { body: bodyName(ref.body) }), label(item), ref.lat, ref.lon);
     html += `<ul class="gl-roles"><li>${t(`gl.refRole.${ref.body}`)}</li></ul>`;
+    // Referencia que no puntúa: se explica por qué no tiene gemelos (la Tierra no se mueve).
+    if (ref.usable === false) {
+      const text = UNSCORED[getLang()];
+      const why = ref.body === "mars" ? text.mars : ref.usable_note ? tr(ref.usable_note) : "";
+      html += `<p class="gl-unscored"><b>${esc(text.title)}</b>${why ? ` ${esc(why)}` : ""}</p>`;
+    }
     if (ref.note) html += `<p class="gl-note">${esc(tr(ref.note))}</p>`;
     if (twins.length) {
       html += `<h3>${t("gl.twinsTitle")}</h3><ol class="gl-twins">${twins.map((site) => {
@@ -1041,7 +1085,7 @@ function fillLegend() {
     <span>${swatch("disc", COLOR.mars)}${t("gl.analogOf.mars")}</span>
     <span>${swatch("diamond", SHAPE_INK)}${t("gl.lg.ref")}</span>
     <span>${swatch("star", SHAPE_INK)}${t("gl.lg.featured")}</span>
-    <span>${swatch("disc", SHAPE_INK)}${t("gl.lg.site")}</span>
+    <span>${swatch("disc", SHAPE_INK)}${t("gl.lg.site").replace("80", String(BEST_MIN_SCORE))}</span>
     <span>${swatch("ring", SHAPE_INK)}${t("gl.lg.validation")}</span>
     <span>${swatch("small", SHAPE_INK)}${t("gl.lg.catalog")}</span>
     <span><i class="gl-ramp" style="--a:${HEAT_RAMP.moon[0]};--b:${HEAT_RAMP.moon[1]}"></i><i class="gl-ramp" style="--a:${HEAT_RAMP.mars[0]};--b:${HEAT_RAMP.mars[1]}"></i>${t("gl.lg.heat")}</span>`;

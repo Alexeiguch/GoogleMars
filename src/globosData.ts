@@ -7,7 +7,16 @@ import { getLang, locale, t } from "./i18n";
 export type Body = "moon" | "mars";
 export type GlobeId = "moon" | "earth" | "mars";
 type Climate = { t_mean: number; t_min: number; t_max: number; diurnal_range: number; precip_year: number };
-export type Reference = { id: string; body: Body; name: string; lat: number; lon: number; note: string };
+export type Reference = {
+  id: string; body: Body; name: string; lat: number; lon: number; note: string;
+  /** results.json v2: tipo de referencia ("sitio", "region_centro", "region_tesela", "malla"…), región y grupo. */
+  kind?: string;
+  region?: string | null;
+  group?: string;
+  /** false: no puntúa (p. ej. en Marte solo hay MOLA de 463 m); usable_note explica por qué, en español. */
+  usable?: boolean;
+  usable_note?: string;
+};
 export type EarthSite = {
   lat: number; lon: number; score: number;
   scores: { terrain: number; surface: number; climate: number };
@@ -33,6 +42,32 @@ export const DATA: Results = {
 };
 export const BODIES: Body[] = ["moon", "mars"];
 export const bodyName = (id: GlobeId) => t(`planet.${id}`);
+
+/**
+ * Clave con la que results.json v2 guarda los gemelos de una referencia (bodies[b].twins[clave]).
+ * Misma regla que twin_key() en pipeline/analogs/rank.py: en Marte, el id; en la Luna, "malla_polar" para la malla,
+ * el id para los sitios sueltos (o sin región) y la región para las teselas de una región de Artemis.
+ * Nobile Rim 1 comparte mosaico con Mons Mouton y puntúa junto con ella.
+ */
+export function twinKeyOf(ref: Reference): string {
+  if (ref.body === "mars") return ref.id;
+  if (ref.id === "nobile_rim_1") return "mons_mouton";
+  if (ref.group === "malla_polar") return "malla_polar";
+  if (ref.kind === "sitio" || !ref.region) return ref.id;
+  return ref.region;
+}
+
+/** Gemelos terrestres de una referencia (vacío si no puntúa). */
+export function twinsOf(ref: Reference): EarthSite[] {
+  if (ref.usable === false) return [];
+  return DATA.bodies[ref.body].twins[twinKeyOf(ref)] ?? [];
+}
+
+/**
+ * Referencias que se ven en «Mejores»: los sitios y los centros de región. La malla polar de la Luna y las teselas
+ * de cada región (más de cien rombos sobre el polo sur) solo salen en «Todos» o al elegirlas en el filtro.
+ */
+export const isHeadlineRef = (ref: Reference) => ref.kind !== "malla" && ref.kind !== "region_tesela";
 
 export type EarthRole =
   | { kind: "site"; body: Body; rank: number }
@@ -61,7 +96,7 @@ const keyOf = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(2)}
 export const refById = new Map(DATA.references.map((r) => [r.id, r]));
 
 /** Puntaje mínimo (0–100) para que un punto de la Tierra salga en «Mejores». */
-export const BEST_MIN_SCORE = 80;
+export const BEST_MIN_SCORE = 85;
 
 export function buildEarthPoints(): EarthPoint[] {
   const points = new Map<string, EarthPoint>();
