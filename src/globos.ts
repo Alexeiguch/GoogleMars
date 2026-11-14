@@ -1117,7 +1117,7 @@ legendToggle.addEventListener("click", () => {
 // Fuentes
 
 const sources: [string, string][] = [
-  ["gl.src.moonRefs", "https://astrogeology.usgs.gov/search/map/moon_lro_lola_dem_118m"],
+  ["gl.src.moonRefs", "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/"],
   ["gl.src.moonSldem", "https://astrogeology.usgs.gov/search/map/moon_lro_lola_selene_kaguya_tc_dem_merge_60n60s_59m"],
   ["gl.src.marsRefs", "https://astrogeology.usgs.gov/search/map/mars_mgs_mola_mex_hrsc_blended_dem_global_200m"],
   ["gl.src.hirise", "https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/"],
