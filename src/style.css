@@ -1,16 +1,45 @@
+/* Tema oscuro (por defecto). El tema lo fija el script del <head> en <html data-theme>; ver src/prefs.ts. */
 :root {
   color-scheme: dark;
   --ground: #171719;
   --surface: #131217;
+  --sunken: #111114;
+  --hover: #202023;
   --border: #36343a;
   --text: #f4f2f4;
   --muted: #aaa7ad;
   --accent: #d69a70;
+  --ok: #8cc49f;
+  --info: #8fb3d9;
+  --warn: #d9b26f;
+  --story: #d8d5da;
+  --overlay: rgba(19, 18, 23, .92);
+  --pin-dot: #e2b092;
+  --moon: #c9d1e0;
   --pad: 32px;
   color: var(--text);
   background: var(--ground);
   font: 400 16px/1.45 "Barlow", system-ui, sans-serif;
   font-synthesis: none;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ground: #f6f4f1;
+  --surface: #ffffff;
+  --sunken: #ece9e4;
+  --hover: #f0ece7;
+  --border: #d8d3cc;
+  --text: #1d1b1e;
+  --muted: #5f5a61;
+  --accent: #a8582c;
+  --ok: #2f7a4a;
+  --info: #3b6b9c;
+  --warn: #9a6d18;
+  --story: #3a363c;
+  --overlay: rgba(255, 255, 255, .94);
+  --pin-dot: #c8693a;
+  --moon: #66789a;
 }
 
 * { box-sizing: border-box; }
@@ -29,9 +58,35 @@ button:focus-visible, a:focus-visible, canvas:focus-visible { outline: 2px solid
 }
 .masthead { min-height: 82px; }
 .masthead h1 { display: flex; align-items: center; gap: 12px; font-size: 28px; font-weight: 600; }
+.masthead .views { margin-left: auto; }
 .masthead a { font-size: 14px; }
 .mark { width: 16px; height: 16px; border: 1px solid var(--accent); transform: rotate(45deg); position: relative; }
 .mark::after { content: ""; position: absolute; inset: 4px; border: 1px solid var(--accent); }
+/* Navegación entre las dos vistas (visor 3D y mapa Luna/Marte) */
+.views { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 20px; }
+.views a { color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent; padding: 10px 0 2px; }
+.views a:hover { color: var(--text); }
+.views a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+
+/* Idioma y tema (src/prefs.ts) */
+.prefs { display: flex; align-items: center; gap: 10px; flex: none; }
+.lang-switch { display: flex; border: 1px solid var(--border); }
+.lang-switch button, .theme-toggle {
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.lang-switch button { min-width: 38px; padding: 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .05em; }
+.lang-switch button + button { border-left: 1px solid var(--border); }
+.lang-switch button:hover, .theme-toggle:hover { color: var(--text); }
+.lang-switch button[aria-pressed="true"] { background: var(--text); color: var(--ground); }
+.theme-toggle { display: grid; place-items: center; width: 36px; border: 1px solid var(--border); color: var(--text); }
+.theme-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+/* Se muestra el icono del tema al que se cambia. */
+.theme-toggle .icon-moon, :root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
 
 .comparison { background: var(--surface); border: 1px solid var(--border); }
 .toolbar { padding: 0 20px; border-bottom: 1px solid var(--border); }
@@ -93,7 +148,10 @@ footer a { color: var(--muted); font-size: 14px; }
 
 @media (max-width: 640px) {
   :root { --pad: 16px; }
-  .masthead { min-height: 66px; }
+  .masthead { min-height: 66px; flex-wrap: wrap; gap: 6px 12px; padding-top: 10px; }
+  .masthead .prefs { margin-left: auto; }
+  .masthead .views { order: 3; width: 100%; justify-content: flex-start; margin-left: 0; }
+  .views a { padding-top: 4px; }
   .masthead h1 { font-size: 23px; }
   .toolbar, .map-footer { padding-inline: 12px; }
   .modes, .camera-actions { gap: 12px; }
@@ -105,7 +163,7 @@ footer a { color: var(--muted); font-size: 14px; }
   th, td { font-size: 14px; }
 }
 
-.globe-section { border: 1px solid var(--border); background: #111114; }
+.globe-section { border: 1px solid var(--border); background: var(--sunken); }
 .globe-headings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .globe-headings > div { padding: 13px 20px 3px; }
 .globe-headings > div + div { border-left: 1px solid var(--border); }
@@ -126,7 +184,7 @@ footer a { color: var(--muted); font-size: 14px; }
 .site a { color: var(--muted); font-size: 14px; text-decoration: none; }
 .site a:hover { text-decoration: underline; }
 #mars-pins button { width: 24px; height: 24px; }
-#mars-pins button::before { width: 7px; height: 7px; border-width: 1px; background: #e2b092; }
+#mars-pins button::before { width: 7px; height: 7px; border-width: 1px; background: var(--pin-dot); }
 #mars-pins button span { display: none; left: 21px; max-width: min(240px, 25vw); overflow: hidden; text-overflow: ellipsis; }
 #mars-pins button[aria-pressed="true"], #mars-pins button:focus-visible, #mars-pins button:hover { z-index: 2; }
 #mars-pins button[aria-pressed="true"] span, #mars-pins button:focus-visible span, #mars-pins button:hover span { display: block; pointer-events: none; }
@@ -176,7 +234,9 @@ button.globe-pin:hover::before, button.globe-pin:focus-visible::before { backgro
   position: absolute;
   left: 38px;
   padding: 3px 7px;
-  background: #171719;
+  background: var(--ground);
+  color: var(--text);
+  border: 1px solid var(--border);
   font-size: 14px;
   white-space: nowrap;
 }
@@ -187,7 +247,7 @@ button.globe-pin:hover::before, button.globe-pin:focus-visible::before { backgro
 .result-title h2 { font-size: 20px; font-weight: 600; }
 .match-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 1px;
   margin: 8px 0 0;
   padding: 0;
@@ -205,11 +265,19 @@ button.globe-pin:hover::before, button.globe-pin:focus-visible::before { backgro
   text-align: left;
   cursor: pointer;
 }
-.match-list button:hover { background: #202023; }
+.match-list button:hover { background: var(--hover); }
 .match-name { border-bottom: 1px solid transparent; font-weight: 600; }
 .match-list button[aria-pressed="true"] .match-name { border-color: var(--accent); }
 .match-distance { display: block; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
 .match-list button:focus-visible { position: relative; z-index: 2; outline-offset: -3px; }
+.match-origin { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; }
+.match-origin.global { color: var(--accent); }
+.match-bars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.match-bars > span { display: flex; align-items: center; gap: 5px; }
+.match-bars b { color: var(--muted); font-size: 11px; font-weight: 500; }
+.match-bars i { flex: 1; height: 4px; background: var(--border); position: relative; }
+.match-bars i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: calc(var(--v) * 100%); background: var(--accent); }
+tr.group th { padding-top: 18px; color: var(--muted); font-size: 14px; font-weight: 500; text-align: left; }
 
 @media (max-width: 640px) {
   .globe-headings > div { padding-inline: 12px; }
@@ -217,7 +285,6 @@ button.globe-pin:hover::before, button.globe-pin:focus-visible::before { backgro
   .globe-stage { height: 180px; }
   .globe-pin span { left: 31px; font-size: 12px; }
   .match-list { grid-template-columns: 1fr; }
-  .match-list button { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
   .match-name, .match-distance { font-size: 13px; }
 }
 
