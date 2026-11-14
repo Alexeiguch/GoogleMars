@@ -51,6 +51,7 @@ Orden de ejecución, versión 2 (cada paso guarda caché y se puede reanudar). P
 | 8. Imágenes de relieve (píxel del dato más grueso de cada comparación) | `python -m analogs.relief_images` | minutos | `../public/relieve/*_L0/L1/L2*.png` |
 | 9. Parches de 2 km para el visor 3D | `python -m analogs.patches` | lento la primera vez | `../src/data/catalog.json`, `../public/terrain/g*.f32` |
 | 10. Relieve del polo sur lunar para los globos 3D | `python -m analogs.moon_pole` | ~1 min | `../public/imagery/moon_south_pole.webp` |
+| 11. Cuadrículas de altura de 30 km a 300 m (referencias y gemelos) para comparar en 3D | `python -m analogs.height_grids` | ~2 min | `../public/terrain/l0/*.f32`, `index.json` |
 
 La bibliografía de los candidatos está en `pipeline/analogs/literature_v2.json` (la lee `rank`). La versión 1 (11 referencias, solo 30 km) quedó en `data/references.json` y `data/backup_v1/`.
 
