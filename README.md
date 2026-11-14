@@ -4,11 +4,12 @@ Proyecto para el reto **"Identify Earth Locations that Analog the Permanent Moon
 
 Buscamos en **toda la Tierra** lugares que se parecen a las zonas candidatas para una base lunar permanente (polo sur, regiones de Artemis III) y a sitios de exploración de Marte. Para cada lugar explicamos **en qué se parece y en qué no**, dimensión por dimensión: terreno, superficie y clima.
 
-La app tiene dos vistas, enlazadas desde la cabecera:
+La app tiene tres vistas, enlazadas desde la cabecera:
 
 | Vista | Página | Qué muestra |
 |---|---|---|
 | **Visor 3D de Marte** | `index.html` | 116 parches de Marte (HiRISE, 2 × 2 km a 20 m) frente a candidatos terrestres al mismo tamaño y escala, en 3D y con cámara compartida. |
+| **Globos 3D** | `globos.html` | Luna, Tierra y Marte con sitios y análogos del mapa y del visor. |
 | **Mapa Luna y Marte** | `luna-marte.html` | Mapa 2D global con pestañas Luna/Marte, historias destacadas, gemelos por sitio, ranking general, validación con análogos conocidos y comparación lado a lado (relieve a la misma escala e imagen real). |
 
 ## Cómo se ejecuta
@@ -49,9 +50,11 @@ Orden de ejecución, versión 2 (cada paso guarda caché y se puede reanudar). P
 | 7. Ranking final con clima (solo finalistas; `--climate-budget` es el máximo de consultas) | `python -m analogs.rank --climate-budget 60` | ~1 min | `../src/data/results.json` |
 | 8. Imágenes de relieve (píxel del dato más grueso de cada comparación) | `python -m analogs.relief_images` | minutos | `../public/relieve/*_L0/L1/L2*.png` |
 | 9. Parches de 2 km para el visor 3D | `python -m analogs.patches` | lento la primera vez | `../src/data/catalog.json`, `../public/terrain/g*.f32` |
-| 10. Relieve del polo sur lunar para los globos 3D | `python -m analogs.moon_pole` | ~1 min | `../public/imagery/moon_south_pole.jpg` |
+| 10. Relieve del polo sur lunar para los globos 3D | `python -m analogs.moon_pole` | ~1 min | `../public/imagery/moon_south_pole.webp` |
 
 La bibliografía de los candidatos está en `pipeline/analogs/literature_v2.json` (la lee `rank`). La versión 1 (11 referencias, solo 30 km) quedó en `data/references.json` y `data/backup_v1/`.
+
+Para generar las imágenes de una versión 1, usa `python -m analogs.relief_images --legacy`.
 
 **Pruebas sin gastar consultas ni tocar la app:**
 
@@ -60,14 +63,17 @@ python -m analogs.rank --no-climate                  # -> data/prueba/results.js
 python -m analogs.patches --no-climate --regions 2   # -> data/prueba/catalog.json y data/prueba/terrain/
 ```
 
-Con `--no-climate` o `--regions`, la salida va siempre a `pipeline/data/prueba/`, para que una prueba no borre los datos reales de la app.
+Con `--no-climate` o `--regions`, los resultados de prueba se guardan por defecto en `pipeline/data/prueba/`.
+El ranking también guarda las selecciones L1 y L2 en `pipeline/data/`. Usa `--sel-dir` para indicar otra carpeta.
+
+Pruebas unitarias sin red desde `pipeline/`: `python -m unittest discover -s tests -v`.
 
 ### Consultas a Meteomatics
 
 La cuenta del hackathon permite **1.000 consultas al día** (vence el 22/11/2026). El clima se pide por lotes de 10 puntos (**1 consulta por lote**) y se guarda en `pipeline/data/climate_ecmwf-era5.json`. Solo se piden los puntos que no estén ya en esa caché.
 
-- `analogs.rank`: hoy todos sus puntos ya están en la caché, así que cuesta **0 consultas**.
-- `analogs.patches` completo: 120 regiones + 32 sitios curados = 152 puntos. La primera ejecución con ERA5 (14/11/2026) costó **16 consultas**; ahora todos están en la caché, así que repetirla cuesta 0.
+- `analogs.rank` calcula cuántas consultas necesita a partir de la caché local y aplica el límite de `--climate-budget`.
+- `analogs.patches` completo: hasta 120 regiones y 32 sitios curados (16 consultas con la caché vacía).
 
 Se usa el modelo **ERA5** (`ecmwf-era5`). El modelo por defecto de Meteomatics ("mix") daba lluvias irreales en desiertos: 1.181 mm/año en la Puna frente a 195 con ERA5, y 702 frente a 21 en el Aïr. `pipeline/data/climate.json` es la caché antigua de ese modelo y ya no se usa.
 
@@ -76,6 +82,7 @@ Se usa el modelo **ERA5** (`ecmwf-era5`). El modelo por defecto de Meteomatics (
 > **Versión 2 (14/11/2026).** Lo que sigue describe la versión 1. La v2 añade:
 > - Referencias con fuente: 140 ventanas del polo sur lunar con las 16 regiones de Artemis III (mosaicos LROC) y una malla de 84–90°S, y 43 sitios de Marte.
 > - Búsqueda de grueso a fino: 30 km → 10 km → 5 km (Luna) o 2 km (Marte, parches HiRISE), siempre con la misma ventana y el mismo píxel que el dato más grueso de cada comparación.
+> - Trece sitios lunares fuera del polo con datos de [SLDEM2015](https://astrogeology.usgs.gov/search/map/moon_lro_lola_selene_kaguya_tc_dem_merge_60n60s_59m) y gemelos terrestres por sitio. El ranking lunar general sigue dedicado al polo sur.
 > - Validación antes y después, y revisión bibliográfica de los candidatos nuevos.
 >
 > Detalles y resultados en [`pipeline/INFORME_v2.md`](pipeline/INFORME_v2.md).
@@ -143,9 +150,10 @@ La puntuación de los parches de 2 km existe dos veces: en Python (`patches.py`,
 ## Estructura
 
 ```
-index.html, luna-marte.html   las dos páginas (vite.config.ts las declara)
+index.html, luna-marte.html, globos.html      entradas declaradas en vite.config.ts
 src/main.ts, viewer.ts, globes.ts, data.ts   visor 3D
 src/lunaMarte.ts, lunaMarte.css              mapa Luna/Marte (Leaflet)
+src/globos.ts, globosData.ts, tiles.ts       globos y mosaicos 3D
 src/data/catalog.json         sitios del visor 3D (lo escribe analogs.patches)
 src/data/results.json         ranking a 30 km (lo escribe analogs.rank)
 public/terrain/*.f32          rejillas de 100 × 100 del visor 3D

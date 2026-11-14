@@ -27,31 +27,29 @@
       </header>
       <section class="lm-layout" aria-label="Análogos de la Luna y Marte en toda la Tierra" data-i18n-attr="aria-label:lm.layoutLabel">
         <aside class="lm-panel" id="panel">
-          <div class="lm-intro">
-            <p id="intro"></p>
-          </div>
           <div class="lm-tabs" role="tablist" aria-label="Cuerpo de referencia" data-i18n-attr="aria-label:lm.tabsLabel">
-            <button type="button" role="tab" data-body="moon" aria-selected="true" data-i18n="lm.tabMoon">Luna · polo sur</button>
+            <button type="button" role="tab" data-body="moon" aria-selected="true" data-i18n="lm.tabMoon">Luna</button>
             <button type="button" role="tab" data-body="mars" aria-selected="false" data-i18n="lm.tabMars">Marte</button>
           </div>
-          <div id="detail" class="lm-detail" aria-live="polite"></div>
-          <h2 class="lm-section" id="featured-h" data-i18n="lm.featured">Historias destacadas</h2>
-          <div id="featured" class="lm-cards"></div>
-          <h2 class="lm-section" data-i18n="lm.ranking">Ranking general</h2>
-          <div class="lm-seg lm-rank-modes" id="rank-modes" role="group" aria-label="Tipo de ranking" data-i18n-attr="aria-label:lm.rankMode" hidden>
-            <button type="button" data-rank="final" aria-pressed="true" data-i18n="lm.rankFinal">Final multiescala (30 km → 10 km → 5/2 km)</button>
-            <button type="button" data-rank="l0" aria-pressed="false" data-i18n="lm.rankL0">A 30 km</button>
-          </div>
-          <ol class="lm-list" id="ranking"></ol>
-          <h2 class="lm-section" data-i18n="lm.refs">Referencias</h2>
-          <div class="lm-refs" id="refs"></div>
-          <h2 class="lm-section" data-i18n="lm.twinsGroups">Gemelos terrestres por grupo</h2>
-          <p class="lm-note lm-pad" data-i18n="lm.twinsHint">Ordenados por la puntuación de su mejor gemelo. Ábrelos para ver los gemelos a 30 km y a 10 km.</p>
-          <div id="twins" class="lm-groups"></div>
-          <h2 class="lm-section" data-i18n="lm.validation">Validación con análogos conocidos</h2>
-          <div class="lm-valid">
-            <table id="validation"></table>
-            <p class="lm-note" id="validation-note"></p>
+          <div id="lm-results" hidden>
+            <div id="detail" class="lm-detail" aria-live="polite"></div>
+            <h2 class="lm-section" id="featured-h" data-i18n="lm.featured">Historias destacadas</h2>
+            <div id="featured" class="lm-cards"></div>
+            <h2 class="lm-section" data-i18n="lm.ranking">Ranking general</h2>
+            <div class="lm-seg lm-rank-modes" id="rank-modes" role="group" aria-label="Tipo de ranking" data-i18n-attr="aria-label:lm.rankMode" hidden>
+              <button type="button" data-rank="final" aria-pressed="true" data-i18n="lm.rankFinal">Final multiescala (30 km → 10 km → 5/2 km)</button>
+              <button type="button" data-rank="l0" aria-pressed="false" data-i18n="lm.rankL0">A 30 km</button>
+            </div>
+            <ol class="lm-list" id="ranking"></ol>
+            <h2 class="lm-section" data-i18n="lm.refs">Referencias</h2>
+            <div class="lm-refs" id="refs"></div>
+            <h2 class="lm-section" data-i18n="lm.twinsGroups">Gemelos terrestres por grupo</h2>
+            <div id="twins" class="lm-groups"></div>
+            <h2 class="lm-section" data-i18n="lm.validation">Validación con análogos conocidos</h2>
+            <div class="lm-valid">
+              <table id="validation"></table>
+              <p class="lm-note" id="validation-note"></p>
+            </div>
           </div>
         </aside>
         <div class="lm-map-wrap">
@@ -62,6 +60,7 @@
         <h2 data-i18n="sources.title">Fuentes de datos</h2>
         <ul>
           <li><a href="https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/" data-i18n="lm.src.moonPgda">Luna · LOLA LDEM_80S_40MPP_ADJ, 40 m (NASA PGDA, Barker et al. 2023)</a></li>
+          <li><a href="https://astrogeology.usgs.gov/search/map/moon_lro_lola_selene_kaguya_tc_dem_merge_60n60s_59m" data-i18n="lm.src.moonSldem">Luna fuera del polo · SLDEM2015, 59 m (LOLA + Kaguya TC, USGS)</a></li>
           <li><a href="https://data.lroc.im-ldi.com/" data-i18n="lm.src.lroc">Regiones de Artemis III · mosaicos LROC NAC ROI (Arizona State University)</a></li>
           <li><a href="https://astrogeology.usgs.gov/search/map/moon_lro_lola_dem_118m" data-i18n="lm.src.moonMini">Minimapa del polo sur · relieve del DEM LRO LOLA 118 m (USGS)</a></li>
           <li><a href="https://astrogeology.usgs.gov/search/map/mars_mgs_mola_mex_hrsc_blended_dem_global_200m" data-i18n="lm.src.mars">Marte a 30 y 10 km · HRSC + MOLA blend v2, 200 m (USGS)</a></li>

@@ -25,7 +25,7 @@ reanudar). data/references.json (v1) no se toca.
 Ejecutar desde pipeline/:
   python -m analogs.references                       # todo -> data/references_v2.json
   python -m analogs.references --solo luna --limite 5 --salida <ruta>   # prueba
-Opciones: --solo luna|marte|hirise (repetible), --limite N (primeras N ventanas por cuerpo y
+Opciones: --solo luna|luna_np|marte|hirise (repetible), --limite N (primeras N ventanas por cuerpo y
 nivel), --hilos K (lecturas simultáneas por servidor, ≤ 8), --salida RUTA.
 """
 
@@ -49,7 +49,7 @@ from .reference_sites import (MARS_R_KM, MARS_SITES, MOON_NONPOLAR_SITES, MOON_R
                               regions_containing)
 from .terrain import FEATURES, SHAPE_FEATURES, shape_features, terrain_features
 
-# Constantes de la v1 (las usan relief_images, moon_pole y la autoprueba de dem_io).
+# Constantes de la v1 para el mapa publicado y la autoprueba de dem_io.
 MOON_DEM = "https://planetarymaps.usgs.gov/mosaic/Lunar_LRO_LOLA_Global_LDEM_118m_Mar2014.tif"
 MOON_R = 1_737_400.0
 MARS_DEM = "https://planetarymaps.usgs.gov/mosaic/Mars/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2.tif"
@@ -60,6 +60,7 @@ DATA = PIPE / "data"
 OUT = DATA / "references_v2.json"
 CACHE = DATA / "cache" / "refs_v2"
 CATALOG = PIPE.parent / "src" / "data" / "catalog.json"
+PUBLISHED_RESULTS = CATALOG.with_name("results.json")
 TERRAIN = PIPE.parent / "public" / "terrain"
 
 # (ventana km, píxel m) por cuerpo y nivel
@@ -234,19 +235,24 @@ def sldem_values(spec: dict) -> dict:
     return v
 
 
-def compute_moon_np(log) -> tuple[list[dict], dict[str, dict]]:
+def compute_moon_np(log, limit: int | None = None) -> tuple[list[dict], dict[str, dict]]:
     """Por sitio (cada lectura usa hasta MAX_PER_SERVER hilos al USGS); las teselas salen del mismo recorte."""
     specs, res, t0 = [], {}, time.time()
-    for i, s in enumerate(MOON_NONPOLAR_SITES):
+    sites = MOON_NONPOLAR_SITES[:limit]
+    l1_count = 0
+    for i, s in enumerate(sites):
         t = time.time()
         sp = _np_spec("L0", s)
         res[sp["id"]] = _run(sp, sldem_values)
         specs.append(sp)
         for k, tt in enumerate(moon_site_tiles(s, 10, 3)):
+            if limit is not None and l1_count >= limit:
+                break
+            l1_count += 1
             ts = _np_spec("L1", s, tt, k)
             res[ts["id"]] = _run(ts, sldem_values)
             specs.append(ts)
-        log(f"  Luna fuera del polo {i + 1:2d}/{len(MOON_NONPOLAR_SITES)} {s['id']:28s} "
+        log(f"  Luna fuera del polo {i + 1:2d}/{len(sites)} {s['id']:28s} "
             f"({time.time() - t:.1f} s; total {time.time() - t0:.0f} s)")
     return specs, res
 
@@ -488,8 +494,22 @@ def main() -> None:
                     help="calcula solo esta parte (repetible); por defecto, todo")
     ap.add_argument("--limite", type=int, default=None, help="prueba: primeras N ventanas por cuerpo y nivel")
     ap.add_argument("--hilos", type=int, default=8, help="lecturas simultáneas por servidor (≤ 8)")
-    ap.add_argument("--salida", type=Path, default=OUT)
+    ap.add_argument("--salida", type=Path)
+    ap.add_argument("--legacy", action="store_true", help="exporta las referencias de 30 km del mapa publicado")
     args = ap.parse_args()
+    if args.legacy:
+        if args.solo or args.limite is not None:
+            ap.error("--legacy conserva el conjunto de referencias publicado")
+        dest = args.salida or DATA / "references.json"
+        published = json.loads(PUBLISHED_RESULTS.read_text(encoding="utf-8"))
+        refs = published.get("legacy_references", published["references"])
+        if any(r.get("level") is not None for r in refs):
+            ap.error("faltan las referencias v1 en results.json; usa una copia del conjunto publicado original")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(refs, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"Escrito {dest} ({len(refs)} referencias publicadas)")
+        return
+    args.salida = args.salida or OUT
     partes = set(args.solo or ["luna", "luna_np", "marte", "hirise"])
     if args.salida.resolve() == (DATA / "references.json").resolve():
         raise SystemExit("data/references.json es la v1 y no se sobrescribe")
@@ -520,7 +540,7 @@ def main() -> None:
     if "luna_np" in partes:
         t = time.time()
         log(f"Luna fuera del polo: {len(MOON_NONPOLAR_SITES)} sitios (L0 y L1) con SLDEM2015")
-        ns, nv = compute_moon_np(log)
+        ns, nv = compute_moon_np(log, args.limite)
         specs += ns
         vals.update(nv)
         times["luna_np"] = time.time() - t
@@ -550,16 +570,18 @@ def main() -> None:
     # posiciones idénticas (p. ej. regiones que comparten mosaico LROC): se avisa en usable_note
     pos = defaultdict(list)
     for r in refs:
-        pos[(r["body"], r["level"], r["lat"], r["lon"])].append(r["id"])
-    for r in refs:
-        otros = [i for i in pos[(r["body"], r["level"], r["lat"], r["lon"])] if i != r["id"]]
-        if otros:
-            r["usable_note"] = "; ".join(x for x in (r["usable_note"], f"misma posición que {', '.join(otros)}") if x)
-            # Solo puntúa la primera de las que coinciden, para que esa posición no cuente dos veces
-            # (Nobile Rim 1 y Mons Mouton comparten mosaico LROC, centro y límites).
-            if r["id"] != pos[(r["body"], r["level"], r["lat"], r["lon"])][0] and r["usable"]:
+        pos[(r["body"], r["level"], r["lat"], r["lon"])].append(r)
+    for coincidentes in pos.values():
+        if len(coincidentes) < 2:
+            continue
+        primera = next((r["id"] for r in coincidentes if r["usable"]), None)
+        for r in coincidentes:
+            otros = [otro["id"] for otro in coincidentes if otro["id"] != r["id"]]
+            notas = [r["usable_note"], f"misma posición que {', '.join(otros)}"]
+            if r["usable"] and r["id"] != primera:
                 r["usable"] = False
-                r["usable_note"] += "; duplicada: no se puntúa (cuenta la primera)"
+                notas.append(f"duplicada de {primera}")
+            r["usable_note"] = "; ".join(filter(None, notas))
 
     args.salida.parent.mkdir(parents=True, exist_ok=True)
     tmp = args.salida.with_name(args.salida.name + ".tmp")

@@ -107,7 +107,18 @@ export function rankEarthSites(target: Site): Match[] {
   }).sort((a, b) => b.total - a.total);
 }
 
+const terrainCache = new Map<string, Float32Array>();
+const terrainCacheLimit = 16;
+
 export async function loadTerrain(site: Site, signal: AbortSignal): Promise<Terrain> {
+  signal.throwIfAborted();
+  const cached = terrainCache.get(site.id);
+  if (cached) {
+    terrainCache.delete(site.id);
+    terrainCache.set(site.id, cached);
+    return { ...site, elevation: cached };
+  }
+
   const response = await fetch(`${import.meta.env.BASE_URL}terrain/${site.id}.f32`, { signal });
   if (!response.ok) throw new Error(`No se pudo cargar el terreno de ${site.name}`);
   const bytes = await response.arrayBuffer();
@@ -119,5 +130,10 @@ export async function loadTerrain(site: Site, signal: AbortSignal): Promise<Terr
     view.getFloat32(index * Float32Array.BYTES_PER_ELEMENT, true),
   );
   if (!elevation.every(Number.isFinite)) throw new Error(`Celdas de terreno no válidas para ${site.name}`);
+  signal.throwIfAborted();
+  terrainCache.set(site.id, elevation);
+  if (terrainCache.size > terrainCacheLimit) {
+    terrainCache.delete(terrainCache.keys().next().value!);
+  }
   return { ...site, elevation };
 }

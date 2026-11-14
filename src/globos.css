@@ -66,6 +66,7 @@ main.gl {
   font: inherit;
   font-size: 15px;
 }
+.gl-field select { width: clamp(9rem, 18vw, 17rem); }
 .gl-field select:focus-visible, .gl-seg button:focus-visible, .gl-reset:focus-visible, .gl-legend-toggle:focus-visible,
 .gl-detail button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -186,6 +187,7 @@ main.gl {
 
 .gl-legend {
   grid-column: 1 / -1;
+  min-height: 34px;
   position: relative;
   z-index: 2;
   display: flex;

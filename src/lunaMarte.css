@@ -15,7 +15,6 @@
 #map { position: absolute; inset: 0; background: #000; }
 .leaflet-container { font: inherit; font-size: 14px; }
 
-.lm-intro { padding: 14px 20px 4px; color: var(--muted); font-size: 14px; }
 .lm-tabs { display: flex; gap: 18px; padding: 0 20px; border-bottom: 1px solid var(--border); }
 .lm-tabs button, .lm-cmp-modes button {
   border: 0;
@@ -170,7 +169,6 @@
 .lm-cmp-levels button { min-height: 32px; font-size: 13px; font-variant-numeric: tabular-nums; }
 .lm-cmp-levels button[aria-pressed="true"] { border-bottom-color: var(--accent); }
 
-.lm-pad { padding: 0 20px 8px; }
 .lm-minihead { margin: 12px 0 2px; color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
 .lm-name .lm-levels { display: block; margin-top: 1px; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .lm-bars-lv { margin-top: 4px; }
@@ -284,7 +282,7 @@
   .lm-panel { border-right: 0; overflow: visible; }
 }
 @media (max-width: 640px) {
-  .lm-intro, .lm-detail, .lm-section, .lm-refname, .lm-valid, .lm-refs, .lm-pad { padding-inline: 12px; }
+  .lm-detail, .lm-section, .lm-refname, .lm-valid, .lm-refs { padding-inline: 12px; }
   .lm-groups, .lm-rank-modes { margin-inline: 12px; }
   .lm-tabs { padding-inline: 12px; }
   .lm-cards { margin-inline: 12px; }

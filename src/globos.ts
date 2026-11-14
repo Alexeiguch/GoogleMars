@@ -8,13 +8,15 @@ import "./globos.css";
 import { bindUiText, type UiText } from "./prefs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { loadGlobeTexture } from "./globeTexture";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { categoryLabel, type Site } from "./data";
 import { getLang, locale, onLangChange, t, tr } from "./i18n";
 import {
-  BEST_MIN_SCORE, BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, isHeadlineRef, marsPatches, refById, topSite, twinKeyOf, twinsOf,
+  BEST_MIN_SCORE, BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, globeReferences, isHeadlineRef, marsPatches,
+  refById, topSite, twinKeyOf, twinsOf,
   windowName, type Body, type EarthPoint, type EarthRole, type GlobeId, type Reference,
 } from "./globosData";
 import { TileLayer, direction, type TileLayerOptions } from "./tiles";
@@ -45,12 +47,12 @@ const UNSCORED = {
   es: { title: "No puntúa.", mars: "Aquí solo hay relieve MOLA de 463 m, demasiado grueso para compararlo a 400 m: este sitio no tiene gemelos en la Tierra." },
   en: { title: "Not scored.", mars: "Only 463 m MOLA relief is available here, too coarse to compare at 400 m, so this site has no Earth twins." },
 } as const;
-const introEarthPoints = buildEarthPoints().length;
+const earthPoints = buildEarthPoints();
 function renderIntroFigures() {
-  const count = (body: Body) => DATA.references.filter((r) => r.body === body).length;
+  const count = (body: Body) => globeReferences.filter((r) => r.body === body).length;
   document.querySelector("#fig-moon")!.textContent = String(count("moon"));
   document.querySelector("#fig-mars")!.textContent = String(count("mars"));
-  document.querySelector("#fig-patches")!.textContent = introEarthPoints.toLocaleString(locale());
+  document.querySelector("#fig-patches")!.textContent = earthPoints.length.toLocaleString(locale());
 }
 renderIntroFigures();
 onLangChange(renderIntroFigures);
@@ -58,9 +60,9 @@ onLangChange(renderIntroFigures);
 // ---------------------------------------------------------------------------------------------
 // Constantes
 
-/** Textura de la Luna (public/imagery/moon.jpg). Si es null, la Luna se dibuja como esfera gris lisa. */
-const MOON_TEXTURE: string | null = "moon.jpg";
-const TEXTURES: Record<GlobeId, string | null> = { moon: MOON_TEXTURE, earth: "earth.jpg", mars: "mars.jpg" };
+/** Textura de la Luna (public/imagery/moon.webp). Si es null, la Luna se dibuja como esfera gris lisa. */
+const MOON_TEXTURE: string | null = "moon.webp";
+const TEXTURES: Record<GlobeId, string | null> = { moon: MOON_TEXTURE, earth: "earth.webp", mars: "mars.webp" };
 const BASE_COLOR: Record<GlobeId, number> = { moon: 0x8d8c8a, earth: 0x315b79, mars: 0xb76845 };
 const HOME_DISTANCE = 3.7;
 /**
@@ -89,7 +91,7 @@ const MOON_BASE_GAIN = 0.66;
 /** CTX es gris: se tiñe con el color medio de Marte (media RGB de Viking / media de CTX). */
 const MARS_CTX_TINT: [number, number, number] = [0.934, 0.74, 0.727];
 /** Relieve del polo sur (pipeline/analogs/moon_pole.py): imagen azimutal equidistante hasta 90° - POLE_EDGE_DEG. */
-const POLE_TEXTURE = "moon_south_pole.jpg";
+const POLE_TEXTURE = "moon_south_pole.webp";
 const POLE_EDGE_DEG = 12;   // igual que EDGE_DEG en moon_pole.py
 const POLE_FADE_DEG = 2;    // fundido con la imagen global entre 78°S y 80°S
 /** El relieve es gris neutro; la imagen global es algo cálida (media RGB / luminancia entre 78°S y 80°S). */
@@ -123,11 +125,6 @@ function rgb(color: string): [number, number, number] {
   const n = Number.parseInt(color.replace("#", ""), 16);
   return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255];
 }
-function mix(a: string, b: string, t: number): [number, number, number] {
-  const [x, y] = [rgb(a), rgb(b)];
-  return [0, 1, 2].map((i) => x[i] + (y[i] - x[i]) * t) as [number, number, number];
-}
-
 // direction(lat, lon) viene de src/tiles.ts: la misma convención para puntos, mosaicos y capa polar.
 
 // ---------------------------------------------------------------------------------------------
@@ -175,7 +172,7 @@ function add(item: Omit<Item, "vec" | "visible">) {
   return full;
 }
 
-for (const ref of DATA.references) {
+for (const ref of globeReferences) {
   const item = add({
     id: `ref:${ref.id}`, globe: ref.body, kind: "ref", lat: ref.lat, lon: ref.lon, raw: ref.name, named: true,
     shape: Shape.Diamond, size: SIZE.ref, color: rgb(COLOR[ref.body]), priority: 5, ref,
@@ -188,7 +185,7 @@ for (const patch of marsPatches) {
     raw: patch.name, named: true, shape: Shape.Disc, size: SIZE.patch, color: rgb(PATCH_COLOR), priority: 1, patch,
   });
 }
-for (const point of buildEarthPoints()) {
+for (const point of earthPoints) {
   const has = (kind: EarthRole["kind"]) => point.roles.some((r) => r.kind === kind);
   const [shape, size, priority] = has("featured") ? [Shape.Star, SIZE.featured, 4]
     : point.best ? [Shape.Disc, SIZE.site, 3]
@@ -206,11 +203,13 @@ for (const body of BODIES) {
   const heat = DATA.bodies[body].heat;
   const scores = heat.map(([, , s]) => s);
   const [lo, hi] = [Math.min(...scores), Math.max(...scores)];
+  const [low, high] = HEAT_RAMP[body].map(rgb);
   heat.forEach(([lat, lon, score], index) => {
     const t = hi > lo ? (score - lo) / (hi - lo) : 1;
     heatItems[body].push(add({
       id: `heat:${body}:${index}`, globe: "earth", kind: "heat", lat, lon, raw: null, named: false,
-      shape: Shape.Soft, size: SIZE.heat, color: mix(HEAT_RAMP[body][0], HEAT_RAMP[body][1], t), priority: 0,
+      shape: Shape.Soft, size: SIZE.heat, priority: 0,
+      color: [0, 1, 2].map((i) => low[i] + (high[i] - low[i]) * t) as Item["color"],
       heat: { body, score },
     }));
   });
@@ -223,29 +222,31 @@ const earthKey = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(
 // Estado
 
 type Mode = "best" | "all";
+type TwinRole = Extract<EarthRole, { kind: "twin" }>;
 let mode: Mode = "best";
 let refFilter: string | null = null;
 let selected: Item | null = null;
+let selectedEarthTwin: TwinRole | undefined;
 let highlighted = new Set<Item>();
 
-function matchesRef(point: EarthPoint, refId: string) {
-  const ref = refById.get(refId)!;
-  // Los gemelos v2 se guardan por clave de grupo (twinKeyOf), no por id de referencia.
+function twinRoleOf(point: EarthPoint, ref: Reference) {
+  if (ref.usable === false) return undefined;
   const key = twinKeyOf(ref);
-  return point.data[ref.body]?.best_ref === refId || point.roles.some((r) => r.kind === "twin" && r.ref === key);
+  return point.roles.find((role): role is TwinRole => role.kind === "twin" && role.body === ref.body && role.ref === key);
 }
 
 function isVisible(item: Item) {
   switch (item.kind) {
-    case "ref": return refFilter ? item.ref!.id === refFilter : mode === "all" || isHeadlineRef(item.ref!);
+    case "ref": return highlighted.has(item) || (refFilter ? item.ref!.id === refFilter : mode === "all" || isHeadlineRef(item.ref!));
     case "patch": return mode === "all" && !refFilter;
     case "heat": return mode === "all" && !refFilter;
     case "earth": {
       const point = item.earth!;
       if (refFilter) {
-        if (!matchesRef(point, refFilter)) return false;
-        // Con un sitio elegido se ven siempre sus 3 gemelos, aunque no lleguen al puntaje de «Mejores».
-        return mode === "all" || point.best || point.roles.some((r) => r.kind === "twin" && r.ref === refFilter);
+        const ref = refById.get(refFilter)!;
+        // Los gemelos de la referencia siguen visibles aunque no lleguen al puntaje de «Mejores».
+        if (twinRoleOf(point, ref)) return true;
+        return (mode === "all" || point.best) && point.data[ref.body]?.best_ref === refFilter;
       }
       return mode === "all" || point.best;
     }
@@ -260,14 +261,15 @@ const stage = $<HTMLElement>("#gl-stage");
 const tip = $<HTMLElement>("#gl-tip");
 const errorBox = $<HTMLElement>("#gl-error");
 
+const pixelRatio = Math.min(devicePixelRatio, 2);
 let renderer: THREE.WebGLRenderer | null = null;
 try {
   renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(pixelRatio);
 } catch {
   errorBox.hidden = false;
 }
 
-const pixelRatio = Math.min(devicePixelRatio, 2);
 const pointUniforms = { pr: { value: pixelRatio } };
 
 const vertexShader = /* glsl */ `
@@ -403,7 +405,6 @@ const TILE_SOURCES: Record<GlobeId, Omit<TileLayerOptions, "onLoad">> = {
   },
 };
 
-const loader = new THREE.TextureLoader();
 const lightOffset = new THREE.Vector3(-2, 2, 1);
 const globes = {} as Record<GlobeId, Globe>;
 
@@ -454,8 +455,7 @@ function southPoleCap(onLoad: () => void) {
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.visible = false;                // hasta que llegue la imagen
-  loader.load(`${import.meta.env.BASE_URL}imagery/${POLE_TEXTURE}`, (map) => {
-    map.colorSpace = THREE.SRGBColorSpace;
+  loadGlobeTexture(`${import.meta.env.BASE_URL}imagery/${POLE_TEXTURE}`, (map) => {
     map.anisotropy = renderer ? Math.min(8, renderer.capabilities.getMaxAnisotropy()) : 1;
     material.map = map;
     material.needsUpdate = true;
@@ -467,9 +467,12 @@ function southPoleCap(onLoad: () => void) {
 
 function homeDirection(id: GlobeId) {
   if (id === "moon") return direction(-89, 0);                          // polo sur lunar
-  if (id === "mars") { const j = refById.get("jezero")!; return direction(j.lat, j.lon); }
+  if (id === "mars") {
+    const site = refById.get("jezero") ?? globeReferences.find((ref) => ref.body === "mars");
+    return site ? direction(site.lat, site.lon) : direction(0, 0);
+  }
   const top = topSite();
-  return direction(top.lat, top.lon);
+  return top ? direction(top.lat, top.lon) : direction(0, 0);
 }
 
 for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
@@ -484,8 +487,7 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
   scene.add(light, new THREE.AmbientLight(0xffffff, 1.05));
   const texture = TEXTURES[id];
   if (texture && renderer) {
-    loader.load(`${import.meta.env.BASE_URL}imagery/${texture}`, (map) => {
-      map.colorSpace = THREE.SRGBColorSpace;
+    loadGlobeTexture(`${import.meta.env.BASE_URL}imagery/${texture}`, (map) => {
       map.anisotropy = Math.min(8, renderer!.capabilities.getMaxAnisotropy());
       const gain = id === "moon" ? MOON_BASE_GAIN : 1;   // en valores sRGB, como se midió
       material.color.setRGB(gain, gain, gain, THREE.SRGBColorSpace);
@@ -501,7 +503,7 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
   const own = items.filter((item) => item.globe === id);
   const layers: Layer[] = [];
   if (id === "earth") {
-    for (const body of BODIES) layers.push(makeLayer([...heatItems[body]]));
+    for (const body of BODIES) layers.push(makeLayer(heatItems[body]));
     layers.push(makeLayer(own.filter((i) => i.kind !== "heat")));
   } else {
     layers.push(makeLayer(own));
@@ -585,13 +587,12 @@ function render() {
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
   if (!width || !height) return;
-  renderer.setPixelRatio(pixelRatio);
   renderer.getSize(size);
   if (size.x !== width || size.y !== height) renderer.setSize(width, height, false);
   const box = canvas.getBoundingClientRect();
-  renderer.setScissorTest(true);
-  renderer.setClearColor(0x000000, 0);
+  renderer.setScissorTest(false);
   renderer.clear();
+  renderer.setScissorTest(true);
   for (const globe of Object.values(globes)) {
     const r = globe.panel.getBoundingClientRect();
     const rect = { x: r.left - box.left, y: r.top - box.top, w: r.width, h: r.height };
@@ -633,12 +634,19 @@ function refreshPoints() {
     item.visible = isVisible(item);
     if (item.visible) count++;
     const { layer, index } = item;
-    if (!layer || index === undefined) continue;
+    if (!layer || index === undefined || item.kind === "heat") continue;
     layer.size.setX(index, item.visible ? item.size : 0);
     layer.hl.setX(index, highlighted.has(item) ? 1 : 0);
   }
   for (const globe of Object.values(globes)) {
-    for (const layer of globe.layers) { layer.size.needsUpdate = true; layer.hl.needsUpdate = true; }
+    for (const layer of globe.layers) {
+      if (layer.items[0]?.kind === "heat") {
+        layer.points.visible = layer.items[0].visible;
+      } else {
+        layer.size.needsUpdate = true;
+        layer.hl.needsUpdate = true;
+      }
+    }
   }
   $("#gl-count").textContent = t("gl.count", { n: count.toLocaleString(locale()) });
   fillGoto();
@@ -783,6 +791,7 @@ function twinItemsOf(ref: Reference) {
 /** Lado en km de la zona que se comparó para este punto. */
 function windowKm(item: Item) {
   if (item.kind === "patch") return PATCH_KM;
+  if (item.ref?.window_km) return item.ref.window_km;
   if (item.kind === "earth") {
     const point = item.earth!;
     const ranked = BODIES.some((b) => point.data[b]);
@@ -867,8 +876,9 @@ function focusPair(item: Item, partner?: Item) {
  * pareja a la vez: el punto de la Tierra y su sitio más parecido de la Luna o Marte, o el sitio y su gemelo n.º 1.
  * Los parches HiRISE y las celdas de calor no tienen pareja: solo se acerca su globo.
  */
-function select(item: Item) {
+function select(item: Item, reference = refFilter ? refById.get(refFilter) : undefined) {
   selected = item;
+  selectedEarthTwin = item.earth && reference ? twinRoleOf(item.earth, reference) : undefined;
   highlighted = new Set([item]);
   let partner: Item | undefined;
   if (item.kind === "ref") {
@@ -876,8 +886,9 @@ function select(item: Item) {
     twins.forEach((t) => highlighted.add(t));
     partner = twins[0];
   } else if (item.kind === "earth") {
-    const body = bestBody(item.earth!);
-    partner = body ? refItem.get(item.earth!.data[body]!.best_ref) : undefined;
+    const body = selectedEarthTwin?.body ?? bestBody(item.earth!);
+    const site = selectedEarthTwin?.site ?? (body ? item.earth!.data[body] : undefined);
+    partner = site ? refItem.get(site.best_ref) : undefined;
     if (partner) highlighted.add(partner);
   }
   focusPair(item, partner);
@@ -890,6 +901,7 @@ function select(item: Item) {
 
 function clearSelection() {
   selected = null;
+  selectedEarthTwin = undefined;
   highlighted = new Set();
   hideFrames();
   detail.hidden = true;
@@ -911,7 +923,7 @@ function row(label: string, value: string | null) {
   return value === null ? "" : `<div><dt>${label}</dt><dd>${value}</dd></div>`;
 }
 const num = (v: unknown, unit: string, d = 1) => (finite(v) ? `${fmt(v, d)}${unit}` : null);
-const refName = (id: string) => esc(tr(refById.get(id)?.name ?? id));
+const refName = (id: string) => esc(id === "malla_polar" ? t("lm.grp.malla_polar") : tr(refById.get(id)?.name ?? id));
 const tagLabel = (tag: string) => (tag === "nuevo" ? t("lm.pill.new") : tag === "validación" ? t("lm.pill.val") : tr(tag));
 
 function roleLabel(role: EarthRole) {
@@ -959,6 +971,9 @@ function renderDetail(item: Item) {
       html += `<p class="gl-unscored"><b>${esc(text.title)}</b>${why ? ` ${esc(why)}` : ""}</p>`;
     }
     if (ref.note) html += `<p class="gl-note">${esc(tr(ref.note))}</p>`;
+    if (ref.source_url?.startsWith("https://")) {
+      html += `<p class="gl-sub"><a href="${esc(ref.source_url)}" target="_blank" rel="noopener">${esc(t("gl.source"))}</a></p>`;
+    }
     if (twins.length) {
       html += `<h3>${t("gl.twinsTitle")}</h3><ol class="gl-twins">${twins.map((site) => {
         const twin = earthByKey.get(earthKey(site.lat, site.lon));
@@ -970,9 +985,10 @@ function renderDetail(item: Item) {
     const point = item.earth!;
     html = header(bodyName("earth"), label(item), point.lat, point.lon);
     html += `<ul class="gl-roles">${point.roles.map((r) => `<li>${roleLabel(r)}</li>`).join("")}</ul>`;
-    const bodies = BODIES.filter((b) => point.data[b]).sort((a, b) => point.data[b]!.score - point.data[a]!.score);
+    const data = selectedEarthTwin ? { ...point.data, [selectedEarthTwin.body]: selectedEarthTwin.site } : point.data;
+    const bodies = BODIES.filter((body) => data[body]).sort((a, b) => data[b]!.score - data[a]!.score);
     for (const body of bodies) {
-      const site = point.data[body]!;
+      const site = data[body]!;
       const ref = refById.get(site.best_ref);
       const color = BAR_COLOR[body];
       html += `<h3>${t(`gl.analogOf.${body}`)}</h3>`;
@@ -985,7 +1001,7 @@ function renderDetail(item: Item) {
       ].join("")}</div>`;
     }
     const catalog = point.roles.find((r) => r.kind === "catalog");
-    const climate = bodies.length ? point.data[bodies[0]]!.climate : catalog?.site.climate;
+    const climate = bodies.length ? data[bodies[0]]!.climate : catalog?.site.climate;
     html += climateRows(climate);
     for (const role of point.roles) if (role.kind === "featured") html += `<p class="gl-note">${esc(tr(role.story))}</p>`;
   } else if (item.kind === "patch") {
@@ -1016,7 +1032,7 @@ detail.addEventListener("click", (event) => {
   if (target.closest(".gl-close")) { clearSelection(); return; }
   const button = target.closest<HTMLElement>("[data-item]");
   const item = button && itemById.get(button.dataset.item!);
-  if (item) { select(item); detail.scrollTop = 0; }
+  if (item) { select(item, selected?.ref); detail.scrollTop = 0; }
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !detail.hidden) clearSelection();
@@ -1039,7 +1055,7 @@ for (const button of modeButtons) {
 const refSelect = $<HTMLSelectElement>("#gl-ref");
 function fillRefs() {
   refSelect.innerHTML = `<option value="">${esc(t("gl.allSites"))}</option>${BODIES.map((body) =>
-    `<optgroup label="${esc(bodyName(body))}">${DATA.references.filter((r) => r.body === body)
+    `<optgroup label="${esc(bodyName(body))}">${globeReferences.filter((r) => r.body === body)
       .map((r) => `<option value="${esc(r.id)}">${refName(r.id)}</option>`).join("")}</optgroup>`).join("")}`;
   refSelect.value = refFilter ?? "";
 }
@@ -1085,7 +1101,7 @@ function fillLegend() {
     <span>${swatch("disc", COLOR.mars)}${t("gl.analogOf.mars")}</span>
     <span>${swatch("diamond", SHAPE_INK)}${t("gl.lg.ref")}</span>
     <span>${swatch("star", SHAPE_INK)}${t("gl.lg.featured")}</span>
-    <span>${swatch("disc", SHAPE_INK)}${t("gl.lg.site").replace("80", `${bodyName("moon")} ${BEST_MIN_SCORE.moon} · ${bodyName("mars")} ${BEST_MIN_SCORE.mars}`)}</span>
+    <span>${swatch("disc", SHAPE_INK)}${t("gl.lg.site", { moon: bodyName("moon"), moonMin: BEST_MIN_SCORE.moon, mars: bodyName("mars"), marsMin: BEST_MIN_SCORE.mars })}</span>
     <span>${swatch("ring", SHAPE_INK)}${t("gl.lg.validation")}</span>
     <span>${swatch("small", SHAPE_INK)}${t("gl.lg.catalog")}</span>
     <span><i class="gl-ramp" style="--a:${HEAT_RAMP.moon[0]};--b:${HEAT_RAMP.moon[1]}"></i><i class="gl-ramp" style="--a:${HEAT_RAMP.mars[0]};--b:${HEAT_RAMP.mars[1]}"></i>${t("gl.lg.heat")}</span>`;
@@ -1102,6 +1118,7 @@ legendToggle.addEventListener("click", () => {
 
 const sources: [string, string][] = [
   ["gl.src.moonRefs", "https://astrogeology.usgs.gov/search/map/moon_lro_lola_dem_118m"],
+  ["gl.src.moonSldem", "https://astrogeology.usgs.gov/search/map/moon_lro_lola_selene_kaguya_tc_dem_merge_60n60s_59m"],
   ["gl.src.marsRefs", "https://astrogeology.usgs.gov/search/map/mars_mgs_mola_mex_hrsc_blended_dem_global_200m"],
   ["gl.src.hirise", "https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/"],
   ["gl.src.copernicus", "https://planetarycomputer.microsoft.com/dataset/cop-dem-glo-90"],
