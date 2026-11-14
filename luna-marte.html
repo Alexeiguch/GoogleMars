@@ -40,8 +40,10 @@
           <h2 class="lm-section" data-i18n="lm.ranking">Ranking general</h2>
           <div class="lm-seg lm-rank-modes" id="rank-modes" role="group" aria-label="Tipo de ranking" data-i18n-attr="aria-label:lm.rankMode" hidden>
             <button type="button" data-rank="final" aria-pressed="true" data-i18n="lm.rankFinal">Final multiescala (30 km → 10 km → 5/2 km)</button>
+            <button type="button" data-rank="new" aria-pressed="false" data-i18n="lm.rankNew">Solo nuevos</button>
             <button type="button" data-rank="l0" aria-pressed="false" data-i18n="lm.rankL0">A 30 km</button>
           </div>
+          <p class="lm-note" id="rank-note" hidden data-i18n="lm.newNote">Solo candidatos lejos de los análogos conocidos y sin estudios encontrados: lo que el reto pide descubrir. «Sin revisar» = bibliografía pendiente.</p>
           <ol class="lm-list" id="ranking"></ol>
           <h2 class="lm-section" data-i18n="lm.refs">Referencias</h2>
           <div class="lm-refs" id="refs"></div>

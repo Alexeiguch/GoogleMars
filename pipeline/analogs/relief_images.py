@@ -283,7 +283,7 @@ def plan_jobs(res: dict, out: Path) -> tuple[list[dict], list[str]]:
         fine = B.get("fine")
         if not isinstance(fine, dict):
             continue
-        for key in ("sites", "twins", "final"):
+        for key in ("sites", "twins", "final", "final_new"):
             for s, hint in _entries(fine.get(key)):
                 for lv, lat, lon, rid, hir in _fine_windows(s, hint):
                     if body == "mars" and lv == "L2":

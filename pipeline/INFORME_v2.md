@@ -66,7 +66,7 @@ tres escalas (T0, T1 y T2). Clima: ERA5 de 2025 vía Meteomatics.
 | 6 | Atacama costera, −24,32, −70,35, 2.100 m | Mons Mouton Plateau (10 y 5 km) | 0,80 | 0,96 | 1,00 | 0,29 | conocido (Atacama) | cálido (13,1 °C); oscilación diaria pequeña (7 °C) |
 | 7 | **Changtang (Gêrzê, Tíbet)**, 33,77, 84,39, 4.826 m | malla polar 86,4°S; a 5 km, Haworth | 0,80 | 0,94 (0,98/0,93/0,90) | 1,00 | 0,32 | **nuevo**: no encontrado tras 8 búsquedas en inglés y chino | 333 mm de lluvia; relieve glaciar y fluvial |
 | 8 | Desierto de Lut, 29,59, 60,40, 1.696 m | malla polar; Haworth | 0,79 | 0,96 | 1,00 | 0,23 | conocido (Lut) | cálido (19,9 °C) |
-| 9 | Norte de Atacama, −20,41, −69,16, 2.702 m | malla polar; Mons Mouton | 0,78 | 0,96 | 1,00 | 0,21 | sin revisar (probablemente dentro del Atacama ya estudiado) | cálido (13,4 °C) |
+| 9 | Precordillera de Tarapacá (Chile), −20,41, −69,16, 2.702 m | malla polar; Mons Mouton | 0,78 | 0,96 | 1,00 | 0,21 | **nuevo**: no encontrado (2.ª ronda) | cálido (13,4 °C) |
 | 10 | Tibesti / Emi Koussi, 19,77, 18,45, 1.996 m | malla polar; Mons Mouton Plateau | 0,77 | 0,95 | 1,00 | 0,18 | conocido (Emi Koussi) | cálido (18,9 °C); 250 mm |
 
 Nuevos más abajo en el top 20, ya revisados:
@@ -85,15 +85,15 @@ Historias destacadas de la Luna:
 | # | Lugar | Gemelo (10 km; 2 km) | Total | Terreno (T0/T1/T2) | Sup. | Clima | Estado | En qué falla |
 |---|---|---|---|---|---|---|---|---|
 | 1 | **Meseta de Djado (Níger)**, 22,68, 11,84, 881 m | Spirit/Gusev; HiRISE de Utopia (misma categoría) | 0,84 | 0,97 (0,98/1,00/0,93) | 1,00 | 0,44 | **nuevo**: no encontrado (búsqueda breve, inglés y francés) | cálido (23,7 °C) |
-| 2 | Desierto oriental de Egipto/Sudán, 23,50, 35,06, 456 m | Nili Fossae; HiRISE de Terra Sirenum | 0,84 | 0,97 | 1,00 | 0,42 | sin revisar | muy cálido (26,9 °C) |
+| 2 | Desierto Oriental (Mar Rojo, Egipto), 23,50, 35,06, 456 m | Nili Fossae; HiRISE de Terra Sirenum | 0,84 | 0,97 | 1,00 | 0,42 | **nuevo**: no encontrado | muy cálido (26,9 °C) |
 | 3 | Cuenca de Qaidam, 38,14, 91,44, 3.252 m | EZ Jezero; HiRISE de delta invertido | 0,84 | 0,97 (0,96/0,99/0,96) | 1,00 | 0,41 | conocido (validación) | — |
 | 4 | Atacama, −23,59, −68,94, 2.436 m | EZ Jezero; delta invertido | 0,83 | 0,97 | 1,00 | 0,39 | conocido | cálido (14,2 °C) |
 | 5 | Tibesti / Emi Koussi, 20,59, 17,93, 1.111 m | Nili Fossae | 0,83 | 0,98 | 1,00 | 0,37 | conocido | cálido |
-| 6 | Desierto oriental (Sudán), 22,23, 35,74, 446 m | Nili Fossae | 0,83 | 0,97 | 1,00 | 0,38 | sin revisar | muy cálido (26,1 °C) |
-| 7 | Tíbet occidental, 35,77, 85,72, 5.367 m | Kasei Valles; delta invertido | 0,83 | 0,97 | 1,00 | 0,37 | sin revisar | 368 mm de lluvia |
-| 8 | Níger occidental (al oeste del Aïr), 19,68, 7,55, 492 m | Meridiani; crestas de Diacria | 0,83 | 0,96 | 1,00 | 0,40 | sin revisar | muy cálido (29,9 °C) |
-| 9 | Sáhara argelino, 25,95, 4,60, 964 m | Kasei Valles; Western Jezero | 0,82 | 0,97 | 1,00 | 0,33 | sin revisar | cálido |
-| 10 | Altiplano andino, −22,68, −67,55, 4.698 m | Kasei Valles; delta invertido | 0,82 | 0,97 | 1,00 | 0,33 | sin revisar (cerca de la Puna conocida) | 238 mm de lluvia |
+| 6 | Desierto Oriental (Mar Rojo, Egipto), 22,23, 35,74, 446 m | Nili Fossae | 0,83 | 0,97 | 1,00 | 0,38 | **nuevo**: no encontrado | muy cálido (26,1 °C) |
+| 7 | Condado de Qiemo (Xinjiang/Tíbet), 35,77, 85,72, 5.367 m | Kasei Valles; delta invertido | 0,83 | 0,97 | 1,00 | 0,37 | **nuevo**: no encontrado | 368 mm de lluvia |
+| 8 | Cerca de Arlit (Agadez, Níger), 19,68, 7,55, 492 m | Meridiani; crestas de Diacria | 0,83 | 0,96 | 1,00 | 0,40 | **nuevo**: no encontrado | muy cálido (29,9 °C) |
+| 9 | Cuenca de Mouydir (Argelia), 25,95, 4,60, 964 m | Kasei Valles; Western Jezero | 0,82 | 0,97 | 1,00 | 0,33 | no verificado (indicios sin fuente confirmada) | cálido |
+| 10 | Sur Lípez (Bolivia), −22,68, −67,55, 4.698 m | Kasei Valles; delta invertido | 0,82 | 0,97 | 1,00 | 0,33 | ya estudiado (High Lakes Project, NASA) | 238 mm de lluvia |
 
 Historias destacadas de Marte:
 - **Qaidam** (validación): el método la encuentra sola, a las tres escalas.
@@ -145,6 +145,62 @@ sur. Por eso se añadieron 13 sitios con coordenadas publicadas por LROC:
   detecta a esta escala.
 - Los nombres de lugar de la tabla vienen de las coordenadas (país o región), no de un geocodificador
   verificado uno a uno.
+
+## 3 ter. Top 10 de candidatos nuevos y robustez frente a los pesos
+
+El reto pide sobre todo análogos **nuevos**, y en el ranking final quedan arriba los ya conocidos (Puna,
+Atacama, Qaidam, Lut). Por eso hay una segunda lista (`fine.final_new`, opción «Solo nuevos» en la app):
+- Toma los mejores bloques L2 que no están cerca de un análogo conocido ni constan como ya estudiados en la
+  bibliografía.
+- Exige terreno^0,6 · superficie^0,4 ≥ 0,6.
+
+**Bibliografía (segunda ronda, 22 candidatos más):**
+- Mismo protocolo: un agente por candidato, búsquedas en inglés y en el idioma local, y un verificador
+  independiente que abre cada enlace de "ya estudiado".
+- Resultado: 15 no encontrados, 2 ya estudiados y confirmados, y 5 no verificados (hay indicios, pero sin
+  fuente confirmada).
+  - Puna junto al volcán Socompa: Schmidt et al. 2018, doi:10.1007/s10482-018-1066-0.
+  - Sur Lípez, Bolivia: High Lakes Project de NASA.
+- En total, 38 lugares revisados.
+
+**Robustez:** los pesos 0,5/0,25/0,25 son una elección. Se probaron 42 combinaciones: terreno de 0,35 a 0,7,
+superficie de 0,1 a 0,35 y clima el resto (al menos 0,1). Para cada candidato se da el porcentaje de
+combinaciones en que sigue en el top 10 de su lista, y su mejor y peor puesto.
+
+### Luna
+
+| # | Lugar (bibliografía) | lat, lon | Gemelo | Total | Terreno (T0/T1/T2) | Clima (media, lluvia) | Bibliografía | Robustez top 10 |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Departamento Iglesia, provincia de San Juan, Argentina | -28,95, -69,19 | malla polar 84–90°S | 0,80 | 0,96 (0,97/0,97/0,94) | 6,4 °C, 187 mm | no encontrado | 100 % (puesto 1–2) |
+| 2 | Condado de Gêrzê | 33,77, 84,39 | malla polar 84–90°S | 0,80 | 0,94 (0,98/0,93/0,90) | -2,2 °C, 333 mm | no encontrado | 100 % (puesto 1–3) |
+| 3 | Provincia de El Loa, Región de Antofagasta, Chile | -21,86, -68,94 | malla polar 84–90°S | 0,78 | 0,93 (0,96/0,94/0,88) | 7,5 °C, 68 mm | no encontrado | 100 % (puesto 3–4) |
+| 4 | Provincia del Tamarugal, Región de Tarapacá, Chile | -20,41, -69,16 | malla polar 84–90°S | 0,78 | 0,96 (0,98/0,93/0,97) | 13,4 °C, 131 mm | no encontrado | 100 % (puesto 2–6) |
+| 5 | Bajsh central del condado de Golshan | 27,68, 62,60 | malla polar 84–90°S | 0,76 | 0,90 (0,94/0,97/0,78) | 25,6 °C, 44 mm | no encontrado | 100 % (puesto 5–6) |
+| 6 | Tehsil Jhal Jhao, distrito de Awaran | 27,14, 65,90 | malla polar 84–90°S | 0,76 | 0,90 (0,93/0,98/0,81) | 25,6 °C, 104 mm | no encontrado | 100 % (puesto 5–7) |
+| 7 | Dehestán de Ashar, distrito de Ashar, condado de Mehres | 26,59, 61,70 | malla polar 84–90°S | 0,75 | 0,87 (0,93/0,95/0,75) | 24,5 °C, 63 mm | no encontrado | 100 % (puesto 7–9) |
+| 8 | Hoggar oriental | 22,86, 8,16 | malla polar 84–90°S | 0,74 | 0,83 (0,97/0,92/0,64) | 25,2 °C, 7 mm | no encontrado | 100 % (puesto 4–8) |
+| 9 | Dehestán Kavir, distrito de Dehuk | 32,32, 57,39 | malla polar 84–90°S | 0,71 | 0,79 (0,94/0,95/0,56) | 22,3 °C, 76 mm | no encontrado | 88 % (puesto 9–11) |
+| 10 | — | 34,41, 82,72 | malla polar 84–90°S | 0,68 | 0,72 (0,55/0,81/0,84) | -6,5 °C, 328 mm | sin revisar | 55 % (puesto 8–11) |
+
+### Marte
+
+| # | Lugar (bibliografía) | lat, lon | Gemelo | Total | Terreno (T0/T1/T2) | Clima (media, lluvia) | Bibliografía | Robustez top 10 |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Daïra de In Guezzam, Provincia de Tamanrasset, Argelia | 20,14, 6,16 | Arcadia Planitia (cráter con hielo) | 0,85 | 0,95 (0,95/0,94/0,96) | 29,5 °C, 2 mm | no encontrado | 100 % (puesto 1–6) |
+| 2 | Meseta de Djado, departamento de Bilma, Níger | 22,68, 11,84 | Spirit (cráter Gusev) | 0,84 | 0,97 (0,98/1,00/0,93) | 23,7 °C, 4 mm | no encontrado | 100 % (puesto 1–2) |
+| 3 | Gobernación del Mar Rojo | 23,50, 35,06 | Nili Fossae: llanuras con carbonatos | 0,84 | 0,97 (0,95/0,97/0,98) | 26,9 °C, 5 mm | no encontrado | 100 % (puesto 2–3) |
+| 4 | Gobernación del Mar Rojo | 22,23, 35,74 | Nili Fossae: llanuras con carbonatos | 0,83 | 0,97 (0,98/0,95/0,98) | 26,1 °C, 12 mm | no encontrado | 100 % (puesto 3–7) |
+| 5 | Condado de Qiemo | 35,77, 85,72 | Kasei Valles (isla aerodinámica) | 0,83 | 0,97 (0,95/0,99/0,97) | -10,3 °C, 368 mm | no encontrado | 100 % (puesto 3–8) |
+| 6 | Cerca de Arlit, región de Agadez, Níger | 19,68, 7,55 | Opportunity (Meridiani Planum) | 0,83 | 0,96 (0,98/0,94/0,96) | 29,9 °C, 18 mm | no encontrado | 100 % (puesto 5–7) |
+| 7 | Provincia de Tamanrasset | 23,77, 4,06 | EZ Hebrus Valles | 0,83 | 0,94 (0,96/0,98/0,87) | 27,7 °C, 6 mm | no encontrado | 86 % (puesto 4–17) |
+| 8 | Cuenca de Mouydir | 25,95, 4,60 | Kasei Valles (isla aerodinámica) | 0,82 | 0,97 (0,96/0,98/0,99) | 25,8 °C, 38 mm | no verificado | 100 % (puesto 5–10) |
+| 9 | Daïra de Tazrouk, wilaya de Tamanrasset, Argelia | 23,14, 7,45 | EZ cráter Columbus (Terra Sirenum) | 0,82 | 0,92 (0,92/0,90/0,95) | 26,0 °C, 6 mm | no encontrado | 60 % (puesto 5–20) |
+| 10 | — | 29,32, 37,19 | Spirit (cráter Gusev) | 0,81 | 0,95 (0,98/0,96/0,92) | 20,4 °C, 19 mm | sin revisar | 57 % (puesto 9–16) |
+
+
+Los 9 primeros nuevos de la Luna y los 9 primeros de Marte tienen revisión bibliográfica, y casi todos siguen
+en el top 10 con cualquier combinación de pesos. En los nuevos de Marte el fallo es siempre el mismo: son
+desiertos cálidos (medias de 20–30 °C). El terreno y la sequedad se parecen; el frío no.
 
 ## 4. Validación (12 análogos fijados antes de ver resultados)
 
@@ -205,11 +261,12 @@ un análogo baja 10,9; en Marte la media baja (88,7 a 88,0) y un análogo baja 1
 ## 6. Qué no se pudo verificar y siguientes pasos
 
 No verificado:
-- **Bibliografía:** de los 22 candidatos nuevos del top 20, 7 tienen revisión completa (6 no encontrados y 1 ya
-  estudiado). Los agentes se detuvieron por el límite de uso de la cuenta, que se restablece el 15/11 a las 07:00.
-  Los otros 15 quedan "sin revisar": la app los marca así y no como "nuevo". Andes de San Juan y Djado tienen
-  solo una búsqueda breve (3 consultas). El "ya estudiado" de Majes no pasó la segunda verificación
-  independiente, pero el enlace se comprobó (HTTP 200, NTRS).
+- **Bibliografía:** se revisaron 38 lugares en dos rondas, con verificación independiente de cada "ya
+  estudiado". Los 9 primeros nuevos de cada cuerpo están revisados. Quedan como "no verificado" 5 lugares
+  con indicios sin fuente confirmada (entre ellos Mouydir y varios gemelos de la Luna fuera del polo), y como
+  "sin revisar" los que están más abajo en las listas. En los Andes de San Juan, un punto vecino del mismo
+  departamento (−28,95, −69,19, a ~70 km) se revisó a fondo en la segunda ronda (11 búsquedas): no
+  encontrado. Djado mantiene la búsqueda breve (3 consultas).
 - **Coordenadas:** las longitudes de Nobile Rim 1, Mons Mouton, de Gerlache Rim 2 y Slater Plain; los polígonos
   oficiales de las regiones (ScienceBase bloqueado). Los resúmenes del taller de 2015 no dicen si la latitud es
   planetocéntrica o planetográfica (diferencia de hasta ~0,3°, ~18 km).

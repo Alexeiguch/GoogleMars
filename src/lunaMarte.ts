@@ -40,6 +40,7 @@ type EarthSite = {
   features?: Features | null; shape?: Features | null;
   cover?: { bare: number; snow_ice: number } | null;
   surface_assumed?: boolean; known_analog?: string | null; literature?: Literature | null;
+  robust?: Partial<Record<"final" | "final_new", { top10_frac: number; best: number; worst: number }>> | null;
 };
 type Featured = { body: Body; ref: string; lat: number; lon: number; tag: string; title: string; story: string };
 type Group = { name: string; body: Body; kind?: string; n_refs?: number; n_refs_levels?: Partial<Record<Level, number>> };
@@ -52,7 +53,7 @@ type ValidationRow = {
 type RefPoint = [string, Body, string, string | null, number, number, boolean];
 type BodyData = {
   sites: EarthSite[]; twins: Record<string, EarthSite[]>; heat: [number, number, number][];
-  fine?: { sites?: EarthSite[] | null; twins?: Record<string, EarthSite[]> | null; final?: EarthSite[] | null } | null;
+  fine?: { sites?: EarthSite[] | null; twins?: Record<string, EarthSite[]> | null; final?: EarthSite[] | null; final_new?: EarthSite[] | null } | null;
 };
 type Results = {
   references: Reference[];
@@ -67,6 +68,7 @@ type Results = {
   groups?: Record<string, Group> | null;
   levels?: Partial<Record<Level, Partial<Record<Body, LevelInfo>>>> | null;
   reference_points?: RefPoint[] | null;
+  weight_sensitivity?: { n_combos: number } | null;
 };
 
 const DATA = rawResults as unknown as Results;
@@ -283,11 +285,13 @@ const rankBadge = (n: number | string, color: string, outline = false) => outlin
 const fineOf = (b: Body) => DATA.bodies[b]?.fine ?? null;
 const finalOf = (b: Body) => (fineOf(b)?.final ?? []).filter((s) => s && Number.isFinite(s.lat));
 const hasFinal = (b: Body) => finalOf(b).length > 0;
+/** Top de candidatos no conocidos (lejos de los análogos conocidos y sin estudios encontrados en la bibliografía). */
+const newOf = (b: Body) => (fineOf(b)?.final_new ?? []).filter((s) => s && Number.isFinite(s.lat));
 /** Nombre de la referencia o del grupo al que se parece un sitio. */
 const likeName = (s: EarthSite) => (s.twin_key ? groupName(s.twin_key) : refLabel(s.best_ref));
 
 // ---- ranking ------------------------------------------------------------------------------
-type RankMode = "final" | "l0";
+type RankMode = "final" | "new" | "l0";
 let rankMode: RankMode = "final";
 const rankModes = document.querySelectorAll<HTMLButtonElement>("[data-rank]");
 for (const b of rankModes) {
@@ -309,18 +313,23 @@ function levelsLine(s: EarthSite) {
 function renderRanking() {
   const color = BODY_COLOR[body];
   const fin = finalOf(body);
-  const mode: RankMode = fin.length ? rankMode : "l0";
+  const nw = newOf(body);
+  const mode: RankMode = !fin.length ? "l0" : rankMode === "new" && !nw.length ? "final" : rankMode;
   const box = $("#rank-modes");
   box.hidden = !fin.length;
-  for (const b of rankModes) b.setAttribute("aria-pressed", String(b.dataset.rank === mode));
+  for (const b of rankModes) {
+    b.setAttribute("aria-pressed", String(b.dataset.rank === mode));
+    if (b.dataset.rank === "new") b.hidden = !nw.length;
+  }
+  $("#rank-note").hidden = mode !== "new";
 
   if (rankLayer) map.removeLayer(rankLayer);
   rankLayer = L.layerGroup().addTo(map);
-  const list = mode === "final" ? fin : DATA.bodies[body].sites;
+  const list = mode === "final" ? fin : mode === "new" ? nw : DATA.bodies[body].sites;
   const ranking = $("#ranking");
   ranking.replaceChildren();
   list.forEach((s, i) => {
-    const title = t(mode === "final" ? "lm.finalTitle" : "lm.rankTitle", { n: i + 1 });
+    const title = t(mode === "final" ? "lm.finalTitle" : mode === "new" ? "lm.newTitle" : "lm.rankTitle", { n: i + 1 });
     const { li, button } = listItem(s, rankBadge(i + 1, color), t("lm.similarTo", { name: likeName(s) }), levelsLine(s));
     const go = register(`rank-${mode}-${i}`, button, (fly) => select(s, title, null, fly));
     const icon = L.divIcon({ className: "", iconSize: [24, 24], html: rankBadge(i + 1, color) });
@@ -774,7 +783,7 @@ function renderValidation() {
 // ---- pintado de la pestaña -----------------------------------------------------------------------
 function reopen(fallback: string | null = null) {
   const open = (currentKey && openers.get(currentKey)) || (fallback && openers.get(fallback)) ||
-    openers.get(`rank-${hasFinal(body) && rankMode === "final" ? "final" : "l0"}-0`) || openers.values().next().value;
+    openers.get(`rank-${hasFinal(body) && rankMode !== "l0" ? (rankMode === "new" && newOf(body).length ? "new" : "final") : "l0"}-0`) || openers.values().next().value;
   open?.(false);
 }
 
@@ -863,6 +872,14 @@ function literatureHtml(s: EarthSite) {
     <div class="lm-lit ${cls}"><b>${esc(head)}</b>${name}${dist}${note}${url ? ` <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${t("lm.lit.link")}</a>` : ""}</div>`;
 }
 
+/** Robustez frente a los pesos (rank.weight_sensitivity): % de combinaciones en que sigue en el top 10. */
+function robustHtml(s: EarthSite) {
+  const r = s.robust?.final_new ?? s.robust?.final;
+  const n = DATA.weight_sensitivity?.n_combos;
+  if (!r || !n) return "";
+  return `<p class="lm-note">${esc(t("lm.robust", { p: pct(r.top10_frac), n, a: r.best, b: r.worst }))}</p>`;
+}
+
 function select(s: EarthSite, title: string, story: string | null = null, fly = true) {
   const lv = siteLevel(s);
   const wins = siteWindows(s);
@@ -918,6 +935,7 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
       ${bar(t("lm.bar.climate"), sc.climate, "var(--ok)")}
     </div>
     ${levelBars}
+    ${robustHtml(s)}
     <div class="lm-compare">
       <div class="lm-cmp-modes" role="group" aria-label="${t("lm.cmpLabel")}">
         <button type="button" data-cmp="relief" aria-pressed="${cmpMode === "relief"}">${t("lm.cmpRelief")}</button>

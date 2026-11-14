@@ -11,17 +11,6 @@
   "reviewed": "2026-11-14"
  },
  {
-  "lat": -20.41007,
-  "lon": -69.16415,
-  "radius_km": 30,
-  "status": "no_verificado",
-  "url": "",
-  "name": "",
-  "note": "Revisión bibliográfica pendiente: los agentes de búsqueda se detuvieron por el límite de uso de la cuenta antes de llegar a este candidato.",
-  "searches": 0,
-  "reviewed": ""
- },
- {
   "lat": 27.67986,
   "lon": 62.60155,
   "radius_km": 30,
@@ -90,72 +79,6 @@
  {
   "lat": 69.2302,
   "lon": -69.5,
-  "radius_km": 30,
-  "status": "no_verificado",
-  "url": "",
-  "name": "",
-  "note": "Revisión bibliográfica pendiente: los agentes de búsqueda se detuvieron por el límite de uso de la cuenta antes de llegar a este candidato.",
-  "searches": 0,
-  "reviewed": ""
- },
- {
-  "lat": 23.5,
-  "lon": 35.0587,
-  "radius_km": 30,
-  "status": "no_verificado",
-  "url": "",
-  "name": "",
-  "note": "Revisión bibliográfica pendiente: los agentes de búsqueda se detuvieron por el límite de uso de la cuenta antes de llegar a este candidato.",
-  "searches": 0,
-  "reviewed": ""
- },
- {
-  "lat": 22.2302,
-  "lon": 35.74288,
-  "radius_km": 30,
-  "status": "no_verificado",
-  "url": "",
-  "name": "",
-  "note": "Revisión bibliográfica pendiente: los agentes de búsqueda se detuvieron por el límite de uso de la cuenta antes de llegar a este candidato.",
-  "searches": 0,
-  "reviewed": ""
- },
- {
-  "lat": 35.7698,
-  "lon": 85.72168,
-  "radius_km": 30,
-  "status": "no_verificado",
-  "url": "",
-  "name": "",
-  "note": "Revisión bibliográfica pendiente: los agentes de búsqueda se detuvieron por el límite de uso de la cuenta antes de llegar a este candidato.",
-  "searches": 0,
-  "reviewed": ""
- },
- {
-  "lat": 19.67986,
-  "lon": 7.54776,
-  "radius_km": 30,
-  "status": "no_verificado",
-  "url": "",
-  "name": "",
-  "note": "Revisión bibliográfica pendiente: los agentes de búsqueda se detuvieron por el límite de uso de la cuenta antes de llegar a este candidato.",
-  "searches": 0,
-  "reviewed": ""
- },
- {
-  "lat": 25.94966,
-  "lon": 4.60002,
-  "radius_km": 30,
-  "status": "no_verificado",
-  "url": "",
-  "name": "",
-  "note": "Revisión bibliográfica pendiente: los agentes de búsqueda se detuvieron por el límite de uso de la cuenta antes de llegar a este candidato.",
-  "searches": 0,
-  "reviewed": ""
- },
- {
-  "lat": -22.67986,
-  "lon": -67.54873,
   "radius_km": 30,
   "status": "no_verificado",
   "url": "",
@@ -251,5 +174,315 @@
   "note": "Búsqueda breve (3 consultas, inglés y francés) del coordinador: no aparece ningún estudio que use la meseta de Djado como análogo planetario. Hay trabajos regionales sobre el Teneré (huellas de remolinos de polvo, 2004; dunas lineales) que no sitúan su zona de estudio en este punto.",
   "searches": 3,
   "reviewed": "2026-11-14"
+ },
+ {
+  "lat": -28.94966,
+  "lon": -69.19168,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Departamento Iglesia, provincia de San Juan, Argentina (Cordillera Frontal andina, cerca de la frontera con la Región de Atacama, Chile)",
+  "note": "No encontré ningún estudio que use o proponga este lugar (ni uno a menos de ~75 km) como análogo planetario, sitio de pruebas de rovers o sitio astrobiológico, tras 11 búsquedas en inglés y español y la apertura de la lista de análogos de Wikipedia, la página de Europlanet para los Andes argentinos y una nota de Diario de Cuyo. Los análogos andinos que aparecen quedan más lejos y son de Marte, no de la Luna: el resumen EPSC2026-939 (glaciares de roca de Dos Lenguas, en la cuenca alta de Agua Negra a ~30°S, unos 150 km al sur; no verifiqué sus coordenadas), el volcán Ojos del Salado, Laguna Verde y el Salar de Maricunga (más de 200 km al norte), el proyecto Solar54 en La Rioja y la Puna de Catamarca. Los dos últimos los vi solo en fragmentos de búsqueda, no abrí sus fuentes. Tampoco hay análogos lunares documentados en la zona. Las coordenadas de algunos sitios las estimé de memoria.",
+  "searches": 14,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_nuevo#1"
+  ]
+ },
+ {
+  "lat": -24.2302,
+  "lon": -67.84517,
+  "radius_km": 30,
+  "status": "ya_estudiado",
+  "url": "https://doi.org/10.1007/s10482-018-1066-0",
+  "name": "Provincia El Loa, Región de Antofagasta, Chile (Puna de Atacama, frontera con Salta, Argentina; entre el Salar de Arizaro y el volcán Socompa)",
+  "note": "El punto cae en la Puna de Atacama (Chile, cerca del límite con Argentina), a unos 44 km del volcán Socompa. Allí, Schmidt et al. 2018 propone los suelos de tefra de las cumbres volcánicas (Socompa y Llullaillaco) como análogo de Marte, y Farías et al. 2013 estudia estromatolitos de la Laguna Socompa como análogo de la Tierra temprana, sin Marte. Ningún estudio abierto trata el salar del candidato en sí. No hay nada específico de análogo lunar, y el paisaje de cumbre volcánica no es el mismo que el del salar. Llullaillaco queda a unos 89 km, fuera del radio. Los textos que hablan de «paisaje marciano» en Arizaro o Tolar Grande son solo prensa de viajes. Verificación independiente: confirmado (Life at extreme elevations on Atacama volcanoes: the closest thing to Mars on Earth? (Schmidt et al., 2018)).",
+  "searches": 10,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_nuevo#3"
+  ]
+ },
+ {
+  "lat": -21.85973,
+  "lon": -68.93605,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Provincia de El Loa, Región de Antofagasta, Chile (Nominatim; unos 67 km al norte de Calama, cuenca alta del Río Loa, flanco oriental del desierto de Atacama)",
+  "note": "No hallé ningún estudio que use o proponga este punto (ni uno a menos de 75 km) como análogo de la Luna o de Marte, tras 11 búsquedas en inglés y español y la apertura de varias fuentes. Lo más cercano es el Salar de Ascotán, a unos 77 km, con solo una nota de prensa que lo vincula con la astrobiología. Los análogos del Atacama bien documentados (Yungay, María Elena Sur, Salar Grande, Llamara, Pajonales) quedan a más de 100 km. El Tatio (~100 km) aparece como análogo solo en Wikipedia, que no abrí. No encontré nada que lo vincule con la Luna. El candidato parece poco estudiado como análogo planetario.",
+  "searches": 13,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_nuevo#4",
+   "moon_gemelo_apollo15"
+  ]
+ },
+ {
+  "lat": -20.41007,
+  "lon": -69.16415,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Provincia del Tamarugal, Región de Tarapacá, Chile (Precordillera al NE de Pica y al O del Salar de Huasco; borde oriental de la Pampa del Tamarugal)",
+  "note": "El punto cae en la precordillera de Tarapacá (Chile), a unos 36 km al oeste del Salar de Huasco y cerca de Pica y Mamiña. No encontré ningún estudio abierto que lo use, ni a un lugar de paisaje similar a menos de 75 km, como análogo de la Luna o de Marte. Lo más cercano son un estudio microbiológico del Salar de Huasco (36 km) que lo describe como modelo para vida en otros planetas, y un estudio de análogo marciano en la Pampa del Tamarugal (89 km). Ninguno es del mismo paisaje, y no hallé nada de análogo lunar en la zona. Hay mucha literatura de Atacama como análogo de Marte, pero se refiere a Yungay y al núcleo hiperárido más al sur.",
+  "searches": 11,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_nuevo#5"
+  ]
+ },
+ {
+  "lat": 20.14027,
+  "lon": 6.16474,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Daïra de In Guezzam, Provincia de Tamanrasset, Argelia (llanura de la Tamesna, cerca de la frontera con Níger)",
+  "note": "El punto cae en la llanura de la Tamesna (daïra de In Guezzam, sur de Argelia, unos 70 km al NNE de In Guezzam). Tras 12 búsquedas (inglés, francés y árabe) no hay ningún estudio que use o proponga este lugar, ni otro a menos de 75 km, como análogo planetario o sitio de pruebas. Los análogos saharianos publicados están lejos: cuenca de Ahnet y salares del Tanezrouft (cientos de km al norte), pruebas de rovers en Marruecos, y rastros de dust devils en el Ténéré (Níger, lejos al este). El único texto que une la Tamesna con Marte es un relato de caza de meteoritos de 2002 (meteorite-recon.com), que abrí: usa imágenes de Marte solo como referencia geomorfológica y no es un estudio de análogo planetario. Genéricos como \"el Sahara es un análogo de Marte\" (EGU2018, IMS2016) no nombran este lugar; el PDF del EGU2018 no pude leerlo y la página de IMS2016 no cargó.",
+  "searches": 12,
+  "reviewed": "2026-11-14",
+  "for": [
+   "mars_nuevo#1"
+  ]
+ },
+ {
+  "lat": 23.5,
+  "lon": 35.0587,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Gobernación del Mar Rojo (البحر الأحمر), Egipto: Desierto Oriental sur, colinas del Mar Rojo (escudo Árabe-Nubio)",
+  "note": "Tras 11 búsquedas (inglés, árabe y francés) no encontré ningún estudio que use o proponga este lugar, ni otro a menos de ~75 km, como análogo planetario, banco de pruebas de rovers o sitio de astrobiología. Los análogos de Marte en Egipto que aparecen están en el Desierto Occidental (dunas, canales invertidos, depresión de Bahariya), a cientos de km y no abiertos por mí. La OeWF estudió Egipto para una misión análoga, sin indicar emplazamiento, y finalmente no fue sede. El Desierto Oriental sí es zona de prueba de NASA EMIT (cartografía hiperespectral del escudo Árabe-Nubio, página abierta), pero sin vínculo planetario. Hay ofiolitas serpentinizadas y carbonatadas en el Desierto Oriental sur, con litología similar a Nili Fossae. Esa relación es inferencia mía y ningún estudio encontrado la plantea.",
+  "searches": 11,
+  "reviewed": "2026-11-14",
+  "for": [
+   "mars_nuevo#3"
+  ]
+ },
+ {
+  "lat": 22.2302,
+  "lon": 35.74288,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Gobernación del Mar Rojo (Al-Bahr al-Ahmar), Egipto (Desierto Oriental, zona fronteriza con Sudán; cerca de Shalatin y Halaib)",
+  "note": "Tras 11 búsquedas (inglés, árabe y francés) no encontré ningún estudio ni propuesta que use este lugar, ni nada a menos de 75 km, como análogo planetario o sitio de pruebas. Lo que sí aparece como análogo de Marte en Egipto está en el Desierto Occidental (Gilf Kebir, Uweinat, unos 1000 km al oeste): El-Baz et al. 1979 y NASA CR-3611, ambos de formas eólicas, y canales invertidos en un artículo de Icarus de 2018. Además, el Foro Espacial Austriaco (ÖWF) y la agencia espacial egipcia (EgSA) hablaron en 2022 de una posible misión análoga en Egipto, sin precisar el lugar. Solo vi resúmenes de búsqueda, no abrí esas fuentes, y las de Halaib, Shalatin o las ofiolitas del Desierto Oriental como análogo de Nili Fossae no existen en lo que encontré; la coincidencia con Nili Fossae (olivino, carbonatos, ofiolitas) es plausible geológicamente pero sin respaldo bibliográfico directo. Nominatim solo da la gobernación, así que no pude confirmar los accidentes del terreno del punto exacto.",
+  "searches": 11,
+  "reviewed": "2026-11-14",
+  "for": [
+   "mars_nuevo#4"
+  ]
+ },
+ {
+  "lat": 35.7698,
+  "lon": 85.72168,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Condado de Qiemo (且末县), Prefectura de Bayingolin, Xinjiang, China; Kunlun/Arka Tagh en el borde norte del Changtang, frontera Xinjiang-Tíbet",
+  "note": "No encontré ningún estudio verificado que use o proponga este punto (ni un paisaje equivalente a menos de 75 km) como análogo planetario, sitio de pruebas de rovers o sitio astrobiológico, tras 11 búsquedas en inglés y chino. Lo único cercano en la literatura de análogos del norte del Tíbet es la cuenca de Qaidam (p. ej. Anglés y Li 2017 en JGR Planets; Xiao et al. 2017 en Earth-Science Reviews), pero está a unos 600-800 km, así que no cuenta como estudio de este lugar. La Wikipedia de análogos de hábitat marciano solo cita Qaidam (37,27N, 94,45E) para esta región. No abrí ninguno de esos trabajos de Qaidam.",
+  "searches": 12,
+  "reviewed": "2026-11-14",
+  "for": [
+   "mars_nuevo#5"
+  ]
+ },
+ {
+  "lat": 19.67986,
+  "lon": 7.54776,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Cerca de Arlit, región de Agadez, Níger (llanura de Tim Mersoï, entre el macizo del Aïr y la frontera argelina; Sáhara central)",
+  "note": "No encontré ningún estudio que proponga o use este lugar (unos 100 km al norte de Arlit, Níger) ni otro a menos de ~75 km como análogo planetario, sitio de pruebas de rovers o sitio de astrobiología. Tras 9 búsquedas en inglés, francés y árabe, solo salen estudios de otros paisajes. Uno es el de las dunas del Ténéré como análogo de Marte y Titán (otro cuerpo, unos 300 km al este de forma aproximada). Otros son el Ahnet y el Tanezrouft en Argelia, a más de 500 km. Un relato de una expedición de meteoritos en la llanura de Tim Mersoï usó imágenes de Marte para elegir superficies antiguas, pero es un texto informal y no una propuesta de análogo. No pude abrir el catálogo de análogos de Foucher et al. (2021) ni el resumen de EGU2018 (acceso denegado o PDF ilegible), así que no puedo descartar que mencionen la zona.",
+  "searches": 10,
+  "reviewed": "2026-11-14",
+  "for": [
+   "mars_nuevo#6"
+  ]
+ },
+ {
+  "lat": 23.7698,
+  "lon": 4.05779,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Provincia de Tamanrasset (Hoggar occidental / Sahara central), Argelia (DZ-11)",
+  "note": "Tras 10 búsquedas en inglés, francés y árabe no encontré ningún estudio verificado que use como análogo planetario (Luna, Marte u otro) este punto ni un lugar a menos de ~75 km, en el flanco occidental del Hoggar. Lo más cercano son estudios regionales de Marte en el Sahara argelino: la cuenca de Ahnet (EPSC-DPS 2025) y las sabkhas del Tanezrouft (proyecto AZALEA), ambos sin coordenadas y probablemente a más de 100 km. No hallé estudios de análogo lunar en la zona, y las menciones al Hoggar como paisaje parecido a Marte son solo de viajes o divulgación.",
+  "searches": 10,
+  "reviewed": "2026-11-14",
+  "for": [
+   "mars_nuevo#7",
+   "moon_gemelo_foso_mare_tranquillitatis"
+  ]
+ },
+ {
+  "lat": 25.94966,
+  "lon": 4.60002,
+  "radius_km": 30,
+  "status": "no_verificado",
+  "url": "",
+  "name": "Cuenca de Mouydir (Sahara central), provincia de Tamanrasset, Argelia",
+  "note": "Nominatim sitúa el punto en la provincia de Tamanrasset (Argelia); por la estratigrafía (Wendt et al.: Reggane, Azel Matti, Ahnet, Foum Belrem, Mouydir de O a E) el punto cae en la cuenca de Mouydir, a unos 25 km del cráter de impacto de Amguid (26.09N, 4.40E), que en Wikipedia y en el artículo de Geosciences 2020 no se menciona como análogo planetario. Hay indicios: la cuenca adyacente de Ahnet sí se propone como análogo de Marte (EPSC 2025, abierto), pero no pude confirmar que sus áreas de estudio estén a menos de ~75 km del candidato (el resumen no da coordenadas ni menciona Mouydir); no encontré ningún estudio de Mouydir como tal ni búsquedas en árabe. Los estudios de análogos encontrados son de Marte, no de la Luna. Verificación independiente: NO confirmado. Abrí los dos enlaces y ambos responden. Son resúmenes reales de congreso (EPSC-DPS 2025), y los dos proponen sitios del Sahara argelino como análogos de Marte. Pero no se cumple (c), que el lugar estudiado esté a menos de ~75 km del candidato (25.94966, 4.60002, cuenca de Mouydir). (1) Caddeo et al. (EPSC-DPS2025-1671) estudian la cuenca de Ahnet como análogo de los depósitos aluviales, evaporític",
+  "searches": 10,
+  "reviewed": "2026-11-14",
+  "for": [
+   "mars_nuevo#8"
+  ]
+ },
+ {
+  "lat": -22.67986,
+  "lon": -67.54873,
+  "radius_km": 30,
+  "status": "ya_estudiado",
+  "url": "https://astrobiology.nasa.gov/news/2008-high-lakes-project-from-early-mars-to-todays-earth/",
+  "name": "Provincia Sur Lípez, Departamento de Potosí, Bolivia (altiplano sudoeste, cerca de la frontera con Chile)",
+  "note": "El candidato está en Sur Lípez (Potosí, Bolivia), a unos 30 km de Laguna Verde y a unos 38 km del Licancabur. Esa zona es un análogo de Marte conocido: el High Lakes Project de NASA/SETI (N. Cabrol, desde 2002-2003) estudia allí lagos de gran altitud como análogos de los lagos marcianos antiguos. Los estudios abiertos tratan la región (lagos Blanca y Verde, Licancabur), no la ventana exacta de 10 km. Una fuente sobre la expedición de 2005 (wingswomenofdiscovery.org) menciona el campo geotérmico Sol de Mañana (unos 30 km), pero no pude leer el PDF, así que no lo cuento como verificado. No encontré estudios de Laguna Colorada, Salar de Chalviri o Polques como análogos. El estudio EPSC2021 (Puna chilena, unos 450 km) es solo contexto y no cuenta para el criterio. Verificación independiente: confirmado (High Lakes Project: from early Mars to today's Earth (NASA Astrobiology Institute, Lyn Bartlett, 2008)).",
+  "searches": 8,
+  "reviewed": "2026-11-14",
+  "for": [
+   "mars_nuevo#9"
+  ]
+ },
+ {
+  "lat": 23.14027,
+  "lon": 7.4511,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Daïra de Tazrouk, wilaya de Tamanrasset, Argelia (Sahara central, flanco oriental del macizo del Hoggar/Ahaggar)",
+  "note": "Tras unas 13 búsquedas en inglés, francés y árabe no encontré ningún estudio que use o proponga este punto (Tazrouk, Tamanrasset, este del Hoggar) ni nada a menos de 75 km como análogo lunar/marciano, sitio de pruebas de rovers o de astrobiología. Solo aparecen análogos saharianos lejanos: la cuenca de Ahnet (EPSC-DPS 2025, unos 600 km, para Marte; abierto) y los sitios de Marruecos (Ibn Battuta). El resumen LPI-1738 (2013) nombra el Hoggar solo de pasada como centro volcánico del Sahara, sin estudiarlo. Las menciones al Tassili n'Ajjer (a unos 450 km) vienen de notas de prensa sobre nombres de rasgos marcianos y no las abrí. La ausencia de resultados no prueba que no exista algún estudio local no indexado.",
+  "searches": 14,
+  "reviewed": "2026-11-14",
+  "for": [
+   "mars_nuevo#10"
+  ]
+ },
+ {
+  "lat": 43.8651,
+  "lon": 101.9926,
+  "radius_km": 30,
+  "status": "no_verificado",
+  "url": "",
+  "name": "Sévrei (Сэврэй), provincia de Ömnögovi (Gobi Sur), Mongolia",
+  "note": "El punto cae en Sévrei, Ömnögovi (Mongolia). Solo hay indicios: el proyecto MARS-V (ONG mongola, con la Mars Society) planea una estación análoga de Marte en el Gobi (Dundgovi y Ömnögovi), pero ninguna fuente abierta da el sitio exacto, así que no pude confirmar que esté a menos de 75 km. No hallé estudios científicos ni resúmenes de LPSC/ADS sobre este lugar, ni nada de análogo lunar. Todo lo hallado es de Marte y de prensa o divulgación. Verificación independiente: NO confirmado. Abrí los tres enlaces y los tres responden (a). Ninguno cumple (b) ni (c) para este candidato. (1) Universe Magazine (27/10/2025) es una nota de prensa que se apoya en CNN. Dice que MARS-V estará \"en las regiones de Dundgovi y Umnugovi\" del Gobi. No da coordenadas ni localidad, no cita ningún estudio y no menciona Sévrei. (2) El comunicado de la Mars Society (4/8/2023) es un anuncio promocional, n",
+  "searches": 9,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_gemelo_apollo11"
+  ]
+ },
+ {
+  "lat": 22.5018,
+  "lon": 14.2121,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Norte de Niger (región de Agadez, zona de Bilma/Djado), cerca de la frontera con Libia (Tummo/Toummo), Sahara central",
+  "note": "Tras 16 búsquedas en inglés, francés y árabe no encontré ningún estudio abierto que use o proponga este punto, ni nada a menos de 75 km, como análogo planetario, sitio de pruebas de rovers o de astrobiología. Lo más cercano es un póster de 2008 sobre huellas de remolinos de polvo (análogo de Marte, no de la Luna) en la frontera Libia-Níger, a unos 115 km. Hay trabajos sobre el Ténéré, el Tibesti y Wau-an-Namus como análogos de Marte, pero están mucho más lejos o no pude confirmar su ubicación. No encontré nada que lo relacione con la Luna ni con Apolo 12.",
+  "searches": 16,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_gemelo_apollo12"
+  ]
+ },
+ {
+  "lat": 23.1349,
+  "lon": 6.6176,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Distrito de Tazrouk, provincia de Tamanrasset, Argelia (macizo del Hoggar/Ahaggar y cuenca de Amadror, Sahara central)",
+  "note": "El punto cae en el distrito de Tazrouk (Tamanrasset, Argelia), al este del macizo volcánico del Hoggar (Ahaggar), en la zona de la cuenca de Amadror. Tras 11 búsquedas en inglés, francés y árabe no encontré ningún estudio que use o proponga este lugar, ni otro a menos de 75 km, como análogo lunar o marciano. Tampoco encontré pruebas de rovers ni astrobiología en la zona. Lo más cercano son estudios de OTROS sitios saharianos, todos lejos: la cuenca de Ahnet (resumen EPSC-DPS 2025, análogo de Marte, que abrí) y la sal plana de Tanezrouft (proyecto AZALEA, EANA 2024, que solo vi en los resultados de búsqueda). Ambos están a cientos de km, fuera del criterio. La NASA bautizó cuadrantes de Marte con parques argelinos (Tassili n'Ajjer, Ghoufi, Djurdjura), pero es una nomenclatura inspirada en el parecido visual, no un estudio de análogo, y no incluye el Hoggar. No pude abrir la página de Marsdaily (demasiadas redirecciones); usé Arab News.",
+  "searches": 13,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_gemelo_apollo16"
+  ]
+ },
+ {
+  "lat": 20.8651,
+  "lon": 32.7404,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Estado del Nilo (River Nile State), Sudán. Es el desierto de Nubia, entre el meandro del Nilo y el Mar Rojo, según Nominatim (solo devolvió región y país).",
+  "note": "Con 10 búsquedas en inglés, árabe y francés no encontré ningún estudio que use o proponga este punto del desierto de Nubia (Sudán) ni uno a menos de 75 km como análogo lunar, marciano o astrobiológico. Solo aparecen análogos de Marte del Sahara oriental, como los del Desierto Occidental de Egipto, Gilf Kebir y Uweinat, a cientos de km. No abrí esas fuentes, así que no las cito. No encontré ninguna referencia a Chang'e-3 para este lugar, y en la ventana domina arenisca nubia, no basalto lunar.",
+  "searches": 10,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_gemelo_change3"
+  ]
+ },
+ {
+  "lat": 24.8651,
+  "lon": 22.0257,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Distrito de Kufra (Al Kufrah), Libia; zona del Mar de Arena de Rebiana (Rabyanah), Sahara oriental",
+  "note": "Hice 9 búsquedas válidas en inglés, árabe y francés y no encontré ningún estudio, propuesta de análogo ni sitio de pruebas de rovers en este punto ni a menos de 75 km. Las referencias de análogos de Marte en el Sahara libio-egipcio (Wau-an-Namus, Gilf Kebir/Uweinat) están a unos 450 km, y solo las vi en resultados de búsqueda. Una página de NASA Earth Observatory sobre Kufra confirma que no menciona Marte, y el catálogo ESA/CAFE devolvió error 403/404, así que no pude comprobarlo. Se agotó el límite de búsquedas web antes de poder probar Google Scholar, ADS o LPSC directamente, y por eso la conclusión es provisional.",
+  "searches": 9,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_gemelo_change4"
+  ]
+ },
+ {
+  "lat": 25.1349,
+  "lon": 5.1096,
+  "radius_km": 30,
+  "status": "no_encontrado",
+  "url": "",
+  "name": "Provincia de Tamanrasset (Tamanghasset), Argelia, Sahara central, al norte del macizo del Hoggar (zona del Mouydir/Amguid, aprox.)",
+  "note": "No encontré ningún estudio que use o proponga este lugar (o uno a menos de 75 km) como análogo lunar, marciano o astrobiológico, tras 7 búsquedas en inglés, francés y árabe. Lo más cercano son análogos marcianos argelinos lejanos: la cuenca de Ahnet (resumen EPSC 2025, abierto, unos 230 km estimados) y los salares de Tanezrouft (proyecto AZALEA, a cientos de km, no abierto). El cráter de impacto de Amguid (unos 100 km al norte) tiene estudios de mineralogía de impacto pero ninguno lo plantea como análogo planetario. No pude cubrir LPSC/ADS directamente porque se agotó el presupuesto de búsquedas web, así que la ausencia es de evidencia, no una prueba definitiva.",
+  "searches": 8,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_gemelo_change5"
+  ]
+ },
+ {
+  "lat": 25.8651,
+  "lon": 17.0618,
+  "radius_km": 30,
+  "status": "no_verificado",
+  "url": "",
+  "name": "Distrito de Murzuq (Fezzan), sureste del Sahara libio, Libia (Nominatim: Murzuq, Libia)",
+  "note": "El candidato cae en el distrito de Murzuq (Libia, Sahara central-oriental), entre el Idehan Murzuq y el campo volcánico de Haruj. No encontré ningún estudio que trate este punto o un lugar a menos de 75 km como análogo planetario. El único estudio de análogos cercano es de Marte, no de la Luna: Wau-an-Namus (24.92N, 17.76E, unos 127 km al SE) como análogo de megarriples/TAR marcianos (Foroutan et al. 2019, Icarus). Solo pude hacer 2 búsquedas efectivas (ambas en inglés), y no se hicieron las del idioma local ni las de Haruj, Murzuq o Qatrun. Por eso la conclusión es 'no_verificado', no 'no_encontrado'. Tampoco hallé nada específicamente lunar (análogo del polo sur o de Chang'e-6) para esta zona. Verificación independiente: NO confirmado. (a) El enlace existe y responde. (b) La página solo contiene la cita bibliográfica de un artículo real (Icarus 319, 840-851, 2019), sin resumen ni texto del estudio. (d) El título presenta Wau-an-Namus como análogo de formas eólicas de Marte, pero la página no da más detalle. (c) No se cumple. Wau-an-Namus está en torno a 25,05 N y 17,77 E (coordenadas de memoria, ya que la página no las da). A pa",
+  "searches": 4,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_gemelo_change6"
+  ]
+ },
+ {
+  "lat": 29.5018,
+  "lon": 33.3781,
+  "radius_km": 30,
+  "status": "no_verificado",
+  "url": "",
+  "name": "Gobernación de Sinaí del Sur (جنوب سيناء), Egipto; zona interior del Sinaí occidental, al este del golfo de Suez (región de Ras Sudr / meseta de Tih; ubicación aproximada, no confirmada por el geocodificador)",
+  "note": "No he podido completar la revisión. Solo hice 2 búsquedas web (ambas en inglés) y agoté el límite de búsquedas antes de las 6 variadas en 2 idiomas que exige el criterio, así que no puedo declarar \"no_encontrado\". En lo que sí pude ver no hay ningún estudio que use este punto, ni uno a menos de 75 km, como análogo planetario. Las búsquedas no devolvieron nada específico del Sinaí, y las páginas de Wikipedia sobre sitios análogos que abrí no mencionan Egipto ni el Sinaí (en la de Marte leí solo 100000 de 159889 caracteres). Hay un dato regional pero no de este sitio. El Foro Espacial Austriaco (OeWF) anunció el 28/02/2022 que Egipto entra en su lista de candidatos para una futura misión análoga de Marte, sin nombrar ningún lugar concreto (abrí la página). No lo registro como estudio, porque no trata de este lugar. Tampoco hice la búsqueda en árabe, ni ADS, LPSC ni el catálogo Europlanet. Si se quiere cerrar el caso, hay que repetirlas con más presupuesto de búsquedas. Tampoco hay estudios de análogos de otro cuerpo para este sitio.",
+  "searches": 8,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_gemelo_foso_marius_hills"
+  ]
+ },
+ {
+  "lat": 23.5018,
+  "lon": 44.2647,
+  "radius_km": 30,
+  "status": "no_verificado",
+  "url": "",
+  "name": "Gobernación de Al Quwayiyah, región de Riad, Arabia Saudita (meseta de Néyed/Najd, cerca del escarpe de Jabal Tuwaiq)",
+  "note": "Solo se completaron 2 de las 6 búsquedas mínimas, ambas en inglés y ninguna en árabe, porque se agotó el presupuesto de búsquedas del turno. Por eso no puedo declarar \"no_encontrado\". Lo que se vio no es concluyente: no apareció ningún estudio que use este lugar, ni otro a menos de 75 km, como análogo planetario. La geocodificación inversa ubica el punto en Al Quwayiyah (región de Riad), en la meseta del Najd. El escarpe de Jabal Tuwaiq solo salió como análogo de yacimientos petrolíferos (Aramco y Bureau of Economic Geology, Universidad de Texas), no planetario. La revisión de 2026 sobre ambientes extremos árabes en Extremophiles (resumen abierto en astrobiology.com) no nombra ningún sitio del Najd; no se pudo abrir el texto completo de Springer por una redirección de autenticación. El único análogo saudí citado es el cráter Al-Wahbah (KAUST, comparado con Enceladus), en la zona de Taif, a unos 500 km o más, y por eso no se incluye. Para cerrar la verificación faltan al menos 4 búsquedas, entre ellas una en árabe, o subir CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION. No hay indicios concretos de que este lugar se estudie como análogo.",
+  "searches": 6,
+  "reviewed": "2026-11-14",
+  "for": [
+   "moon_gemelo_foso_mare_ingenii"
+  ]
  }
 ]

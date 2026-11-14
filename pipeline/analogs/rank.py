@@ -851,8 +851,21 @@ def climate_points(L0: dict, F1: dict, F2: dict, E) -> list[tuple[float, float]]
             fi = {i for v in r["twin_idx"].values() for i in v} | (set() if body in F2 else set(r["top"]))
             pts += [(float(r["lat"][i]), float(r["lon"][i])) for i in fi]
         if body in F2:
-            pts += [(float(F2[body]["lat"][i]), float(F2[body]["lon"][i])) for i in F2[body]["final_idx"]]
+            pts += [(float(F2[body]["lat"][i]), float(F2[body]["lon"][i]))
+                    for i in list(F2[body]["final_idx"]) + list(F2[body].get("new_idx", []))]
     return pts
+
+
+NEW_MIN_PRE = 0.6  # mínimo de terreno^0,6 · superficie^0,4 para entrar en el top de nuevos
+
+
+def pick_new(F2: dict, lit: list) -> None:
+    """Top de candidatos NO conocidos: los mejores bloques L2 que no están cerca de un análogo conocido
+    ni constan como ya estudiados en la bibliografía (el reto valora sobre todo análogos nuevos)."""
+    for body, f in F2.items():
+        cand = np.array([i for i in range(len(f["pre"])) if f["pre"][i] >= NEW_MIN_PRE
+                         and known_name(float(f["lat"][i]), float(f["lon"][i]), lit) is None], int)
+        f["new_idx"] = nms(f["pre"], f["lat"], f["lon"], TOP_N, NMS_KM, cand=cand) if len(cand) else []
 
 
 def build_sites(L0: dict, F1: dict, F2: dict, E, refs_by_id: dict, clim: dict, climate_scores, lit: list) -> dict:
@@ -950,8 +963,49 @@ def build_sites(L0: dict, F1: dict, F2: dict, E, refs_by_id: dict, clim: dict, c
                              for g, k in enumerate(r["L"]["key_list"])}
         if body in F2:
             fine["final"] = sorted((site_l2(body, F2[body]["rows"][i]) for i in F2[body]["final_idx"]), key=order)
+            # top de candidatos no conocidos (pueden estar también en "final")
+            fine["final_new"] = sorted((site_l2(body, F2[body]["rows"][i]) for i in F2[body].get("new_idx", [])),
+                                       key=order)
         bodies[body] = {"sites": sites, "twins": twins, "heat": heat, "fine": fine}
     return bodies
+
+
+# Sensibilidad a los pesos: los pesos 0,5/0,25/0,25 son una elección; se prueban todas las combinaciones
+# de esta rejilla (terreno 0,35–0,7; superficie 0,1–0,35; clima = el resto, al menos 0,1).
+SENS_TERRAIN = (0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7)
+SENS_SURFACE = (0.1, 0.15, 0.2, 0.25, 0.3, 0.35)
+SENS_TOP = 10
+
+
+def weight_sensitivity(bodies: dict) -> dict:
+    """Para cada finalista (ranking final y top de nuevos): en qué fracción de las combinaciones de pesos
+    sigue en el top 10 de su lista y su mejor y peor puesto. Se guarda en el sitio como "robust"."""
+    combos = [(wt, ws, round(1 - wt - ws, 3)) for wt in SENS_TERRAIN for ws in SENS_SURFACE if 1 - wt - ws >= 0.1 - 1e-9]
+    info = {"n_combos": len(combos), "terrain": list(SENS_TERRAIN), "surface": list(SENS_SURFACE), "top": SENS_TOP}
+    for body, B in bodies.items():
+        fine = B.get("fine") or {}
+        for key in ("final", "final_new"):
+            lst = fine.get(key) or []
+            if not lst:
+                continue
+            sc = np.array([[x["scores"]["terrain"], x["scores"]["surface"], x["scores"]["climate"] or 0.0] for x in lst])
+            ranks = []
+            for wt, ws, wc in combos:
+                tot = sc @ np.array([wt, ws, wc])
+                ranks.append(np.argsort(np.argsort(-tot, kind="stable"), kind="stable") + 1)
+            R = np.array(ranks)                  # combos × sitios
+            for j, x in enumerate(lst):
+                x.setdefault("robust", {})[key] = {"top10_frac": round(float((R[:, j] <= SENS_TOP).mean()), 3),
+                                                   "best": int(R[:, j].min()), "worst": int(R[:, j].max())}
+    print(f"\n== Sensibilidad a los pesos: {len(combos)} combinaciones (terreno {SENS_TERRAIN[0]}–{SENS_TERRAIN[-1]}, "
+          f"superficie {SENS_SURFACE[0]}–{SENS_SURFACE[-1]}, clima ≥ 0,1)")
+    for body, B in bodies.items():
+        for key in ("final", "final_new"):
+            for x in ((B.get("fine") or {}).get(key) or [])[:10]:
+                r = x["robust"][key]
+                print(f"  {body:4s} {key:9s} {x['lat']:8.3f} {x['lon']:9.3f} top10 {r['top10_frac']:5.0%} "
+                      f"puesto {r['best']}–{r['worst']}  {x.get('known_analog') or 'NUEVO'}")
+    return info
 
 
 def print_sites(bodies: dict) -> None:
@@ -1075,8 +1129,10 @@ def main(argv=None) -> None:
         print(f"\n== L2: {len(l2)} bloques de {fine_dir / 'l2'}")
         F2 = run_l2(l2, refs, refs_by_id, F1, L0, E)
 
+    pick_new(F2, lit)
     clim = get_climate(climate_points(L0, F1, F2, E), a.no_climate, a.climate_budget)
     bodies = build_sites(L0, F1, F2, E, refs_by_id, clim, climate_module(a.no_climate).climate_scores, lit)
+    sens = weight_sensitivity(bodies)
     print_sites(bodies)
     valid, missing = validation_table(before, after, {b: r["valid"] for b, r in F1.items()},
                                       {b: r.get("valid_fair") for b, r in F1.items()})
@@ -1114,6 +1170,7 @@ def main(argv=None) -> None:
            "reference_points": [[r["id"], r["body"], r["level"], r.get("group"), r["lat"], r["lon"],
                                  bool(r.get("usable"))] for r in refs],
            "shape_features_adopted": {b: r["decision"] for b, r in F1.items()},
+           "weight_sensitivity": sens,
            "weights": {"terrain": W_TERRAIN, "surface": W_SURFACE, "climate": W_CLIMATE},
            "n_windows": len(E.rows), "n_fine": {"L1": len(l1), "L2": len(l2)}}
 
