@@ -22,13 +22,14 @@
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
           <a href="./" data-i18n="nav.viewer">Visor 3D de Marte</a>
           <a href="./luna-marte.html" data-i18n="nav.map">Mapa Luna y Marte</a>
-          <a href="./globos.html" aria-current="page" data-i18n="nav.globes">Globos 3D</a>
-          <a href="#sources"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
+          <a href="./globos.html" id="gl-browse-link" aria-current="page" data-i18n="nav.globes">Globos 3D</a>
+          <a href="#path-planner" id="path-link" data-i18n="path.title">Planificador de rutas</a>
+          <a href="#sources" id="gl-sources-link"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
         </nav>
       </header>
 
       <div class="gl-toolbar">
-        <h2 class="gl-title" data-i18n="nav.globes">Globos 3D</h2>
+        <h2 class="gl-title" id="gl-browse-title" data-i18n="nav.globes">Globos 3D</h2>
         <div class="gl-mode">
           <div class="gl-seg" role="group" aria-label="Puntos que se muestran" data-i18n-attr="aria-label:gl.modeLabel">
             <button type="button" data-mode="best" aria-pressed="true" data-i18n="gl.best">Mejores</button>
@@ -47,6 +48,34 @@
         </div>
       </div>
 
+      <section class="path-toolbar" id="path-tools" aria-labelledby="path-title" hidden>
+        <div class="path-toolbar-head">
+          <h2 class="gl-title" id="path-title" data-i18n="path.title">Planificador de rutas</h2>
+          <div class="path-search-actions">
+            <div class="path-distance" id="path-distance" aria-hidden="true">
+              <strong id="path-distance-value"></strong>
+              <span id="path-distance-range"></span>
+            </div>
+            <span id="path-distance-announcement" class="visually-hidden" role="status" aria-atomic="true"></span>
+            <button type="button" id="path-search" class="path-primary" aria-describedby="path-distance-announcement" data-i18n="path.search" disabled>Buscar rutas en la Tierra</button>
+          </div>
+        </div>
+        <div class="path-actions">
+          <button type="button" id="path-draw" aria-pressed="false" data-i18n="path.draw">Dibujar ruta</button>
+          <button type="button" id="path-upload" aria-describedby="path-formats" data-i18n="path.upload">Subir ruta</button>
+          <input type="file" id="path-file" accept=".geojson,.json,.gpx,.kml,application/geo+json,application/gpx+xml,application/vnd.google-earth.kml+xml" hidden>
+          <span id="path-formats" class="path-formats">GeoJSON, GPX, KML</span>
+          <button type="button" id="path-example" class="path-quiet" data-i18n="path.example">Probar una ruta en Jezero</button>
+          <button type="button" id="path-undo" class="path-quiet" data-i18n="path.undo" hidden>Deshacer punto</button>
+          <button type="button" id="path-fit" class="path-quiet" data-i18n="path.fit" hidden>Encuadrar rutas</button>
+          <button type="button" id="path-clear" class="path-quiet" data-i18n="path.clear" hidden>Borrar ruta</button>
+          <span id="path-metadata" class="path-metadata"></span>
+        </div>
+        <p id="path-help" class="path-help" data-i18n="path.help" hidden>Marca los puntos de la ruta en Marte.</p>
+        <p id="path-keyboard" class="visually-hidden" data-i18n="path.keyboard">Usa las flechas para mover el centro de la vista, más y menos para acercar y Enter para agregar un punto.</p>
+        <p id="path-status" class="path-status" role="status" aria-atomic="true"></p>
+      </section>
+
       <div class="gl-body">
         <section class="gl-stage" id="gl-stage" aria-label="Globos de la Luna, la Tierra y Marte" data-i18n-attr="aria-label:gl.stageLabel">
           <canvas id="gl-canvas" aria-hidden="true"></canvas>
@@ -63,6 +92,11 @@
           <div class="gl-panel" data-globe="mars">
             <p class="gl-label"><b data-i18n="planet.mars">Marte</b> <span data-i18n="gl.radius.mars">radio 3.390 km</span></p>
             <button type="button" class="gl-reset" data-i18n="gl.reset">Restablecer vista</button>
+            <div class="path-zoom" id="path-zoom" hidden>
+              <button type="button" id="path-zoom-in" aria-label="Acercar Marte" data-i18n-attr="aria-label:path.zoomIn">+</button>
+              <button type="button" id="path-zoom-out" aria-label="Alejar Marte" data-i18n-attr="aria-label:path.zoomOut">−</button>
+            </div>
+            <span class="path-crosshair" aria-hidden="true"></span>
             <p class="gl-credit">Viking: NASA Mars Trek · CTX: NASA/JPL/MSSS/Caltech Murray Lab/Esri</p>
           </div>
           <div class="gl-tip" id="gl-tip" role="tooltip" hidden></div>
@@ -71,6 +105,7 @@
         </section>
         <aside class="gl-detail" id="gl-detail" aria-live="polite" aria-label="Detalle del punto" data-i18n-attr="aria-label:gl.detailLabel" hidden></aside>
       </div>
+      <section id="path-comparison" class="path-comparison-host" aria-label="Comparación de rutas" data-i18n-attr="aria-label:path.comparison" hidden></section>
     </main>
     <footer id="sources" class="gl-footer">
       <section class="gl-about intro">
