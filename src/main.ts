@@ -261,6 +261,12 @@ async function selectMatch(match: Match) {
   }
 }
 
+const matchMetrics = [
+  { key: "terrain", icon: "M2 13 6 6l2 3 2-5 4 9H2Z" },
+  { key: "surface", icon: "M2 5h12M2 8l4 1 4-1 4 1M2 12h12" },
+  { key: "climate", icon: "M8 2v1m0 10v1M2 8h1m10 0h1M3.75 3.75l.7.7m7.1 7.1.7.7m0-8.5-.7.7m-7.1 7.1-.7.7M11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" },
+] as const;
+
 function renderMatchList() {
   matchList.replaceChildren(...shownMatches.map((match, index) => {
     const { site: candidate } = match;
@@ -280,14 +286,15 @@ function renderMatchList() {
     score.textContent = `${index === 0 ? t("v.bestOf", { n: rankedCount }) : ""}${t("v.score", { v: num(match.total) })}`;
     const bars = document.createElement("span");
     bars.className = "match-bars";
-    bars.setAttribute("aria-label",
-      t("v.barsLabel", { t: num(match.terrain), s: num(match.surface), c: num(match.climate) }));
-    bars.innerHTML = ([["v.bar.terrain", match.terrain], ["v.bar.surface", match.surface], ["v.bar.climate", match.climate]] as const)
-      .map(([key, value]) => {
-        const label = t(key);
-        return `<span title="${label} ${num(value)}"><b>${label[0]}</b><i style="--v:${Math.max(0, value)}"></i></span>`;
-      })
-      .join("");
+    bars.innerHTML = matchMetrics.map(({ key, icon }) => `
+      <span class="match-metric">
+        <span class="match-metric-label">${t(`v.bar.${key}`)}</span>
+        <span class="match-metric-value">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="${icon}"/></svg>
+          ${num(match[key])}
+        </span>
+        <i aria-hidden="true" style="--v:${match[key]}"></i>
+      </span>`).join("");
     button.append(name, origin, score, bars);
     button.addEventListener("click", () => void selectMatch(match));
     item.append(button);
