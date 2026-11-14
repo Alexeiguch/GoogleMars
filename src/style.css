@@ -272,11 +272,31 @@ button.globe-pin:hover::before, button.globe-pin:focus-visible::before { backgro
 .match-list button:focus-visible { position: relative; z-index: 2; outline-offset: -3px; }
 .match-origin { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; }
 .match-origin.global { color: var(--accent); }
-.match-bars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
-.match-bars > span { display: flex; align-items: center; gap: 5px; }
-.match-bars b { color: var(--muted); font-size: 11px; font-weight: 500; }
-.match-bars i { flex: 1; height: 4px; background: var(--border); position: relative; }
-.match-bars i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: calc(var(--v) * 100%); background: var(--accent); }
+.match-bars { display: grid; grid-template-columns: repeat(3, minmax(max-content, 1fr)); gap: 8px; margin-top: 8px; }
+.match-metric { display: grid; gap: 3px; }
+.match-metric-label { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.match-metric-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.match-metric-value svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--muted);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.match-metric i { height: 4px; background: var(--border); position: relative; }
+.match-metric i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: clamp(0%, calc(var(--v) * 100%), 100%); background: var(--accent); }
 tr.group th { padding-top: 18px; color: var(--muted); font-size: 14px; font-weight: 500; text-align: left; }
 
 @media (max-width: 640px) {
