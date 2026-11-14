@@ -28,21 +28,27 @@
       <section class="lm-layout" aria-label="Análogos de la Luna y Marte en toda la Tierra" data-i18n-attr="aria-label:lm.layoutLabel">
         <aside class="lm-panel" id="panel">
           <div class="lm-tabs" role="tablist" aria-label="Cuerpo de referencia" data-i18n-attr="aria-label:lm.tabsLabel">
-            <button type="button" role="tab" data-body="moon" aria-selected="true" data-i18n="lm.tabMoon">Luna · polo sur</button>
+            <button type="button" role="tab" data-body="moon" aria-selected="true" data-i18n="lm.tabMoon">Luna</button>
             <button type="button" role="tab" data-body="mars" aria-selected="false" data-i18n="lm.tabMars">Marte</button>
           </div>
           <div id="lm-results" hidden>
             <div id="detail" class="lm-detail" aria-live="polite"></div>
-            <h2 class="lm-section" data-i18n="lm.featured">Historias destacadas</h2>
+            <h2 class="lm-section" id="featured-h" data-i18n="lm.featured">Historias destacadas</h2>
             <div id="featured" class="lm-cards"></div>
-            <h2 class="lm-section" data-i18n="lm.twins">Gemelos terrestres de cada sitio</h2>
-            <div id="twins"></div>
             <h2 class="lm-section" data-i18n="lm.ranking">Ranking general</h2>
+            <div class="lm-seg lm-rank-modes" id="rank-modes" role="group" aria-label="Tipo de ranking" data-i18n-attr="aria-label:lm.rankMode" hidden>
+              <button type="button" data-rank="final" aria-pressed="true" data-i18n="lm.rankFinal">Final multiescala (30 km → 10 km → 5/2 km)</button>
+              <button type="button" data-rank="l0" aria-pressed="false" data-i18n="lm.rankL0">A 30 km</button>
+            </div>
             <ol class="lm-list" id="ranking"></ol>
+            <h2 class="lm-section" data-i18n="lm.refs">Referencias</h2>
+            <div class="lm-refs" id="refs"></div>
+            <h2 class="lm-section" data-i18n="lm.twinsGroups">Gemelos terrestres por grupo</h2>
+            <div id="twins" class="lm-groups"></div>
             <h2 class="lm-section" data-i18n="lm.validation">Validación con análogos conocidos</h2>
             <div class="lm-valid">
               <table id="validation"></table>
-              <p class="lm-note" data-i18n="lm.validationNote">Percentil global (entre todas las ventanas de 30 km de tierra firme) del mejor punto a menos de 50 km de cada análogo ya conocido. Cuanto más alto, mejor detecta el método los lugares que la ciencia ya usa.</p>
+              <p class="lm-note" id="validation-note"></p>
             </div>
           </div>
         </aside>
@@ -53,13 +59,19 @@
       <footer id="sources">
         <h2 data-i18n="sources.title">Fuentes de datos</h2>
         <ul>
-          <li><a href="https://astrogeology.usgs.gov/search/map/moon_lro_lola_dem_118m" data-i18n="lm.src.moon">Luna · LRO LOLA DEM 118 m (USGS)</a></li>
-          <li><a href="https://astrogeology.usgs.gov/search/map/mars_mgs_mola_mex_hrsc_blended_dem_global_200m" data-i18n="lm.src.mars">Marte · HRSC + MOLA 200 m (USGS)</a></li>
-          <li><a href="https://planetarycomputer.microsoft.com/dataset/cop-dem-glo-90" data-i18n="lm.src.glo90">Tierra · Copernicus DEM GLO-90</a></li>
+          <li><a href="https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/" data-i18n="lm.src.moonPgda">Luna · LOLA LDEM_80S_40MPP_ADJ, 40 m (NASA PGDA, Barker et al. 2023)</a></li>
+          <li><a href="https://astrogeology.usgs.gov/search/map/moon_lro_lola_selene_kaguya_tc_dem_merge_60n60s_59m" data-i18n="lm.src.moonSldem">Luna fuera del polo · SLDEM2015, 59 m (LOLA + Kaguya TC, USGS)</a></li>
+          <li><a href="https://data.lroc.im-ldi.com/" data-i18n="lm.src.lroc">Regiones de Artemis III · mosaicos LROC NAC ROI (Arizona State University)</a></li>
+          <li><a href="https://astrogeology.usgs.gov/search/map/moon_lro_lola_dem_118m" data-i18n="lm.src.moonMini">Minimapa del polo sur · relieve del DEM LRO LOLA 118 m (USGS)</a></li>
+          <li><a href="https://astrogeology.usgs.gov/search/map/mars_mgs_mola_mex_hrsc_blended_dem_global_200m" data-i18n="lm.src.mars">Marte a 30 y 10 km · HRSC + MOLA blend v2, 200 m (USGS)</a></li>
+          <li><a href="https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/" data-i18n="lm.src.hirise">Marte a 2 km · DTM HiRISE (USGS)</a></li>
+          <li><a href="https://planetarycomputer.microsoft.com/dataset/cop-dem-glo-90" data-i18n="lm.src.glo90">Tierra a 30 y 10 km · Copernicus DEM GLO-90</a></li>
+          <li><a href="https://planetarycomputer.microsoft.com/dataset/cop-dem-glo-30" data-i18n="lm.src.glo30">Tierra a 5 y 2 km · Copernicus DEM GLO-30</a></li>
           <li><a href="https://planetarycomputer.microsoft.com/dataset/esa-worldcover" data-i18n="lm.src.cover">Tierra · ESA WorldCover 2021</a></li>
           <li><a href="https://www.meteomatics.com/en/weather-api/" data-i18n="lm.src.climate">Clima 2025 · Meteomatics (ERA5)</a></li>
           <li><a href="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" data-i18n="lm.src.earthImg">Imagen de la Tierra · Esri World Imagery</a></li>
           <li><a href="https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer" data-i18n="lm.src.marsImg">Imagen de Marte · mosaico CTX (Caltech Murray Lab, vía Esri)</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Mars_Viking_MDIM21_ClrMosaic_1km.jpg" data-i18n="lm.src.marsMini">Minimapa de Marte · Viking MDIM 2.1</a></li>
         </ul>
       </footer>
     </main>

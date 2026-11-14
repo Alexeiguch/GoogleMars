@@ -44,7 +44,7 @@ from scipy.spatial import cKDTree
 from scipy.spatial.distance import cdist
 
 from .dem_io import glo90_index, tile_key
-from .reference_sites import MARS_SITES, MOON_REGIONS, MOON_SITES
+from .reference_sites import MARS_SITES, MOON_NONPOLAR_SITES, MOON_REGIONS, MOON_SITES
 from .references import SCALES
 from .terrain import FEATURES, SHAPE_FEATURES, feature_labels
 
@@ -103,37 +103,57 @@ KNOWN_ANALOGS = [
 ]
 VALIDATION = [a for a in KNOWN_ANALOGS if a[4]]
 
-# Historias destacadas (elegidas a mano tras ver el ranking v1 y revisar la bibliografía).
-# "ref" es una clave de gemelos; si no existe se avisa y se quita.
+# Historias destacadas v2 (elegidas a mano tras ver el ranking v2 y la revisión bibliográfica).
+# "ref" es una clave de gemelos; si no existe se avisa y se quita. Las cifras salen de
+# results.json v2 (14/11/2026); si cambian las referencias o los datos, hay que revisarlas.
+# Las historias v1 de Jezero (otra ventana de Qaidam) y de Ustyurt/Elysium se retiraron: Elysium
+# (InSight) es una zona "solo MOLA" que ya no puntúa a 400 m.
 FEATURED = [
     {
+        "body": "moon", "ref": "malla_polar", "lat": 33.7698, "lon": 84.39181, "tag": "nuevo",
+        "title": "Changtang (Tíbet occidental, ~4.800 m), gemelo de las llanuras del polo sur lunar",
+        "story": ("A 10 km, esta ventana del altiplano de Changtang (condado de Gêrzê, Ngari) tiene casi la misma "
+                  "distribución de pendientes que una ventana de la malla polar a 86,4°S (pendiente típica 2,9° frente "
+                  "a 3,1°; p90 8,7° frente a 9,9°; 72 % llano frente a 68 %; relieve 234 m frente a 261 m). La "
+                  "similitud se mantiene a 30 km (98/100) y a 5 km (90/100, frente a una tesela de la región Haworth "
+                  "de Artemis III). Es suelo desnudo al 100 %, con una media de −2,2 °C y mínimas de −27 °C (ERA5, "
+                  "2025): un lugar para ensayar movilidad y aterrizaje en las llanuras entre cráteres del polo sur, "
+                  "con frío y a gran altitud. Tras 8 búsquedas en inglés y chino no encontramos estudios que lo usen "
+                  "como análogo; los análogos tibetanos publicados están en la cuenca de Qaidam, a más de 600 km. "
+                  "Dónde falla: aquí el relieve lo modelan el hielo y el agua, no los impactos, y caen 333 mm al año."),
+    },
+    {
         "body": "moon", "ref": "shackleton", "lat": -29.4982, "lon": -69.5145, "tag": "nuevo",
-        "title": "Alta cordillera de los Andes (~29,5°S), gemela del borde de Shackleton",
-        "story": ("Una ventana de 30 km a ~4.200 m en la frontera Chile–Argentina tiene casi la misma "
-                  "distribución de pendientes que el borde del cráter Shackleton (pendiente típica 14,6° frente a 14,1°; "
-                  "48 % del terreno por encima de 15° frente a 47 %), con un 98 % de roca desnuda y una media anual "
-                  "de −6 °C. Sirve para probar movilidad de rovers y aterrizaje en laderas empinadas como las de las "
-                  "crestas iluminadas del polo sur lunar. No hemos encontrado estudios que la usen como análogo lunar; "
-                  "los Andes sí se estudian como análogo de Marte, sobre todo más al norte (Puna, Atacama)."),
+        "title": "Alta cordillera de San Juan (Argentina, ~4.200 m), gemela del cráter Shackleton",
+        "story": ("Una ventana de 30 km en el departamento de Iglesia (San Juan) tiene casi la misma pendiente que "
+                  "el cráter Shackleton medido con el DEM LOLA de 40 m (pendiente típica 14,6° frente a 14,0°; 48 % "
+                  "del terreno por encima de 15° frente a 47 %), con un 98 % de roca desnuda, media de −6,2 °C y "
+                  "mínimas de −39 °C. Sirve para probar rovers y aterrizajes en laderas empinadas como las de las "
+                  "crestas iluminadas del polo sur. Dónde falla: Shackleton es más profundo (relieve 3.781 m frente a "
+                  "2.027 m) y sus pendientes extremas son mayores (p90 31° frente a 25°). En una búsqueda breve (inglés "
+                  "y español) no encontramos estudios que usen esta zona como análogo; los análogos andinos publicados "
+                  "están en la Puna y en Atacama, a más de 300 km."),
     },
     {
-        "body": "mars", "ref": "jezero", "lat": 37.5018, "lon": 95.7353, "tag": "validación",
-        "title": "Cuenca de Qaidam (Tíbet, China), gemela de Jezero",
-        "story": ("Sin decírselo, el método encontró la cuenca de Qaidam como el mejor gemelo del cráter Jezero "
-                  "(pendiente típica 1,7° frente a 1,8°; relieve 721 m frente a 831 m; rugosidad 29 m frente a 30 m). "
-                  "Qaidam ya está propuesta en la literatura científica como análogo de Marte: antiguo lago "
-                  "evaporado a ~3.400 m, frío, seco, con mucha radiación UV, yardangs, sales y playas. Que el método "
-                  "la redescubra solo con datos globales es una buena prueba de que funciona."),
+        "body": "mars", "ref": "ez_jezero_syrtis_isidis", "lat": 38.14027, "lon": 91.44283, "tag": "validación",
+        "title": "Cuenca de Qaidam (China), gemela de la zona de exploración de Jezero",
+        "story": ("Sin decírselo, el método encontró la cuenca de Qaidam (~3.250 m) como el mejor gemelo de la zona de "
+                  "exploración humana Jezero–Syrtis–Isidis, con terreno parecido a las tres escalas: 96/100 a 30 km, "
+                  "99/100 a 10 km y 96/100 a 2 km frente a un parche HiRISE de un delta invertido (pendiente típica "
+                  "5,2° frente a 4,5°; relieve 93 m frente a 102 m). Qaidam ya está publicada como análogo de Marte "
+                  "(antiguo lago evaporado, frío y seco, con yardangs y sales): que el método la redescubra sin "
+                  "saberlo es una prueba de que funciona."),
     },
     {
-        "body": "mars", "ref": "elysium", "lat": 42.1349, "lon": 55.7927, "tag": "nuevo",
-        "title": "Meseta de Ustyurt (Uzbekistán), gemela fría de Elysium Planitia",
-        "story": ("Las llanuras del Sahara son las más parecidas a Elysium y Utopia, pero son cálidas. Ustyurt "
-                  "tiene el mismo terreno (pendiente típica 0,22° frente a 0,25°; relieve 74 m frente a 74 m), "
-                  "un 100 % de suelo desnudo y además inviernos duros (mínima de −18 °C en 2025 según ERA5). "
-                  "Una llanura muy plana, seca y fría es un buen sitio para ensayar aterrizajes, navegación sobre "
-                  "terreno sin referencias y operaciones en frío. No hemos encontrado estudios científicos que la "
-                  "propongan como análogo de Marte; solo comparaciones turísticas."),
+        "body": "mars", "ref": "spirit_gusev", "lat": 22.67986, "lon": 11.84114, "tag": "nuevo",
+        "title": "Meseta de Djado (Níger), gemela de las llanuras del cráter Gusev",
+        "story": ("Es el n.º 1 del ranking final de Marte. A 10 km se parece mucho a una ventana de las llanuras de "
+                  "Gusev donde aterrizó Spirit (pendiente típica 2,3° frente a 2,3°; p90 8,1° frente a 8,5°; 77 % llano "
+                  "frente a 78 %; relieve 187 m frente a 179 m: 100/100), y también a 30 km (98/100) y a 2 km (93/100 "
+                  "frente a un parche HiRISE de Utopia Planitia de la misma categoría). Es roca desnuda casi sin lluvia "
+                  "(4 mm en 2025). En una búsqueda breve (inglés y francés) no encontramos estudios que lo usen como "
+                  "análogo; hay trabajos regionales sobre el Teneré que no sitúan su zona aquí. Dónde falla: es "
+                  "caluroso (media de 23,7 °C), al contrario que Marte."),
     },
 ]
 
@@ -142,8 +162,8 @@ LEVELS = {
                                 "resolución efectiva 16–50 m según la latitud",
                     "earth_data": "Copernicus GLO-90 (90 m)", "coarsest": "Tierra a 400 m (escaneo global)"},
            "mars": {"ref_data": "Blend HRSC+MOLA v2: 200 m donde hay HRSC; 463 m o peor donde solo hay MOLA "
-                                "(esas referencias se marcan)",
-                    "earth_data": "Copernicus GLO-90 (90 m)", "coarsest": "Tierra a 400 m; Marte solo-MOLA 463 m"}},
+                                "(esas referencias no puntúan a 400 m)",
+                    "earth_data": "Copernicus GLO-90 (90 m)", "coarsest": "Tierra a 400 m (las referencias solo MOLA, 463 m, no puntúan)"}},
     "L1": {"moon": {"ref_data": "LOLA PGDA 40 m (EFFRES ~30–50 m)", "earth_data": "Copernicus GLO-90 (90 m)",
                     "coarsest": "LOLA ~30–50 m y GLO-90 90 m -> píxel 120 m"},
            "mars": {"ref_data": "Blend HRSC+MOLA v2, solo teselas con HRSC (200 m)",
@@ -284,6 +304,8 @@ def twin_key(r: dict) -> str:
     if r["body"] == "moon":
         if r.get("group") == "malla_polar":
             return "malla_polar"
+        if r.get("kind") == "sitio_tesela":  # teselas de 10 km de un sitio fuera del polo
+            return r.get("parent") or r["id"].rsplit("_t", 1)[0]
         if r.get("kind") == "sitio" or not r.get("region"):
             return r["id"]
         return r["region"]
@@ -298,6 +320,7 @@ def group_info(refs: list[dict]) -> dict:
     names = {r["id"]: (r["name"], "region") for r in MOON_REGIONS}
     names.update({s["id"]: (s["name"], "sitio") for s in MOON_SITES})
     names.update({s["id"]: (s["name"], "sitio") for s in MARS_SITES})
+    names.update({s["id"]: (s["name"], "fuera_del_polo") for s in MOON_NONPOLAR_SITES})
     names["malla_polar"] = ("Malla polar de 84–90°S (generada, no es un sitio publicado)", "malla")
     # Nobile Rim 1 comparte mosaico LROC (centro y límites) con Mons Mouton: se puntúan juntas.
     names["mons_mouton"] = ("Mons Mouton y Nobile Rim 1 (comparten mosaico LROC)", "region")
@@ -310,6 +333,8 @@ def group_info(refs: list[dict]) -> dict:
         g = out.setdefault(k, {"name": name, "body": r["body"], "kind": kind, "n_refs": 0,
                                "n_refs_levels": {"L0": 0, "L1": 0, "L2": 0}})
         g["n_refs_levels"][r["level"]] += 1
+        if r.get("twin_only"):  # solo gemelos: no entra en el ranking ni en la validación
+            g["twin_only"] = True
         if r["level"] == "L0":
             g["n_refs"] += 1
     return out
@@ -351,26 +376,47 @@ def known_name(lat: float, lon: float, lit: list[dict] | None = None) -> str | N
     return None
 
 
+def _previous_block_id(block: dict) -> str:
+    """Nombre de caché L2 anterior a los identificadores con coordenadas de cinco decimales."""
+    lat, lon = block["lat"], block["lon"]
+    ns, ew = ("n" if lat >= 0 else "s"), ("e" if lon >= 0 else "w")
+    prefix = "control" if block.get("reasons") == ["control"] else "cand"
+    return f"{prefix}_{ns}{abs(lat):07.3f}_{ew}{abs(lon):08.3f}"
+
+
 def load_fine(fine_dir: Path, level: int, selection: Path | None = None) -> list:
+    """Carga ventanas de la selección actual y descarta bloques L2 de otra posición o configuración."""
     directory = fine_dir / f"l{level}"
     if selection is None:
-        files = [(path, None) for path in sorted(directory.glob("*.json"))]
+        files = [([path], None) for path in sorted(directory.glob("*.json"))]
     else:
         field, key = ("tiles", "key") if level == 1 else ("blocks", "id")
         chosen = json.loads(selection.read_text(encoding="utf-8"))[field]
-        files = [(directory / f"{row[key]}.json", row) for row in chosen]
+        files = []
+        for row in chosen:
+            paths = [directory / f"{row[key]}.json"]
+            if level == 2:
+                previous = directory / f"{_previous_block_id(row)}.json"
+                if previous != paths[0]:
+                    paths.append(previous)
+            files.append((paths, row))
     out = []
-    for path, selected in files:
-        if not path.exists():
-            continue
-        data = json.loads(path.read_text(encoding="utf-8"))
-        if level == 1:
-            if selected is not None:
-                for row in data:
-                    row["control"] = bool(selected.get("control"))
-            out.extend(data)
-        elif selected is None or all(data.get(k) == selected[k] for k in ("lat", "lon", "body", "control")):
-            out.append(data)
+    for paths, selected in files:
+        for path in paths:
+            if not path.is_file():
+                continue
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if level == 1:
+                if selected is not None:
+                    for row in data:
+                        row["control"] = bool(selected.get("control"))
+                out.extend(data)
+                break
+            if selected is None or all(data.get(k) == selected[k] for k in ("lat", "lon", "body", "control")):
+                if selected is not None:
+                    data["block"] = selected["id"]
+                out.append(data)
+                break
     return out
 
 
@@ -413,11 +459,37 @@ def validate(pre: np.ndarray, lats, lons, control: np.ndarray | None) -> dict[st
     for name, la, lo, _, _ in VALIDATION:
         near = np.where(haversine_km(la, lo, lats, lons) < VALID_KM)[0]
         near = near[np.isfinite(pre[near])]
+        if control is not None:  # L1: puntuación 0 = sin padre L0 (p. ej. islas como Lanzarote): no cuenta
+            near = near[pre[near] > 0]
         if len(near) == 0 or len(ref) == 0:
             out[name] = None
             continue
         j = near[pre[near].argmax()]
         out[name] = round(float((ref < pre[j]).mean() * 100), 1)
+    return out
+
+
+def validate_fair(pre: np.ndarray, lats, lons, control: np.ndarray, n_max: int = 20000) -> dict[str, float | None]:
+    """Percentil fino "justo": la mejor ventana a < VALID_KM del análogo frente a la MEJOR ventana a
+    < VALID_KM de cada punto de control (y no frente a ventanas sueltas). En L1 hay ~75 ventanas en
+    50 km, así que comparar su máximo con valores sueltos infla el percentil. Los puntos de control
+    junto al borde de su tile tienen algo menos de vecinos escaneados: el sesgo que queda es pequeño."""
+    from scipy.spatial import cKDTree
+    la, lo = np.radians(np.asarray(lats, float)), np.radians(np.asarray(lons, float))
+    xyz = np.c_[np.cos(la) * np.cos(lo), np.cos(la) * np.sin(lo), np.sin(la)]
+    ok = np.isfinite(pre)
+    idx_ok = np.where(ok)[0]
+    tree = cKDTree(xyz[ok])
+    ctrl = np.where(control & ok)[0]
+    if len(ctrl) > n_max:  # submuestra fija para que sea rápido
+        ctrl = np.sort(np.random.default_rng(2026).choice(ctrl, n_max, replace=False))
+    chord = 2 * math.sin(VALID_KM / 6371.0 / 2)
+    M = np.array([pre[idx_ok[nb]].max() for nb in tree.query_ball_point(xyz[ctrl], chord)])
+    out = {}
+    for name, a_la, a_lo, _, _ in VALIDATION:
+        near = np.where(haversine_km(a_la, a_lo, lats, lons) < VALID_KM)[0]
+        near = near[np.isfinite(pre[near]) & (pre[near] > 0)]
+        out[name] = round(float((M < pre[near].max()).mean() * 100), 1) if len(near) and len(M) else None
     return out
 
 
@@ -435,9 +507,10 @@ def score_l0(body: str, refs0: list[dict], QX: np.ndarray, pct: Percentiles) -> 
 # ---------------------------------------------------------------- L1 y L2
 
 def l1_terrain(L: dict, QE: np.ndarray, pe: np.ndarray, S0: np.ndarray, chunk: int = 4000) -> dict:
-    """T(e, r) = sqrt(T1 · T0(padre(e), padre(r))) (T1 solo si falta un padre), reducido por ventana:
+    """T(e, r) = sqrt(T1 · T0(padre(e), padre(r))) (0 si falta un padre: sin dos escalas no hay terreno multiescala), reducido por ventana:
     máximo y su referencia, T0 y T1 de esa pareja y máximo por clave de gemelos."""
     QR, pcol, gcols = L["QR"], L["pcol"], L["gcols"]
+    rank = L.get("rank")  # referencias que entran en el máximo general (None = todas)
     n, K = len(QE), len(gcols)
     best = np.zeros(n, "float32")
     arg = np.zeros(n, int)
@@ -455,8 +528,8 @@ def l1_terrain(L: dict, QE: np.ndarray, pe: np.ndarray, S0: np.ndarray, chunk: i
             blk = T0[okw]
             blk[:, has_r] = sub
             T0[okw] = blk
-        T = np.where(np.isfinite(T0), np.sqrt(T1 * np.nan_to_num(T0)), T1)
-        j = T.argmax(axis=1)
+        T = np.where(np.isfinite(T0), np.sqrt(T1 * np.nan_to_num(T0)), 0.0)  # sin padre en algún nivel: no puntúa
+        j = (T if rank is None else np.where(rank[None, :], T, -1.0)).argmax(axis=1)
         rows = np.arange(len(T))
         best[a:a + chunk], arg[a:a + chunk] = T[rows, j], j
         t0b[a:a + chunk], t1b[a:a + chunk] = T0[rows, j], T1[rows, j]
@@ -473,7 +546,10 @@ def build_l1(body: str, refs: list[dict], L0: dict, feats: list[str]) -> dict | 
     keys = [twin_key(r) for r in refs1]
     kl = sorted(set(keys), key=keys.index)
     gcols = [np.array([j for j, k in enumerate(keys) if k == g]) for g in kl]
-    return {"refs": refs1, "pcol": pcol, "keys": keys, "key_list": kl, "gcols": gcols,
+    rank = np.array([not r.get("twin_only") for r in refs1])
+    twin_only_keys = {k for k, r in zip(keys, refs1) if r.get("twin_only")}
+    return {"refs": refs1, "pcol": pcol, "keys": keys, "key_list": kl, "gcols": gcols, "rank": rank,
+            "twin_only_keys": twin_only_keys,
             "R": np.array([vec({**r["features"], **(r.get("shape") or {})}, feats) for r in refs1])}
 
 
@@ -521,7 +597,13 @@ def run_l0(refs: list[dict], E) -> dict[str, dict]:
             raise SystemExit(f"Faltan referencias L0 usables para {body}; ejecuta analogs.references para ambos cuerpos")
         B = score_l0(body, refs0, E.Q, E.pct)
         S = B["S"]
-        B["t"], B["best"] = S.max(axis=1), S.argmax(axis=1)
+        # El ranking, el mapa de calor y la validación usan solo las referencias que puntúan; las de
+        # "solo gemelos" (Luna fuera del polo) solo cuentan para sus propios gemelos.
+        rc = np.flatnonzero([not r.get("twin_only") for r in refs0])
+        if not len(rc):
+            raise SystemExit(f"Faltan referencias L0 para el ranking global de {body}; los sitios solo para gemelos no puntúan")
+        B["rank_cols"] = rc
+        B["t"], B["best"] = S[:, rc].max(axis=1), rc[S[:, rc].argmax(axis=1)]
         B["pre"] = B["t"] ** 0.6 * E.surf ** 0.4
         B["key_max"] = {k: S[:, cols].max(axis=1) for k, cols in B["groups"].items()}
         # gemelos por clave: los mejores lugares de la Tierra para CADA clave de referencias
@@ -530,7 +612,8 @@ def run_l0(refs: list[dict], E) -> dict[str, dict]:
         # preselección con supresión de vecinos (para no listar 20 ventanas del mismo desierto)
         B["chosen"] = nms(B["pre"], E.lat, E.lon, SHORTLIST, NMS_KM)
         L0[body] = B
-        print(f"L0 {body}: {len(refs0)} referencias usables en {len(B['groups'])} claves de gemelos")
+        print(f"L0 {body}: {len(refs0)} referencias usables en {len(B['groups'])} claves de gemelos"
+              f" ({len(refs0) - len(rc)} solo para gemelos)")
     return L0
 
 
@@ -610,9 +693,10 @@ def _l1_body(body: str, W: list[dict], refs: list[dict], B0: dict, E) -> dict | 
         r = l1_terrain(L, QE, pe, B0["S"])
         r.update(QE=QE, L=L, feats=feats, pre=r["T"] ** 0.6 * surf[:, 0] ** 0.4)
         r["valid"] = validate(r["pre"], lat, lon, pop)
+        r["valid_fair"] = validate_fair(r["pre"], lat, lon, pop)
         res[name] = r
     # rasgos de forma: se adoptan si la media no baja y ningún análogo baja más de SHAPE_MAX_DROP
-    v6, v9 = res["6"]["valid"], res["9"]["valid"]
+    v6, v9 = res["6"]["valid_fair"], res["9"]["valid_fair"]  # decide con el percentil justo
     common = [n for n in v6 if v6[n] is not None and v9[n] is not None]
     m6 = float(np.mean([v6[n] for n in common])) if common else None
     m9 = float(np.mean([v9[n] for n in common])) if common else None
@@ -631,7 +715,7 @@ def _l1_body(body: str, W: list[dict], refs: list[dict], B0: dict, E) -> dict | 
     r["top"] = nms(r["pre"], lat, lon, TOP_N, NMS_KM)
     print(f"  {body}: {len(W)} ventanas ({control.sum()} de control), {len(L['refs'])} referencias L1 en "
           f"{len(L['key_list'])} claves; sin padre L0: {int((pe < 0).sum())} ventanas y "
-          f"{int((L['pcol'] < 0).sum())} referencias (en esas parejas T = T1)")
+          f"{int((L['pcol'] < 0).sum())} referencias (esas parejas no puntúan)")
     print(f"  {body}: rasgos de forma -> media de percentiles 6 rasgos {dec['mean_6']} / 9 rasgos {dec['mean_9']} "
           f"(peor cambio {dec['worst_change']}, {dec['n_analogs']} análogos): "
           f"{'SE ADOPTAN' if ok else 'no se adoptan'}")
@@ -656,7 +740,10 @@ def select_blocks(F1: dict, dest: Path) -> None:
     blocks: dict[tuple[float, float], dict] = {}
     for body, r in F1.items():
         seed: list[int] = []
-        for idx in r["twin_idx"].values():
+        skip = r["L"].get("twin_only_keys", set())  # L2 solo tiene referencias del polo sur
+        for key, idx in r["twin_idx"].items():
+            if key in skip:
+                continue
             if idx and (not seed or haversine_km(r["lat"][idx[0]], r["lon"][idx[0]], r["lat"][seed],
                                                  r["lon"][seed]).min() >= L2_NMS):
                 seed.append(idx[0])
@@ -820,7 +907,8 @@ def build_sites(L0: dict, F1: dict, F2: dict, E, refs_by_id: dict, clim: dict, c
             j, t, t0, t1 = int(r["arg"][i]), float(r["T"][i]), float(r["T0"][i]), float(r["T1"][i])
         else:  # gemelo de la clave g: la mejor pareja con las referencias de esa clave
             cols = L["gcols"][g]
-            sub = l1_terrain({**L, "QR": L["QR"][cols], "pcol": L["pcol"][cols], "gcols": [np.arange(len(cols))]},
+            sub = l1_terrain({**L, "QR": L["QR"][cols], "pcol": L["pcol"][cols], "gcols": [np.arange(len(cols))],
+                              "rank": None},
                              r["QE"][i:i + 1], r["pe"][i:i + 1], L0[body]["S"])
             j, t, t0, t1 = int(cols[sub["arg"][0]]), float(sub["T"][0]), float(sub["T0"][0]), float(sub["T1"][0])
         w, ref, pe = r["W"][i], L["refs"][j], int(r["pe"][i])
@@ -833,6 +921,8 @@ def build_sites(L0: dict, F1: dict, F2: dict, E, refs_by_id: dict, clim: dict, c
                                                 "km": round(float(r["pe_km"][i]), 1)},
              "levels": {"L1": {**ll, "best_ref": ref["id"]}},
              "features": w[body]["features"], "shape": w[body].get("shape"), "cover": w.get("cover")}
+        if pe >= 0:  # ventana L0 (30 km) del escaneo que contiene a esta, para comparar también a esa escala
+            d["levels"]["L0"] = {**{k: d["parent_L0"][k] for k in ("lat", "lon")}, "best_ref": ref.get("parent")}
         return finish(body, d, t, float(r["surf"][i, 0]), bool(r["surf"][i, 1]))
 
     def site_l2(body: str, x: dict) -> dict:
@@ -850,6 +940,11 @@ def build_sites(L0: dict, F1: dict, F2: dict, E, refs_by_id: dict, clim: dict, c
         if x["i1"] is not None:
             F = F1[body]
             d["levels"]["L1"] = {"lat": float(F["lat"][x["i1"]]), "lon": float(F["lon"][x["i1"]]), "best_ref": r1}
+            pe = int(F["pe"][x["i1"]])
+            if pe >= 0:
+                d["parent_L0"] = {"lat": float(E.lat[pe]), "lon": float(E.lon[pe])}
+                d["best_ref_L0"] = refs_by_id[r1].get("parent") if r1 else None
+                d["levels"]["L0"] = {**d["parent_L0"], "best_ref": d["best_ref_L0"]}
         return finish(body, d, x["T"], x["S"], x["assumed"])
 
     def order(s):
@@ -905,10 +1000,11 @@ def print_sites(bodies: dict) -> None:
                     print(line(s, k))
 
 
-def validation_table(before: dict, after: dict, fine: dict) -> tuple[list, list]:
+def validation_table(before: dict, after: dict, fine: dict, fine_fair: dict | None = None) -> tuple[list, list]:
+    fine_fair = fine_fair or {}
     print("\n== Validación (percentil de la mejor ventana a <50 km; L0 entre todas las ventanas, "
-          "fino L1 entre las de control)")
-    print(f"  {'cuerpo':6s} {'análogo':32s} {'antes':>6s} {'después':>8s} {'delta':>6s} {'fino L1':>8s}")
+          "fino L1 entre las de control; 'L1 justo' frente a la mejor ventana a <50 km de cada punto de control)")
+    print(f"  {'cuerpo':6s} {'análogo':32s} {'antes':>6s} {'después':>8s} {'delta':>6s} {'fino L1':>8s} {'L1 justo':>9s}")
 
     def f(x):
         return f"{x:6.1f}" if x is not None else "     —"
@@ -918,14 +1014,15 @@ def validation_table(before: dict, after: dict, fine: dict) -> tuple[list, list]
             b0 = (before.get(body) or {}).get(name)
             a0 = after[body].get(name)
             f0 = (fine.get(body) or {}).get(name)
+            ff = (fine_fair.get(body) or {}).get(name)
             delta = round(a0 - b0, 1) if a0 is not None and b0 is not None else None
             v = {"body": body, "name": name, "lat": la, "lon": lo, "percentile": a0,
-                 "before": b0, "after": a0, "delta": delta, "fine": f0}
+                 "before": b0, "after": a0, "delta": delta, "fine": f0, "fine_fair": ff}
             if a0 is None:  # la app espera un número en "percentile"
                 v["note"] = f"sin ventana a <{VALID_KM} km"
             (ok if a0 is not None else missing).append(v)
             print(f"  {body:6s} {name[:32]:32s} {f(b0)} {f(a0):>8s} "
-                  f"{(f'{delta:+6.1f}' if delta is not None else f(None))} {f(f0):>8s}"
+                  f"{(f'{delta:+6.1f}' if delta is not None else f(None))} {f(f0):>8s} {f(ff):>9s}"
                   f"{'   sin ventana a <50 km' if a0 is None else ''}")
         vals = [x for x in ok if x["body"] == body and x["before"] is not None]
         if vals:
@@ -941,9 +1038,13 @@ def check_featured(bodies: dict) -> list[dict]:
         if not tw:
             print(f"AVISO: historia destacada '{f['title']}': no existe la clave de gemelos '{f['ref']}'; se quita")
             continue
-        dmin = min(float(haversine_km(f["lat"], f["lon"], s["lat"], s["lon"])) for s in tw)
+        B = bodies[f["body"]]
+        fine = B.get("fine") or {}
+        pool = [*tw, *B["sites"], *(fine.get("final") or []), *(fine.get("sites") or [])]
+        pool.extend(s for matches in (fine.get("twins") or {}).values() for s in matches)
+        dmin = min(float(haversine_km(f["lat"], f["lon"], s["lat"], s["lon"])) for s in pool)
         if dmin > 0.1:
-            print(f"AVISO: historia destacada '{f['ref']}': el gemelo más cercano está a {dmin:.1f} km; se quita")
+            print(f"AVISO: historia destacada '{f['ref']}': el sitio más cercano está a {dmin:.1f} km; se quita")
             continue
         out.append(f)
     return out
@@ -977,7 +1078,13 @@ def main(argv=None) -> None:
     L0 = run_l0(refs, E)
     before = {}
     refs_before = REFS_BEFORE if REFS_BEFORE.exists() else REFS_V1
-    legacy_refs = json.loads(refs_before.read_text(encoding="utf-8")) if refs_before.exists() else []
+    if refs_before.is_file():
+        legacy_refs = json.loads(refs_before.read_text(encoding="utf-8"))
+    elif APP_RESULTS.is_file():
+        published = json.loads(APP_RESULTS.read_text(encoding="utf-8"))
+        legacy_refs = published.get("legacy_references", published["references"] if not published.get("version") else [])
+    else:
+        legacy_refs = []
     if legacy_refs:
         before = v1_validation(E.rows, legacy_refs, E.surf, E.lat, E.lon)
     else:
@@ -992,8 +1099,8 @@ def main(argv=None) -> None:
         F1 = run_l1(l1, refs, L0, E)
         if F1:
             select_blocks(F1, sel_dir / "fine_l2_blocks.json")
-    l2_selection = sel_dir / "fine_l2_blocks.json" if F1 else None
-    l2 = load_fine(fine_dir, 2, l2_selection)
+    l2_selection = sel_dir / "fine_l2_blocks.json"
+    l2 = load_fine(fine_dir, 2, l2_selection if l2_selection.is_file() else None)
     F2 = {}
     if l2:
         print(f"\n== L2: {len(l2)} bloques de {fine_dir / 'l2'}")
@@ -1002,7 +1109,8 @@ def main(argv=None) -> None:
     clim = get_climate(climate_points(L0, F1, F2, E), a.no_climate, a.climate_budget)
     bodies = build_sites(L0, F1, F2, E, refs_by_id, clim, climate_scores, lit)
     print_sites(bodies)
-    valid, missing = validation_table(before, after, {b: r["valid"] for b, r in F1.items()})
+    valid, missing = validation_table(before, after, {b: r["valid"] for b, r in F1.items()},
+                                      {b: r.get("valid_fair") for b, r in F1.items()})
 
     groups = group_info(refs)
     out_refs = [{**r, "twin_key": twin_key(r), "note": r.get("note") or r.get("source_note") or ""}
@@ -1012,7 +1120,21 @@ def main(argv=None) -> None:
             out_refs.append({"id": k, "body": g["body"], "level": "L0", "kind": "grupo", "name": g["name"],
                              "note": f"Grupo de {g['n_refs']} referencias L0 (ver reference_points).",
                              "features": None, "usable": True, "group_only": True})
-    out = {"version": 2, "references_version": version, "references": out_refs,
+    # Referencias L1/L2 que aparecen como mejor pareja de algún sitio mostrado: la app las necesita para
+    # la tabla de rasgos de cada escala (references solo lleva las L0, que son las que se dibujan en los globos).
+    used = set()
+    for B in bodies.values():
+        pools = [B["sites"], *B["twins"].values()]
+        fine = B.get("fine") or {}
+        pools += [fine.get("sites") or [], fine.get("final") or [], *(fine.get("twins") or {}).values()]
+        for lst in pools:
+            for x in lst:
+                used.update(v.get("best_ref") for v in (x.get("levels") or {}).values())
+                used.update((x.get("best_ref_L1"), x.get("best_ref_L2")))
+    keep = ("id", "body", "level", "group", "region", "name", "lat", "lon", "kind", "parent", "window_km", "px_m",
+            "source_url", "source_note", "coord_quality", "features", "shape", "quality", "usable", "usable_note")
+    refs_fine = [{k: r.get(k) for k in keep} for r in refs if r["level"] != "L0" and r["id"] in used]
+    out = {"version": 2, "references_version": version, "references": out_refs, "references_fine": refs_fine,
            "feature_labels": {k: feature_labels(SCALES[("moon", "L0")][1])[k] for k in FEATURES},
            "bodies": bodies, "validation": valid, "validation_no_window": missing,
            **({"legacy_references": legacy_refs} if legacy_refs else {}),

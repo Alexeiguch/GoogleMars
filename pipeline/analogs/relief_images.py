@@ -8,7 +8,7 @@ ventana y el MISMO píxel, y el píxel nunca más fino que el dato más grueso d
 | L1    | 10 km a 120 m (GLO-90)        | 10 km a 200 m (GLO-90)                            |
 | L2    | 5 km a 60 m (GLO-30)          | 2 km a 30 m (GLO-30 frente al parche HiRISE)      |
 
-Luna: LOLA 40 m de Barker et al. 2023 (dem_io.sample_moon). Marte L0/L1: blend HRSC+MOLA 200 m
+Luna: LOLA 40 m de Barker et al. 2023 en el polo sur (dem_io.sample_moon) y SLDEM2015 (59 m) fuera del polo. Marte L0/L1: blend HRSC+MOLA 200 m
 (dem_io.sample_mars). Marte L2: parche HiRISE del visor (public/terrain/<id>.f32, 100×100 a 20 m,
 fila 0 = norte) remuestreado a 30 m (67 px). Tierra: dem_io.sample_earth. Mismo sombreado para
 todos (sol desde el noroeste a 45°, gradiente con el píxel real). Las imágenes pequeñas
@@ -140,6 +140,9 @@ def sample_hirise(pid: str, window_km: float = 2.0, px: float = 30.0) -> np.ndar
 def sample_ref(body: str, level: str, rid: str, lat: float | None, lon: float | None) -> np.ndarray | None:
     win, px = SCALES[(body, level)]
     if body == "moon":
+        # Polo sur (80–90°S): LOLA PGDA 40 m. Fuera del polo (60°S–60°N): SLDEM2015 (59 m).
+        if lat > -60:
+            return dem_io.sample_moon_sldem(lat, lon, win, px)
         return dem_io.sample_moon(lat, lon, win, px)
     if level == "L2":
         return sample_hirise(rid, win, px)

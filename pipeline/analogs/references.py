@@ -25,7 +25,7 @@ reanudar). data/references.json (v1) no se toca.
 Ejecutar desde pipeline/:
   python -m analogs.references                       # todo -> data/references_v2.json
   python -m analogs.references --solo luna --limite 5 --salida <ruta>   # prueba
-Opciones: --solo luna|marte|hirise (repetible), --limite N (primeras N ventanas por cuerpo y
+Opciones: --solo luna|luna_np|marte|hirise (repetible), --limite N (primeras N ventanas por cuerpo y
 nivel), --hilos K (lecturas simultáneas por servidor, ≤ 8), --salida RUTA.
 """
 
@@ -44,8 +44,9 @@ from pathlib import Path
 import numpy as np
 
 from . import dem_io
-from .reference_sites import (MARS_R_KM, MARS_SITES, MOON_R_KM, MOON_REGIONS, MOON_SITES, haversine_km,
-                              mars_site_tiles, moon_polar_grid, region_tiles, regions_containing)
+from .reference_sites import (MARS_R_KM, MARS_SITES, MOON_NONPOLAR_SITES, MOON_R_KM, MOON_REGIONS, MOON_SITES,
+                              haversine_km, mars_site_tiles, moon_polar_grid, moon_site_tiles, region_tiles,
+                              regions_containing)
 from .terrain import FEATURES, SHAPE_FEATURES, shape_features, terrain_features
 
 # Constantes de la v1 para el mapa publicado y la autoprueba de dem_io.
@@ -67,7 +68,7 @@ SCALES = {("moon", "L0"): (30, 400), ("moon", "L1"): (10, 120), ("moon", "L2"): 
           ("mars", "L0"): (30, 400), ("mars", "L1"): (10, 200), ("mars", "L2"): (2, 30)}
 BIG_REGION_KM = 40        # regiones mayores: también teselas de 30 km en L0
 L2_MAX_EXTENT_KM = 20     # L2 de la Luna: solo el cuadrado central de 20 km de cada región
-PARENT_KM = 21            # padre L0 de una ventana L1/L2: el centro L0 más cercano a < 21 km
+PARENT_KM = 32            # padre L0 de una ventana L1/L2: el centro L0 más cercano a < 32 km (malla L0 de 30 km: hasta ~21 km dentro y algo más en el borde de 84°S)
 HIRISE_PARENT_KM = 100    # padre de un parche HiRISE: sitio de Marte a < 100 km
 HIRISE_N, HIRISE_PX = 100, 20.0
 MOON_THREADS = 4          # la Luna se lee del disco: no cuenta para el límite por servidor
@@ -209,6 +210,51 @@ def moon_usable(spec: dict, v: dict) -> tuple[bool, str]:
     if "no_verificada" in cq or cq.startswith("punto_") or cq.startswith("lat_gsfc"):
         notas.append(f"posición no verificada ({cq})")
     return ok, "; ".join(notas)
+
+
+# ---------------------------------------------------------------- Luna fuera del polo (SLDEM2015)
+# Solo gemelos (twin_only): no entran en el ranking ni en la validación del polo sur. L0 (30 km a 400 m)
+# y L1 (3×3 teselas de 10 km a 120 m); SLDEM2015 tiene 59 m reales (LOLA + estéreo Kaguya TC).
+
+def _np_spec(level: str, s: dict, t: dict | None = None, k: int | None = None) -> dict:
+    extra = dict(subgroup=s["subgroup"], dem="sldem", twin_only=True)
+    if t is None:
+        return _spec("moon", level, s["id"], s["group"], None, s["name"], s["lat"], s["lon"], "sitio",
+                     s["source_url"], s["source_note"], s["coord_quality"], **extra)
+    nota = (f"{t['source']} ({t['east_km']:+.0f} km E, {t['north_km']:+.0f} km N del sitio). "
+            f"Hereda la fuente del sitio {s['id']}: {s['source_note']}")
+    return _spec("moon", level, t["id"], s["group"], None, f"{s['name']} · tesela {k}", t["lat"], t["lon"],
+                 "sitio_tesela", s["source_url"], nota, "derivada_de_sitio", **extra)
+
+
+def sldem_values(spec: dict) -> dict:
+    w, px = spec["window_km"], spec["px_m"]
+    z = dem_io.sample_moon_sldem(spec["lat"], spec["lon"], w, px)
+    v = _feats(z, px, spec["level"] != "L0")
+    v["quality"] = {"dem": "SLDEM2015 (LOLA + Kaguya TC)", "dem_px_m": 59.2}
+    return v
+
+
+def compute_moon_np(log, limit: int | None = None) -> tuple[list[dict], dict[str, dict]]:
+    """Por sitio (cada lectura usa hasta MAX_PER_SERVER hilos al USGS); las teselas salen del mismo recorte."""
+    specs, res, t0 = [], {}, time.time()
+    sites = MOON_NONPOLAR_SITES[:limit]
+    l1_count = 0
+    for i, s in enumerate(sites):
+        t = time.time()
+        sp = _np_spec("L0", s)
+        res[sp["id"]] = _run(sp, sldem_values)
+        specs.append(sp)
+        for k, tt in enumerate(moon_site_tiles(s, 10, 3)):
+            if limit is not None and l1_count >= limit:
+                break
+            l1_count += 1
+            ts = _np_spec("L1", s, tt, k)
+            res[ts["id"]] = _run(ts, sldem_values)
+            specs.append(ts)
+        log(f"  Luna fuera del polo {i + 1:2d}/{len(sites)} {s['id']:28s} "
+            f"({time.time() - t:.1f} s; total {time.time() - t0:.0f} s)")
+    return specs, res
 
 
 # ---------------------------------------------------------------- Marte
@@ -368,7 +414,11 @@ def _assign_parents(refs: list[dict]) -> None:
 
 
 def _finish(spec: dict, v: dict) -> dict:
-    if spec["body"] == "moon":
+    if spec.get("dem") == "sldem":
+        usable = v["features"] is not None
+        note = ("SLDEM2015 (59 m). Solo gemelos: no entra en el ranking ni en la validación del polo sur"
+                if usable else f"más del 10 % de la ventana sin dato ({v['nan_frac']:.0%})")
+    elif spec["body"] == "moon":
         usable, note = moon_usable(spec, v)
     elif spec["kind"] == "hirise":
         usable = v["features"] is not None
@@ -440,7 +490,7 @@ def _summary(refs: list[dict], log) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Referencias v2 de la Luna y Marte (L0, L1, L2).")
-    ap.add_argument("--solo", action="append", choices=["luna", "marte", "hirise"],
+    ap.add_argument("--solo", action="append", choices=["luna", "luna_np", "marte", "hirise"],
                     help="calcula solo esta parte (repetible); por defecto, todo")
     ap.add_argument("--limite", type=int, default=None, help="prueba: primeras N ventanas por cuerpo y nivel")
     ap.add_argument("--hilos", type=int, default=8, help="lecturas simultáneas por servidor (≤ 8)")
@@ -460,7 +510,7 @@ def main() -> None:
         print(f"Escrito {dest} ({len(refs)} referencias publicadas)")
         return
     args.salida = args.salida or OUT
-    partes = set(args.solo or ["luna", "marte", "hirise"])
+    partes = set(args.solo or ["luna", "luna_np", "marte", "hirise"])
     if args.salida.resolve() == (DATA / "references.json").resolve():
         raise SystemExit("data/references.json es la v1 y no se sobrescribe")
     dem_io.set_max_per_server(args.hilos)
@@ -487,6 +537,13 @@ def main() -> None:
         vals.update(compute_moon(ms, log))
         specs += ms
         times["luna"] = time.time() - t
+    if "luna_np" in partes:
+        t = time.time()
+        log(f"Luna fuera del polo: {len(MOON_NONPOLAR_SITES)} sitios (L0 y L1) con SLDEM2015")
+        ns, nv = compute_moon_np(log, args.limite)
+        specs += ns
+        vals.update(nv)
+        times["luna_np"] = time.time() - t
     if "marte" in partes:
         t = time.time()
         sites = MARS_SITES[:args.limite] if args.limite else MARS_SITES

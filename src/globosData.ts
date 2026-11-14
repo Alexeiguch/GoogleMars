@@ -7,7 +7,19 @@ import { getLang, locale, t } from "./i18n";
 export type Body = "moon" | "mars";
 export type GlobeId = "moon" | "earth" | "mars";
 type Climate = { t_mean: number; t_min: number; t_max: number; diurnal_range: number; precip_year: number };
-export type Reference = { id: string; body: Body; name: string; lat: number; lon: number; note: string; twin_key?: string };
+export type Reference = {
+  id: string; body: Body; name: string; lat: number; lon: number; note: string;
+  /** results.json v2: tipo de referencia ("sitio", "region_centro", "region_tesela", "malla"…), región y grupo. */
+  kind?: string;
+  twin_key?: string;
+  region?: string | null;
+  group?: string;
+  /** false: no puntúa (p. ej. en Marte solo hay MOLA de 463 m); usable_note explica por qué, en español. */
+  usable?: boolean;
+  usable_note?: string;
+  source_url?: string;
+  window_km?: number;
+};
 export type EarthSite = {
   lat: number; lon: number; score: number;
   scores: { terrain: number; surface: number; climate: number };
@@ -29,9 +41,36 @@ export const DATA = rawResults as unknown as Results;
 export const BODIES: Body[] = ["moon", "mars"];
 export const bodyName = (id: GlobeId) => t(`planet.${id}`);
 
+/**
+ * Clave con la que results.json v2 guarda los gemelos de una referencia (bodies[b].twins[clave]).
+ * Misma regla que twin_key() en pipeline/analogs/rank.py: en Marte, el id; en la Luna, "malla_polar" para la malla,
+ * el id para los sitios sueltos (o sin región) y la región para las teselas de una región de Artemis.
+ * Nobile Rim 1 comparte mosaico con Mons Mouton y puntúa junto con ella.
+ */
+export function twinKeyOf(ref: Reference): string {
+  if (ref.twin_key) return ref.twin_key;
+  if (ref.body === "mars") return ref.id;
+  if (ref.id === "nobile_rim_1") return "mons_mouton";
+  if (ref.group === "malla_polar") return "malla_polar";
+  if (ref.kind === "sitio" || !ref.region) return ref.id;
+  return ref.region;
+}
+
+/** Gemelos terrestres de una referencia (vacío si no puntúa). */
+export function twinsOf(ref: Reference): EarthSite[] {
+  if (ref.usable === false) return [];
+  return DATA.bodies[ref.body].twins[twinKeyOf(ref)] ?? [];
+}
+
+/**
+ * Referencias que se ven en «Mejores»: los sitios y los centros de región. La malla polar de la Luna y las teselas
+ * de cada región (más de cien rombos sobre el polo sur) solo salen en «Todos» o al elegirlas en el filtro.
+ */
+export const isHeadlineRef = (ref: Reference) => ref.kind !== "malla" && ref.kind !== "region_tesela";
+
 export type EarthRole =
   | { kind: "site"; body: Body; rank: number }
-  | { kind: "twin"; body: Body; ref: string; rank: number }
+  | { kind: "twin"; body: Body; ref: string; rank: number; site: EarthSite }
   | { kind: "featured"; body: Body; ref: string; tag: string; title: string; story: string }
   | { kind: "validation"; body: Body; name: string; percentile: number }
   | { kind: "catalog"; origin: "curated" | "global"; name: string; site: Site };
@@ -56,8 +95,11 @@ const keyOf = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(2)}
 export const globeReferences = DATA.references.filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon));
 export const refById = new Map(globeReferences.map((r) => [r.id, r]));
 
-/** Puntaje mínimo (0–100) para que un punto de la Tierra salga en «Mejores». */
-export const BEST_MIN_SCORE = 80;
+/**
+ * Puntaje mínimo (0–100) para que un punto de la Tierra salga en «Mejores», por cuerpo: la Luna puntúa más bajo
+ * (su terreno es más abrupto que casi toda la Tierra y el clima nunca se le parece), su máximo actual es 82.
+ */
+export const BEST_MIN_SCORE: Record<Body, number> = { moon: 80, mars: 85 };
 
 export function buildEarthPoints(): EarthPoint[] {
   const points = new Map<string, EarthPoint>();
@@ -80,8 +122,9 @@ export function buildEarthPoints(): EarthPoint[] {
     for (const [ref, twins] of Object.entries(DATA.bodies[body].twins)) {
       twins.forEach((site, index) => {
         const point = at(site.lat, site.lon);
-        point.roles.push({ kind: "twin", body, ref, rank: index + 1 });
-        point.data[body] ??= site;
+        point.roles.push({ kind: "twin", body, ref, rank: index + 1, site });
+        const hasOverallRank = point.roles.some((role) => role.kind === "site" && role.body === body);
+        if (!hasOverallRank && (!point.data[body] || site.score > point.data[body]!.score)) point.data[body] = site;
       });
     }
   }
@@ -95,10 +138,14 @@ export function buildEarthPoints(): EarthPoint[] {
   }
 
   for (const point of points.values()) {
-    // «Mejores»: top 20, gemelo o historia destacada, y además con puntaje de BEST_MIN_SCORE o más
+    // «Mejores»: top 20, gemelo o historia destacada, y además con el puntaje mínimo de su cuerpo o más
     // (redondeado como se muestra en la página, para que un 80 en pantalla cuente).
     const listed = point.roles.some((r) => r.kind === "site" || r.kind === "twin" || r.kind === "featured");
-    const strong = BODIES.some((b) => point.data[b] && Math.round(point.data[b]!.score * 100) >= BEST_MIN_SCORE);
+    const strong = BODIES.some((body) => {
+      const threshold = BEST_MIN_SCORE[body];
+      return Math.round((point.data[body]?.score ?? 0) * 100) >= threshold || point.roles.some((role) =>
+        role.kind === "twin" && role.body === body && Math.round(role.site.score * 100) >= threshold);
+    });
     point.best = listed && strong;
     point.color = colorBody(point);
     point.name = earthName(point);

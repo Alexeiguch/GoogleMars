@@ -1,10 +1,28 @@
-// Botones de idioma (ES/EN) y tema (claro/oscuro) en la cabecera de las dos páginas.
+// Botones de idioma (ES/EN) y tema (claro/oscuro) e insignia del reto en la cabecera de las tres páginas.
 // El tema y el idioma iniciales los fija el script en línea del <head> para que no haya parpadeo.
 import { applyStatic, getLang, onLangChange, setLang, t, type Lang } from "./i18n";
 
 type Theme = "light" | "dark";
 const THEME_KEY = "analogs-theme";
-const THEME_COLOR: Record<Theme, string> = { dark: "#171719", light: "#f6f4f1" };
+const THEME_COLOR: Record<Theme, string> = { dark: "#151517", light: "#f4f1ec" };
+
+/**
+ * Textos de interfaz nuevos de cada página (introducción, títulos de sección…) que no están en i18n.ts.
+ * Rellena los elementos con data-ui="clave" y los vuelve a pintar al cambiar de idioma.
+ * {nombre} se sustituye por params[nombre].
+ */
+export type UiText = Record<Lang, Record<string, string>>;
+export function bindUiText(dict: UiText, params: Record<string, string | number> = {}) {
+  const apply = () => {
+    const strings = dict[getLang()];
+    for (const el of document.querySelectorAll<HTMLElement>("[data-ui]")) {
+      const text = strings[el.dataset.ui!];
+      if (text != null) el.textContent = text.replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? ""));
+    }
+  };
+  apply();
+  onLangChange(apply);
+}
 
 const root = document.documentElement;
 const currentTheme = (): Theme => (root.dataset.theme === "light" ? "light" : "dark");
@@ -30,6 +48,25 @@ box.innerHTML = `
   <button type="button" class="theme-toggle">${sun}${moon}</button>`;
 document.querySelector(".masthead")?.append(box);
 
+// Insignia de la NASA junto al título, como contexto del reto (no implica respaldo de la NASA).
+// Sus textos viven aquí y no en i18n.ts para no tocar el diccionario compartido.
+const BRAND_TEXT: Record<Lang, { lead: string; event: string }> = {
+  es: { lead: "Proyecto para", event: "NASA Space Apps Challenge 2026" },
+  en: { lead: "Built for", event: "NASA Space Apps Challenge 2026" },
+};
+const brand = document.createElement("p");
+brand.className = "brand-event";
+brand.innerHTML = `
+  <img class="brand-event__logo" src="${import.meta.env.BASE_URL}brand/nasa-logo.svg" alt="NASA" width="43" height="36" decoding="async">
+  <span class="brand-event__text"><span class="brand-event__lead"></span> <span class="brand-event__name"></span></span>`;
+document.querySelector(".masthead h1")?.after(brand);
+
+function syncBrand() {
+  const text = BRAND_TEXT[getLang()];
+  brand.querySelector(".brand-event__lead")!.textContent = text.lead;
+  brand.querySelector(".brand-event__name")!.textContent = text.event;
+}
+
 const langButtons = box.querySelectorAll<HTMLButtonElement>("[data-lang]");
 const themeButton = box.querySelector<HTMLButtonElement>(".theme-toggle")!;
 
@@ -46,8 +83,9 @@ function syncTheme() {
 
 for (const button of langButtons) button.addEventListener("click", () => setLang(button.dataset.lang as Lang));
 themeButton.addEventListener("click", () => setTheme(currentTheme() === "dark" ? "light" : "dark"));
-onLangChange(() => { syncLang(); syncTheme(); });
+onLangChange(() => { syncLang(); syncTheme(); syncBrand(); });
 
 applyStatic();
 syncLang();
 syncTheme();
+syncBrand();

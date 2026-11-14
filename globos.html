@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#171719">
+    <meta name="theme-color" content="#151517">
     <script>
       // Idioma y tema antes de pintar (sin parpadeo). Ver src/prefs.ts e src/i18n.ts.
       (function () {
@@ -28,6 +28,7 @@
       </header>
 
       <div class="gl-toolbar">
+        <h2 class="gl-title" data-i18n="nav.globes">Globos 3D</h2>
         <div class="gl-mode">
           <div class="gl-seg" role="group" aria-label="Puntos que se muestran" data-i18n-attr="aria-label:gl.modeLabel">
             <button type="button" data-mode="best" aria-pressed="true" data-i18n="gl.best">Mejores</button>
@@ -72,6 +73,14 @@
       </div>
     </main>
     <footer id="sources" class="gl-footer">
+      <section class="gl-about intro">
+        <p class="intro__lede" data-ui="intro.lede"></p>
+        <dl class="intro__figures">
+          <div class="fig fig--moon"><dt data-ui="intro.figMoon"></dt><dd id="fig-moon"></dd></div>
+          <div class="fig fig--mars"><dt data-ui="intro.figMars"></dt><dd id="fig-mars"></dd></div>
+          <div class="fig fig--earth"><dt data-ui="intro.figPatches"></dt><dd id="fig-patches"></dd></div>
+        </dl>
+      </section>
       <h2 data-i18n="sources.title">Fuentes de datos</h2>
       <ul id="source-list"></ul>
       <p class="gl-howto" data-i18n="gl.howto">Arrastra un globo para girarlo; usa la rueda o pellizca con dos dedos para acercar. Los globos se dibujan del mismo tamaño: el radio real va en la etiqueta de cada uno.</p>

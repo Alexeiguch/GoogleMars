@@ -5,7 +5,7 @@ import "@fontsource/barlow/latin-500.css";
 import "@fontsource/barlow/latin-600.css";
 import "./style.css";
 import "./globos.css";
-import "./prefs";
+import { bindUiText, type UiText } from "./prefs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadGlobeTexture } from "./globeTexture";
@@ -13,12 +13,49 @@ import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { categoryLabel, type Site } from "./data";
-import { locale, onLangChange, t, tr } from "./i18n";
+import { getLang, locale, onLangChange, t, tr } from "./i18n";
 import {
-  BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, globeReferences, marsPatches, refById, topSite,
+  BEST_MIN_SCORE, BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, globeReferences, isHeadlineRef, marsPatches,
+  refById, topSite, twinKeyOf, twinsOf,
   windowName, type Body, type EarthPoint, type EarthRole, type GlobeId, type Reference,
 } from "./globosData";
 import { TileLayer, direction, type TileLayerOptions } from "./tiles";
+
+// ---------------------------------------------------------------------------------------------
+// Franja de introducción: textos propios de esta página (no están en i18n.ts) y cifras de los datos ya cargados.
+
+const UI_TEXT: UiText = {
+  es: {
+    "intro.lede": "La Luna, la Tierra y Marte, dibujados del mismo tamaño. Los puntos de la Tierra son los lugares que más se parecen a los sitios de referencia de la Luna y de Marte: elige uno para ver su ficha y sus gemelos.",
+    "intro.figMoon": "sitios de referencia en la Luna",
+    "intro.figMars": "sitios de referencia en Marte",
+    "intro.figPatches": "puntos de la Tierra comparados",
+  },
+  en: {
+    "intro.lede": "The Moon, Earth and Mars, drawn at the same size. The points on Earth are the places that best match the Moon and Mars reference sites: pick one to see its details and its twins.",
+    "intro.figMoon": "Moon reference sites",
+    "intro.figMars": "Mars reference sites",
+    "intro.figPatches": "Earth points compared",
+  },
+};
+bindUiText(UI_TEXT);
+/**
+ * Aviso de la ficha de una referencia sin puntuar (results.json: usable=false). En Marte la causa es siempre la misma
+ * (solo hay MOLA de 463 m) y se explica en llano; en la Luna se añade usable_note tal cual.
+ */
+const UNSCORED = {
+  es: { title: "No puntúa.", mars: "Aquí solo hay relieve MOLA de 463 m, demasiado grueso para compararlo a 400 m: este sitio no tiene gemelos en la Tierra." },
+  en: { title: "Not scored.", mars: "Only 463 m MOLA relief is available here, too coarse to compare at 400 m, so this site has no Earth twins." },
+} as const;
+const earthPoints = buildEarthPoints();
+function renderIntroFigures() {
+  const count = (body: Body) => globeReferences.filter((r) => r.body === body).length;
+  document.querySelector("#fig-moon")!.textContent = String(count("moon"));
+  document.querySelector("#fig-mars")!.textContent = String(count("mars"));
+  document.querySelector("#fig-patches")!.textContent = earthPoints.length.toLocaleString(locale());
+}
+renderIntroFigures();
+onLangChange(renderIntroFigures);
 
 // ---------------------------------------------------------------------------------------------
 // Constantes
@@ -148,7 +185,7 @@ for (const patch of marsPatches) {
     raw: patch.name, named: true, shape: Shape.Disc, size: SIZE.patch, color: rgb(PATCH_COLOR), priority: 1, patch,
   });
 }
-for (const point of buildEarthPoints()) {
+for (const point of earthPoints) {
   const has = (kind: EarthRole["kind"]) => point.roles.some((r) => r.kind === kind);
   const [shape, size, priority] = has("featured") ? [Shape.Star, SIZE.featured, 4]
     : point.best ? [Shape.Disc, SIZE.site, 3]
@@ -185,30 +222,31 @@ const earthKey = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(
 // Estado
 
 type Mode = "best" | "all";
+type TwinRole = Extract<EarthRole, { kind: "twin" }>;
 let mode: Mode = "best";
 let refFilter: string | null = null;
 let selected: Item | null = null;
+let selectedEarthTwin: TwinRole | undefined;
 let highlighted = new Set<Item>();
 
-function matchesRef(point: EarthPoint, refId: string) {
-  const ref = refById.get(refId)!;
-  return point.data[ref.body]?.best_ref === refId ||
-    point.roles.some((r) => r.kind === "twin" && r.body === ref.body && r.ref === (ref.twin_key ?? refId));
+function twinRoleOf(point: EarthPoint, ref: Reference) {
+  if (ref.usable === false) return undefined;
+  const key = twinKeyOf(ref);
+  return point.roles.find((role): role is TwinRole => role.kind === "twin" && role.body === ref.body && role.ref === key);
 }
 
 function isVisible(item: Item) {
   switch (item.kind) {
-    case "ref": return !refFilter || item.ref!.id === refFilter;
+    case "ref": return highlighted.has(item) || (refFilter ? item.ref!.id === refFilter : mode === "all" || isHeadlineRef(item.ref!));
     case "patch": return mode === "all" && !refFilter;
     case "heat": return mode === "all" && !refFilter;
     case "earth": {
       const point = item.earth!;
       if (refFilter) {
-        if (!matchesRef(point, refFilter)) return false;
-        // Con un sitio elegido se ven siempre sus 3 gemelos, aunque no lleguen al puntaje de «Mejores».
         const ref = refById.get(refFilter)!;
-        return mode === "all" || point.best ||
-          point.roles.some((r) => r.kind === "twin" && r.body === ref.body && r.ref === (ref.twin_key ?? refFilter));
+        // Los gemelos de la referencia siguen visibles aunque no lleguen al puntaje de «Mejores».
+        if (twinRoleOf(point, ref)) return true;
+        return (mode === "all" || point.best) && point.data[ref.body]?.best_ref === refFilter;
       }
       return mode === "all" || point.best;
     }
@@ -745,7 +783,7 @@ function bestBody(point: EarthPoint): Body | null {
 }
 
 function twinItemsOf(ref: Reference) {
-  return (DATA.bodies[ref.body].twins[ref.twin_key ?? ref.id] ?? [])
+  return twinsOf(ref)
     .map((t) => earthByKey.get(earthKey(t.lat, t.lon)))
     .filter((i): i is Item => !!i);
 }
@@ -753,6 +791,7 @@ function twinItemsOf(ref: Reference) {
 /** Lado en km de la zona que se comparó para este punto. */
 function windowKm(item: Item) {
   if (item.kind === "patch") return PATCH_KM;
+  if (item.ref?.window_km) return item.ref.window_km;
   if (item.kind === "earth") {
     const point = item.earth!;
     const ranked = BODIES.some((b) => point.data[b]);
@@ -837,8 +876,9 @@ function focusPair(item: Item, partner?: Item) {
  * pareja a la vez: el punto de la Tierra y su sitio más parecido de la Luna o Marte, o el sitio y su gemelo n.º 1.
  * Los parches HiRISE y las celdas de calor no tienen pareja: solo se acerca su globo.
  */
-function select(item: Item) {
+function select(item: Item, reference = refFilter ? refById.get(refFilter) : undefined) {
   selected = item;
+  selectedEarthTwin = item.earth && reference ? twinRoleOf(item.earth, reference) : undefined;
   highlighted = new Set([item]);
   let partner: Item | undefined;
   if (item.kind === "ref") {
@@ -846,8 +886,9 @@ function select(item: Item) {
     twins.forEach((t) => highlighted.add(t));
     partner = twins[0];
   } else if (item.kind === "earth") {
-    const body = bestBody(item.earth!);
-    partner = body ? refItem.get(item.earth!.data[body]!.best_ref) : undefined;
+    const body = selectedEarthTwin?.body ?? bestBody(item.earth!);
+    const site = selectedEarthTwin?.site ?? (body ? item.earth!.data[body] : undefined);
+    partner = site ? refItem.get(site.best_ref) : undefined;
     if (partner) highlighted.add(partner);
   }
   focusPair(item, partner);
@@ -860,6 +901,7 @@ function select(item: Item) {
 
 function clearSelection() {
   selected = null;
+  selectedEarthTwin = undefined;
   highlighted = new Set();
   hideFrames();
   detail.hidden = true;
@@ -881,7 +923,7 @@ function row(label: string, value: string | null) {
   return value === null ? "" : `<div><dt>${label}</dt><dd>${value}</dd></div>`;
 }
 const num = (v: unknown, unit: string, d = 1) => (finite(v) ? `${fmt(v, d)}${unit}` : null);
-const refName = (id: string) => esc(tr(refById.get(id)?.name ?? id));
+const refName = (id: string) => esc(id === "malla_polar" ? t("lm.grp.malla_polar") : tr(refById.get(id)?.name ?? id));
 const tagLabel = (tag: string) => (tag === "nuevo" ? t("lm.pill.new") : tag === "validación" ? t("lm.pill.val") : tr(tag));
 
 function roleLabel(role: EarthRole) {
@@ -919,10 +961,19 @@ function renderDetail(item: Item) {
   let html = "";
   if (item.kind === "ref") {
     const ref = item.ref!;
-    const twins = DATA.bodies[ref.body].twins[ref.twin_key ?? ref.id] ?? [];
+    const twins = twinsOf(ref);
     html = header(t("gl.refKicker", { body: bodyName(ref.body) }), label(item), ref.lat, ref.lon);
     html += `<ul class="gl-roles"><li>${t(`gl.refRole.${ref.body}`)}</li></ul>`;
+    // Referencia que no puntúa: se explica por qué no tiene gemelos (la Tierra no se mueve).
+    if (ref.usable === false) {
+      const text = UNSCORED[getLang()];
+      const why = ref.body === "mars" ? text.mars : ref.usable_note ? tr(ref.usable_note) : "";
+      html += `<p class="gl-unscored"><b>${esc(text.title)}</b>${why ? ` ${esc(why)}` : ""}</p>`;
+    }
     if (ref.note) html += `<p class="gl-note">${esc(tr(ref.note))}</p>`;
+    if (ref.source_url?.startsWith("https://")) {
+      html += `<p class="gl-sub"><a href="${esc(ref.source_url)}" target="_blank" rel="noopener">${esc(t("gl.source"))}</a></p>`;
+    }
     if (twins.length) {
       html += `<h3>${t("gl.twinsTitle")}</h3><ol class="gl-twins">${twins.map((site) => {
         const twin = earthByKey.get(earthKey(site.lat, site.lon));
@@ -934,9 +985,10 @@ function renderDetail(item: Item) {
     const point = item.earth!;
     html = header(bodyName("earth"), label(item), point.lat, point.lon);
     html += `<ul class="gl-roles">${point.roles.map((r) => `<li>${roleLabel(r)}</li>`).join("")}</ul>`;
-    const bodies = BODIES.filter((b) => point.data[b]).sort((a, b) => point.data[b]!.score - point.data[a]!.score);
+    const data = selectedEarthTwin ? { ...point.data, [selectedEarthTwin.body]: selectedEarthTwin.site } : point.data;
+    const bodies = BODIES.filter((body) => data[body]).sort((a, b) => data[b]!.score - data[a]!.score);
     for (const body of bodies) {
-      const site = point.data[body]!;
+      const site = data[body]!;
       const ref = refById.get(site.best_ref);
       const color = BAR_COLOR[body];
       html += `<h3>${t(`gl.analogOf.${body}`)}</h3>`;
@@ -949,7 +1001,7 @@ function renderDetail(item: Item) {
       ].join("")}</div>`;
     }
     const catalog = point.roles.find((r) => r.kind === "catalog");
-    const climate = bodies.length ? point.data[bodies[0]]!.climate : catalog?.site.climate;
+    const climate = bodies.length ? data[bodies[0]]!.climate : catalog?.site.climate;
     html += climateRows(climate);
     for (const role of point.roles) if (role.kind === "featured") html += `<p class="gl-note">${esc(tr(role.story))}</p>`;
   } else if (item.kind === "patch") {
@@ -980,7 +1032,7 @@ detail.addEventListener("click", (event) => {
   if (target.closest(".gl-close")) { clearSelection(); return; }
   const button = target.closest<HTMLElement>("[data-item]");
   const item = button && itemById.get(button.dataset.item!);
-  if (item) { select(item); detail.scrollTop = 0; }
+  if (item) { select(item, selected?.ref); detail.scrollTop = 0; }
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !detail.hidden) clearSelection();
@@ -1049,7 +1101,7 @@ function fillLegend() {
     <span>${swatch("disc", COLOR.mars)}${t("gl.analogOf.mars")}</span>
     <span>${swatch("diamond", SHAPE_INK)}${t("gl.lg.ref")}</span>
     <span>${swatch("star", SHAPE_INK)}${t("gl.lg.featured")}</span>
-    <span>${swatch("disc", SHAPE_INK)}${t("gl.lg.site")}</span>
+    <span>${swatch("disc", SHAPE_INK)}${t("gl.lg.site", { moon: bodyName("moon"), moonMin: BEST_MIN_SCORE.moon, mars: bodyName("mars"), marsMin: BEST_MIN_SCORE.mars })}</span>
     <span>${swatch("ring", SHAPE_INK)}${t("gl.lg.validation")}</span>
     <span>${swatch("small", SHAPE_INK)}${t("gl.lg.catalog")}</span>
     <span><i class="gl-ramp" style="--a:${HEAT_RAMP.moon[0]};--b:${HEAT_RAMP.moon[1]}"></i><i class="gl-ramp" style="--a:${HEAT_RAMP.mars[0]};--b:${HEAT_RAMP.mars[1]}"></i>${t("gl.lg.heat")}</span>`;
@@ -1066,6 +1118,7 @@ legendToggle.addEventListener("click", () => {
 
 const sources: [string, string][] = [
   ["gl.src.moonRefs", "https://astrogeology.usgs.gov/search/map/moon_lro_lola_dem_118m"],
+  ["gl.src.moonSldem", "https://astrogeology.usgs.gov/search/map/moon_lro_lola_selene_kaguya_tc_dem_merge_60n60s_59m"],
   ["gl.src.marsRefs", "https://astrogeology.usgs.gov/search/map/mars_mgs_mola_mex_hrsc_blended_dem_global_200m"],
   ["gl.src.hirise", "https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/"],
   ["gl.src.copernicus", "https://planetarycomputer.microsoft.com/dataset/cop-dem-glo-90"],
