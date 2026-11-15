@@ -1,12 +1,14 @@
 {
-  "name": "terrain-analogs",
+  "name": "terratwin",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "node --test --test-concurrency=2 --test-reporter=spec tests/e2e/*.test.mjs",
+    "test:e2e:serie": "node --test --test-concurrency=1 --test-reporter=spec tests/e2e/*.test.mjs"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.1.0",
@@ -18,6 +20,7 @@
   "devDependencies": {
     "@types/leaflet": "1.9.22",
     "@types/three": "0.187.0",
+    "playwright-core": "1.49.1",
     "typescript": "5.9.3",
     "vite": "8.3.8"
   }

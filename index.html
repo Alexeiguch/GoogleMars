@@ -1,106 +1,22 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#151517">
-    <script>
-      // Idioma y tema antes de pintar (sin parpadeo). Ver src/prefs.ts e src/i18n.ts.
-      (function () {
-        var d = document.documentElement, l = null, t = null;
-        try { l = localStorage.getItem("analogs-lang"); t = localStorage.getItem("analogs-theme"); } catch (e) {}
-        d.lang = l === "en" || l === "es" ? l : (/^es\b/i.test(navigator.language || "") ? "es" : "en");
-        d.dataset.theme = t === "light" || t === "dark" ? t : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-      })();
-    </script>
-    <title data-i18n="v.docTitle">Análogos terrestres · Visor 3D</title>
+    <!-- El «Visor 3D de Marte» se fusionó con Globos 3D: la portada lleva allí (los enlaces antiguos siguen funcionando).
+         Esta página solo redirige: título y enlace son neutros (TerraTwin) para que no salga español con la app en inglés. -->
+    <meta http-equiv="refresh" content="0; url=./globos.html">
+    <script>location.replace("./globos.html" + location.hash);</script>
+    <title>TerraTwin</title>
+    <meta name="description" content="TerraTwin searches all of Earth's land for places that resemble the candidate zones for a Moon base and sites on Mars, and tells you where they match and where they do not.">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <style>
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #151517; color: #f2f0ec; font: 16px system-ui, sans-serif; }
+      a { color: inherit; }
+    </style>
   </head>
   <body>
-    <main>
-      <header class="masthead">
-        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">Análogos terrestres</span></h1>
-        <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
-          <a href="./" aria-current="page" data-i18n="nav.viewer">Visor 3D de Marte</a>
-          <a href="./luna-marte.html" data-i18n="nav.map">Mapa Luna y Marte</a>
-          <a href="./globos.html" data-i18n="nav.globes">Globos 3D</a>
-          <a href="./globos.html#path-planner" data-i18n="path.title">Planificador de rutas</a>
-          <a href="#sources"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
-        </nav>
-      </header>
-      <section class="intro" aria-labelledby="intro-title">
-        <div class="intro__text">
-          <h2 class="intro__title" id="intro-title" data-i18n="nav.viewer">Visor 3D de Marte</h2>
-          <p class="intro__lede" data-ui="intro.lede"></p>
-        </div>
-        <dl class="intro__figures">
-          <div class="fig fig--mars"><dt data-ui="intro.figMars"></dt><dd id="fig-mars"></dd></div>
-          <div class="fig fig--earth"><dt data-ui="intro.figEarth"></dt><dd id="fig-earth"></dd></div>
-          <div class="fig"><dt data-ui="intro.figPatch"></dt><dd id="fig-patch"></dd></div>
-        </dl>
-      </section>
-      <section class="globe-section" aria-label="Globos de los planetas" data-i18n-attr="aria-label:v.globesLabel">
-        <header class="step-head"><span class="step-num" aria-hidden="true">01</span><h2 data-ui="step.pick">Elige un sitio de Marte</h2></header>
-        <div class="panel globe-panel">
-          <div class="globe-headings ruled">
-            <div><h2><span data-i18n="planet.mars">Marte</span> <span id="mars-count"></span></h2><div class="site-controls"><select id="mars-site" aria-label="Sitio de terreno de Marte" data-i18n-attr="aria-label:v.marsPicker"></select><button id="find-matches" type="button" data-i18n="v.find">Buscar análogos</button></div></div>
-            <div><h2 data-i18n="planet.earth">Tierra</h2><span id="earth-site" aria-live="polite"></span></div>
-          </div>
-          <div class="globe-stage">
-            <canvas id="globes" aria-label="Globos de Marte y la Tierra. Arrastra Marte para girarlo." data-i18n-attr="aria-label:v.globesCanvas"></canvas>
-            <div id="mars-drag" aria-hidden="true"></div>
-            <div id="mars-pins"></div>
-            <span class="globe-pin" id="earth-pin" aria-hidden="true" hidden></span>
-            <p id="globe-error" role="status" hidden data-i18n="v.globeError">Los globos no están disponibles. Elige un sitio de Marte arriba para comparar el terreno.</p>
-          </div>
-        </div>
-      </section>
-      <section class="results" id="results" aria-labelledby="matches-title" hidden>
-        <div class="result-title step-head"><span class="step-num" aria-hidden="true">02</span><h2 id="matches-title" data-i18n="v.matchesTitle">Análogos en la Tierra</h2><a href="#comparison"><span data-i18n="v.compareLink">Comparar terreno</span> <span aria-hidden="true">↓</span></a></div>
-        <ol class="match-list" id="match-list" aria-label="Sitios de la Tierra ordenados por terreno, superficie y clima" data-i18n-attr="aria-label:v.matchListLabel"></ol>
-      </section>
-      <section class="comparison" aria-label="Comparación de terreno" data-i18n-attr="aria-label:v.comparisonLabel" id="comparison" hidden>
-        <header class="step-head"><span class="step-num" aria-hidden="true">03</span><h2 data-i18n="v.compareLink">Comparar terreno</h2></header>
-        <div class="panel comparison-panel">
-        <div class="toolbar">
-          <div class="modes" role="group" aria-label="Color del terreno" data-i18n-attr="aria-label:v.colorLabel">
-            <button type="button" data-mode="relief" aria-pressed="false" data-i18n="v.relief">Relieve</button>
-            <button type="button" data-mode="slope" aria-pressed="true" data-i18n="v.slope">Pendiente</button>
-          </div>
-          <div class="camera-actions" role="group" aria-label="Cámara compartida" data-i18n-attr="aria-label:v.cameraLabel">
-            <button type="button" id="top-view" data-i18n="v.topView">Vista cenital</button>
-            <button type="button" id="reset-view" data-i18n="v.resetView">Restablecer vista</button>
-          </div>
-        </div>
-        <div class="site-grid ruled" id="site-headings"></div>
-        <div class="stage">
-          <canvas id="terrain" tabindex="0" aria-label="Vistas de terreno sincronizadas. Arrastra o usa las flechas para girar los dos terrenos. Usa la rueda o más y menos para acercar." data-i18n-attr="aria-label:v.terrainCanvas"></canvas>
-          <p id="viewer-error" role="status" hidden></p>
-        </div>
-        <div class="map-footer">
-          <div class="legend" id="legend" aria-label="Pendiente en grados" data-i18n-attr="aria-label:v.legendLabel"></div>
-          <span id="grid-scale"></span>
-        </div>
-        </div>
-      </section>
-      <section class="details" id="details" aria-labelledby="metrics-title" hidden>
-        <header class="step-head"><span class="step-num" aria-hidden="true">04</span><h2 id="metrics-title" data-i18n="v.metricsTitle">Medidas del terreno</h2></header>
-        <div class="panel table-panel">
-          <table>
-            <thead><tr><th scope="col" data-i18n="v.measure">Medida</th><th scope="col" data-i18n="planet.mars">Marte</th><th scope="col" data-i18n="planet.earth">Tierra</th></tr></thead>
-            <tbody id="metrics"></tbody>
-          </table>
-        </div>
-      </section>
-      <footer id="sources">
-        <h2 data-i18n="sources.title">Fuentes de datos</h2><ul id="source-list"></ul>
-        <details id="ranking-method" hidden>
-          <summary data-i18n="v.method.summary">Cómo se puntúan los análogos</summary>
-          <p data-i18n="v.method.p1">Los candidatos terrestres vienen de dos conjuntos: sitios de EE. UU. elegidos a mano (USGS 3DEP), que solo compiten dentro de la categoría de terreno del sitio de Marte, y parches de 2 × 2 km de un escaneo mundial de suelo desnudo o helado (Copernicus DEM GLO-30), que compiten solo por sus medidas.</p>
-          <p data-i18n-html="v.method.p2"><strong>Terreno (50 %)</strong> es 1 menos la distancia de terreno: para la pendiente mediana, la pendiente del percentil 90 y el desnivel, se divide la diferencia absoluta entre la suma de los dos valores y se promedian las tres. <strong>Superficie (25 %)</strong> es la fracción de roca o arena desnuda del parche (ESA WorldCover); para los sitios polares de Marte cuentan más la nieve y el hielo. <strong>Clima (25 %)</strong> premia los lugares fríos, secos y con gran oscilación térmica diaria, a partir de un año de datos de Meteomatics. Ningún lugar de la Tierra llega a las condiciones de Marte, así que mide cercanía relativa.</p>
-          <p data-i18n="v.method.p3">La puntuación compara topografía, cobertura del suelo y clima. No estima la equivalencia geológica ni la idoneidad para una misión.</p>
-        </details>
-      </footer>
-    </main>
-    <script type="module" src="/src/main.ts"></script>
+    <p><a href="./globos.html">TerraTwin</a></p>
   </body>
 </html>

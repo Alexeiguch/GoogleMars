@@ -1,6 +1,36 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { cellSize, cellSlopes, gridSize, patchWidth, type Terrain } from "./data";
+import { cellSize, gridSize, patchWidth } from "./data";
+
+/**
+ * Terreno que se dibuja: una cuadrícula cuadrada de alturas en metros (fila 0 = norte). Por defecto, la de los
+ * parches HiRISE del catálogo (100 × 100 celdas de 20 m); las ventanas L0 de la Luna y Marte traen n y cell propios
+ * (100 × 100 celdas de 300 m = 30 km). Todas se escalan a la misma anchura en pantalla con escala vertical real.
+ */
+export type ViewerSite = {
+  id: string;
+  elevation: Float32Array;
+  n?: number;
+  cell?: number;
+  metrics: { medianElevation: number; relief: number };
+};
+/** Anchura en unidades de escena a la que se dibuja cualquier terreno (la de un parche HiRISE de 2 km). */
+const SCENE_WIDTH = patchWidth;
+
+/** Pendiente en grados de cada celda (diferencias centradas, como cellSlopes de data.ts, con tamaño variable). */
+export function gridSlopes(elevation: Float32Array, n: number, cell: number) {
+  return elevation.map((_, index) => {
+    const row = Math.floor(index / n);
+    const col = index % n;
+    const west = Math.max(0, col - 1);
+    const east = Math.min(n - 1, col + 1);
+    const north = Math.max(0, row - 1);
+    const south = Math.min(n - 1, row + 1);
+    const dx = (elevation[row * n + east] - elevation[row * n + west]) / ((east - west) * cell);
+    const dz = (elevation[south * n + col] - elevation[north * n + col]) / ((south - north) * cell);
+    return Math.atan(Math.hypot(dx, dz)) * 180 / Math.PI;
+  });
+}
 
 export type Mode = "relief" | "slope";
 
@@ -11,7 +41,7 @@ export const slopeBands = [
   { upper: Infinity, label: "10°+", color: "#a14431" },
 ];
 
-export function createViewer(canvas: HTMLCanvasElement, sites: Terrain[]) {
+export function createViewer(canvas: HTMLCanvasElement, sites: ViewerSite[]) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setClearColor(0x000000, 0);
@@ -25,16 +55,19 @@ export function createViewer(canvas: HTMLCanvasElement, sites: Terrain[]) {
   controls.zoomSpeed = 0.65;
   const defaultPosition = new THREE.Vector3(2650, 2450, 3550);
 
-  function makeTerrain(site: Terrain) {
+  function makeTerrain(site: ViewerSite) {
     const metrics = site.metrics;
-    const slope = cellSlopes(site.elevation);
-    const geometry = new THREE.PlaneGeometry(
-      patchWidth - cellSize, patchWidth - cellSize, gridSize - 1, gridSize - 1,
-    );
+    const n = site.n ?? gridSize;
+    const cell = site.cell ?? cellSize;
+    // Metros → unidades de escena; la misma escala en horizontal y en vertical (escala vertical real).
+    const scale = SCENE_WIDTH / (n * cell);
+    const slope = gridSlopes(site.elevation, n, cell);
+    const side = (n - 1) * cell * scale;
+    const geometry = new THREE.PlaneGeometry(side, side, n - 1, n - 1);
     geometry.rotateX(-Math.PI / 2);
     const positions = geometry.getAttribute("position");
     for (let i = 0; i < positions.count; i++) {
-      positions.setY(i, site.elevation[i] - metrics.medianElevation);
+      positions.setY(i, (site.elevation[i] - metrics.medianElevation) * scale);
     }
     geometry.computeVertexNormals();
 
@@ -51,12 +84,18 @@ export function createViewer(canvas: HTMLCanvasElement, sites: Terrain[]) {
     sun.position.set(-1600, 1850, -950);
     const fill = new THREE.HemisphereLight(0xeeeef2, 0x5a5148, 1.8);
     const grid = new THREE.GridHelper(2800, 14, 0x444346, 0x333236);
-    grid.position.y = Math.min(...site.elevation) - metrics.medianElevation - 35;
+    grid.position.y = (Math.min(...site.elevation) - metrics.medianElevation) * scale - 35;
     scene.add(mesh, grid, sun, fill);
-    return { scene, colors, metrics, slope, mesh, grid, site };
+    // Rango del color de relieve: ±105 m en los parches de 2 km; en ventanas con más desnivel, la mitad del desnivel.
+    const reliefHalf = Math.max(105, metrics.relief / 2);
+    return { scene, colors, metrics, slope, mesh, grid, site, reliefHalf };
   }
 
   const terrain = sites.map(makeTerrain);
+  const sizeVec = new THREE.Vector2();
+  // Arrastrar manda muchos eventos por fotograma: se dibuja como mucho una vez por fotograma.
+  let drawFrame = 0;
+  const requestDraw = () => { if (!drawFrame) drawFrame = requestAnimationFrame(() => { drawFrame = 0; render(); }); };
   let mode: Mode = "slope";
 
   function render() {
@@ -64,7 +103,7 @@ export function createViewer(canvas: HTMLCanvasElement, sites: Terrain[]) {
     const height = canvas.clientHeight;
     if (width === 0 || height === 0) return;
 
-    const size = renderer.getSize(new THREE.Vector2());
+    const size = renderer.getSize(sizeVec);
     if (size.x !== width || size.y !== height) renderer.setSize(width, height, false);
     renderer.setScissorTest(true);
     const panelWidth = Math.floor(width / terrain.length);
@@ -90,14 +129,14 @@ export function createViewer(canvas: HTMLCanvasElement, sites: Terrain[]) {
     const low = new THREE.Color("#7d766b");
     const high = new THREE.Color("#e1dbcc");
     const reliefColor = new THREE.Color();
-    terrain.forEach(({ colors, metrics, slope, site }) => {
+    terrain.forEach(({ colors, metrics, slope, site, reliefHalf }) => {
       const { elevation } = site;
       for (let i = 0; i < colors.count; i++) {
         const band = slopeBands.findIndex((item) => slope[i] < item.upper);
         const height = elevation[i] - metrics.medianElevation;
         const color = mode === "slope"
           ? bandColors[band]
-          : reliefColor.copy(low).lerp(high, THREE.MathUtils.clamp((height + 105) / 210, 0, 1));
+          : reliefColor.copy(low).lerp(high, THREE.MathUtils.clamp((height + reliefHalf) / (2 * reliefHalf), 0, 1));
         colors.setXYZ(i, color.r, color.g, color.b);
       }
       colors.needsUpdate = true;
@@ -133,9 +172,9 @@ export function createViewer(canvas: HTMLCanvasElement, sites: Terrain[]) {
 
   setView("oblique");
   setMode("slope");
-  controls.addEventListener("change", render);
-  new ResizeObserver(render).observe(canvas);
-  function setSites(pair: Terrain[]) {
+  controls.addEventListener("change", requestDraw);
+  new ResizeObserver(requestDraw).observe(canvas);
+  function setSites(pair: ViewerSite[]) {
     for (const [index, site] of pair.entries()) {
       const old = terrain[index];
       if (old.site.id === site.id) continue;
