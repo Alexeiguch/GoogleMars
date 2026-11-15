@@ -149,7 +149,7 @@ FEATURED = [
         "title": "Meseta de Djado (Níger), gemela de las llanuras del cráter Gusev",
         "story": ("Es el n.º 1 del ranking final de Marte. A 10 km se parece mucho a una ventana de las llanuras de "
                   "Gusev donde aterrizó Spirit (pendiente típica 2,3° frente a 2,3°; p90 8,1° frente a 8,5°; 77 % llano "
-                  "frente a 78 %; relieve 187 m frente a 179 m: 100/100), y también a 30 km (98/100) y a 2 km (93/100 "
+                  "frente a 77 %; relieve 187 m frente a 179 m: 100/100), y también a 30 km (98/100) y a 2 km (93/100 "
                   "frente a un parche HiRISE de Utopia Planitia de la misma categoría). Es roca desnuda casi sin lluvia "
                   "(4 mm en 2025). En una búsqueda breve (inglés y francés) no encontramos estudios que lo usen como "
                   "análogo; hay trabajos regionales sobre el Teneré que no sitúan su zona aquí. Dónde falla: es "
