@@ -1,0 +1,1582 @@
+{
+ "window_km": 30.0,
+ "grid": 100,
+ "cell_m": 300.0,
+ "dtype": "float32 little-endian",
+ "orientation": "fila 0 = norte, columna 0 = oeste; metros",
+ "refs": [
+  "amundsen_rim",
+  "apollo11",
+  "apollo12",
+  "apollo14",
+  "apollo15",
+  "apollo16",
+  "apollo17",
+  "aram_chaos_bloques_estratificados",
+  "arcadia_planitia_crater_hielo",
+  "candor_chasma_oeste_depositos_estratificados",
+  "change3",
+  "change4",
+  "change5",
+  "change6",
+  "connecting_ridge",
+  "connecting_ridge_extension",
+  "de_gerlache_kocher_massif",
+  "de_gerlache_rim_1",
+  "de_gerlache_rim_2",
+  "deuteronilus_mensae_lda",
+  "eberswalde_delta",
+  "ez_columbus_crater",
+  "ez_deuteronilus_mensae",
+  "ez_hebrus_valles",
+  "ez_hellas_rim",
+  "ez_jezero_syrtis_isidis",
+  "ez_mawrth_vallis",
+  "ez_protonilus_mensae",
+  "faustini_rim_a",
+  "foso_mare_ingenii",
+  "foso_mare_tranquillitatis",
+  "foso_marius_hills",
+  "gale",
+  "gasa_crater_barrancos_activos",
+  "haworth",
+  "holden_crater_depositos_suroeste",
+  "im2_athena",
+  "jezero",
+  "kasei_valles_isla_aerodinamica",
+  "malapert_massif",
+  "malla30km_0019",
+  "malla30km_0097",
+  "malla30km_0103",
+  "mars_pathfinder",
+  "mawrth_vallis_filosilicatos",
+  "meridiani",
+  "mons_mouton",
+  "mons_mouton_plateau",
+  "newton_crater_interior_barrancos",
+  "nili_fossae_llanuras_carbonatos",
+  "nobile_rim_2",
+  "olympus_mons_flanco_norte_abanicos_lava",
+  "peak_near_cabeus_b",
+  "peak_near_shackleton",
+  "shackleton",
+  "shackleton_borde_s",
+  "slater_plain",
+  "spirit_gusev",
+  "viking2"
+ ],
+ "earth": [
+  "-0.8651_-91.1061",
+  "-15.4982_-74.3563",
+  "-18.1349_-69.9148",
+  "-19.4982_13.6546",
+  "-20.4982_-69.0865",
+  "-20.8651_-69.0865",
+  "-21.1349_-68.9479",
+  "-21.4982_-68.6583",
+  "-21.4982_-68.9479",
+  "-21.8651_-68.3687",
+  "-21.8651_15.3185",
+  "-23.1349_-70.1471",
+  "-23.4982_-68.9706",
+  "-23.8651_-68.6765",
+  "-24.1349_-67.7964",
+  "-24.4982_-68.0929",
+  "-24.4982_-68.3893",
+  "-24.8651_-68.0929",
+  "-24.8651_-68.3893",
+  "-24.8651_-69.5751",
+  "-25.1349_-67.2012",
+  "-25.4982_-67.5000",
+  "-25.4982_-67.7988",
+  "-26.1349_-67.8012",
+  "-26.1349_-69.6084",
+  "-26.4982_-67.1988",
+  "-26.4982_-69.6084",
+  "-26.4982_-69.9096",
+  "-27.1349_-69.6255",
+  "-27.4982_16.3057",
+  "-27.8651_-69.3219",
+  "-28.1349_-68.5758",
+  "-28.1349_-68.8832",
+  "-29.4982_-69.5145",
+  "11.5018_42.3805",
+  "12.5018_42.6476",
+  "13.1349_41.8056",
+  "16.5018_49.0730",
+  "16.8651_52.7247",
+  "18.1349_11.6193",
+  "18.8651_19.2898",
+  "18.8651_9.3466",
+  "19.1349_36.2691",
+  "19.5018_2.4905",
+  "19.5018_7.6431",
+  "19.5018_9.0744",
+  "19.8651_-11.5363",
+  "19.8651_18.5210",
+  "19.8651_18.8073",
+  "20.1349_18.3173",
+  "20.1349_18.6058",
+  "20.1349_30.7212",
+  "20.1349_6.2019",
+  "20.5018_18.0288",
+  "20.5018_9.0865",
+  "20.8651_30.4327",
+  "20.8651_32.7404",
+  "21.5018_18.7934",
+  "21.5018_30.9556",
+  "21.8651_17.0560",
+  "22.1349_19.1732",
+  "22.1349_35.8074",
+  "22.1349_6.3327",
+  "22.5018_11.8774",
+  "22.5018_14.2121",
+  "22.5018_33.4728",
+  "23.1349_26.9118",
+  "23.1349_5.4412",
+  "23.1349_6.6176",
+  "23.5018_39.8529",
+  "23.5018_44.2647",
+  "23.8651_3.6765",
+  "23.8651_3.9706",
+  "24.1349_-5.8399",
+  "24.1349_40.4051",
+  "24.8651_22.0257",
+  "24.8651_34.7727",
+  "24.8651_7.2036",
+  "24.8651_9.2787",
+  "25.1349_4.8108",
+  "25.1349_5.1096",
+  "25.5018_6.6036",
+  "25.8651_17.0618",
+  "26.1349_42.7410",
+  "26.8651_62.9217",
+  "27.1349_61.2449",
+  "27.5018_2.0344",
+  "27.5018_38.7753",
+  "27.5018_40.2935",
+  "27.5018_56.0830",
+  "28.1349_37.1619",
+  "28.5018_33.7807",
+  "29.1349_19.1219",
+  "29.1349_60.0310",
+  "29.5018_33.3781",
+  "29.5018_37.0971",
+  "29.5018_63.7500",
+  "30.1349_-2.0312",
+  "30.1349_-7.3438",
+  "30.5018_34.5312",
+  "30.5018_60.7812",
+  "30.8651_-5.7812",
+  "30.8651_59.5312",
+  "31.1349_-4.5253",
+  "31.1349_56.2342",
+  "31.1349_57.1835",
+  "31.1349_60.0316",
+  "31.5018_53.7025",
+  "31.8651_55.6013",
+  "32.1349_54.7756",
+  "32.5018_62.7885",
+  "32.8651_79.1346",
+  "33.1349_57.4461",
+  "34.8651_57.2817",
+  "36.1349_95.2803",
+  "36.5018_-116.9395",
+  "37.1349_-110.2602",
+  "37.5018_88.6086",
+  "38.1349_89.2087",
+  "38.5018_90.9289",
+  "38.8651_89.2087",
+  "38.8651_89.5528",
+  "38.8651_90.9289",
+  "39.1349_91.5698",
+  "39.1349_93.6628",
+  "39.1349_94.0116",
+  "39.5018_93.6628",
+  "40.5018_78.5900",
+  "40.5018_99.2062",
+  "42.5018_88.3537",
+  "43.1349_100.5074",
+  "43.8651_101.9926",
+  "44.8651_92.1591",
+  "44.8651_93.2955",
+  "45.1349_94.0385",
+  "46.5018_85.2487"
+ ],
+ "pairs": [
+  {
+   "body": "moon",
+   "twin_key": "peak_near_cabeus_b",
+   "rank": 1,
+   "earth": "-29.4982_-69.5145",
+   "ref": "peak_near_cabeus_b",
+   "score": 0.679
+  },
+  {
+   "body": "moon",
+   "twin_key": "peak_near_cabeus_b",
+   "rank": 2,
+   "earth": "32.8651_79.1346",
+   "ref": "peak_near_cabeus_b",
+   "score": 0.6735
+  },
+  {
+   "body": "moon",
+   "twin_key": "peak_near_cabeus_b",
+   "rank": 3,
+   "earth": "36.1349_95.2803",
+   "ref": "peak_near_cabeus_b",
+   "score": 0.6488
+  },
+  {
+   "body": "moon",
+   "twin_key": "haworth",
+   "rank": 1,
+   "earth": "-24.1349_-67.7964",
+   "ref": "haworth",
+   "score": 0.7224
+  },
+  {
+   "body": "moon",
+   "twin_key": "haworth",
+   "rank": 2,
+   "earth": "-28.1349_-68.5758",
+   "ref": "haworth",
+   "score": 0.7074
+  },
+  {
+   "body": "moon",
+   "twin_key": "haworth",
+   "rank": 3,
+   "earth": "-21.1349_-68.9479",
+   "ref": "haworth",
+   "score": 0.6727
+  },
+  {
+   "body": "moon",
+   "twin_key": "malapert_massif",
+   "rank": 1,
+   "earth": "32.8651_79.1346",
+   "ref": "malapert_massif",
+   "score": 0.6816
+  },
+  {
+   "body": "moon",
+   "twin_key": "malapert_massif",
+   "rank": 2,
+   "earth": "-24.4982_-68.3893",
+   "ref": "malapert_massif",
+   "score": 0.6627
+  },
+  {
+   "body": "moon",
+   "twin_key": "malapert_massif",
+   "rank": 3,
+   "earth": "-27.1349_-69.6255",
+   "ref": "malapert_massif",
+   "score": 0.6506
+  },
+  {
+   "body": "moon",
+   "twin_key": "mons_mouton_plateau",
+   "rank": 1,
+   "earth": "-25.4982_-67.7988",
+   "ref": "mons_mouton_plateau",
+   "score": 0.8162
+  },
+  {
+   "body": "moon",
+   "twin_key": "mons_mouton_plateau",
+   "rank": 2,
+   "earth": "20.1349_18.3173",
+   "ref": "mons_mouton_plateau",
+   "score": 0.7873
+  },
+  {
+   "body": "moon",
+   "twin_key": "mons_mouton_plateau",
+   "rank": 3,
+   "earth": "-20.8651_-69.0865",
+   "ref": "mons_mouton_plateau",
+   "score": 0.7688
+  },
+  {
+   "body": "moon",
+   "twin_key": "mons_mouton",
+   "rank": 1,
+   "earth": "32.8651_79.1346",
+   "ref": "mons_mouton",
+   "score": 0.7285
+  },
+  {
+   "body": "moon",
+   "twin_key": "mons_mouton",
+   "rank": 2,
+   "earth": "-26.4982_-69.6084",
+   "ref": "mons_mouton",
+   "score": 0.7019
+  },
+  {
+   "body": "moon",
+   "twin_key": "mons_mouton",
+   "rank": 3,
+   "earth": "28.5018_33.7807",
+   "ref": "mons_mouton",
+   "score": 0.6896
+  },
+  {
+   "body": "moon",
+   "twin_key": "nobile_rim_2",
+   "rank": 1,
+   "earth": "-26.4982_-69.6084",
+   "ref": "nobile_rim_2",
+   "score": 0.7823
+  },
+  {
+   "body": "moon",
+   "twin_key": "nobile_rim_2",
+   "rank": 2,
+   "earth": "39.1349_93.6628",
+   "ref": "nobile_rim_2",
+   "score": 0.7729
+  },
+  {
+   "body": "moon",
+   "twin_key": "nobile_rim_2",
+   "rank": 3,
+   "earth": "-18.1349_-69.9148",
+   "ref": "nobile_rim_2",
+   "score": 0.7335
+  },
+  {
+   "body": "moon",
+   "twin_key": "de_gerlache_rim_2",
+   "rank": 1,
+   "earth": "-24.4982_-68.0929",
+   "ref": "de_gerlache_rim_2",
+   "score": 0.774
+  },
+  {
+   "body": "moon",
+   "twin_key": "de_gerlache_rim_2",
+   "rank": 2,
+   "earth": "-28.1349_-68.5758",
+   "ref": "de_gerlache_rim_2",
+   "score": 0.7618
+  },
+  {
+   "body": "moon",
+   "twin_key": "de_gerlache_rim_2",
+   "rank": 3,
+   "earth": "-18.1349_-69.9148",
+   "ref": "de_gerlache_rim_2",
+   "score": 0.7335
+  },
+  {
+   "body": "moon",
+   "twin_key": "slater_plain",
+   "rank": 1,
+   "earth": "-25.4982_-67.5000",
+   "ref": "slater_plain",
+   "score": 0.7815
+  },
+  {
+   "body": "moon",
+   "twin_key": "slater_plain",
+   "rank": 2,
+   "earth": "39.1349_91.5698",
+   "ref": "slater_plain",
+   "score": 0.7801
+  },
+  {
+   "body": "moon",
+   "twin_key": "slater_plain",
+   "rank": 3,
+   "earth": "-28.1349_-68.8832",
+   "ref": "slater_plain",
+   "score": 0.7761
+  },
+  {
+   "body": "moon",
+   "twin_key": "faustini_rim_a",
+   "rank": 1,
+   "earth": "-25.4982_-67.7988",
+   "ref": "faustini_rim_a",
+   "score": 0.7695
+  },
+  {
+   "body": "moon",
+   "twin_key": "faustini_rim_a",
+   "rank": 2,
+   "earth": "-28.1349_-68.8832",
+   "ref": "faustini_rim_a",
+   "score": 0.7457
+  },
+  {
+   "body": "moon",
+   "twin_key": "faustini_rim_a",
+   "rank": 3,
+   "earth": "20.1349_18.3173",
+   "ref": "faustini_rim_a",
+   "score": 0.724
+  },
+  {
+   "body": "moon",
+   "twin_key": "peak_near_shackleton",
+   "rank": 1,
+   "earth": "-26.1349_-67.8012",
+   "ref": "peak_near_shackleton",
+   "score": 0.7566
+  },
+  {
+   "body": "moon",
+   "twin_key": "peak_near_shackleton",
+   "rank": 2,
+   "earth": "-21.4982_-68.9479",
+   "ref": "peak_near_shackleton",
+   "score": 0.7193
+  },
+  {
+   "body": "moon",
+   "twin_key": "peak_near_shackleton",
+   "rank": 3,
+   "earth": "19.8651_18.5210",
+   "ref": "peak_near_shackleton",
+   "score": 0.7166
+  },
+  {
+   "body": "moon",
+   "twin_key": "amundsen_rim",
+   "rank": 1,
+   "earth": "-26.4982_-69.6084",
+   "ref": "amundsen_rim",
+   "score": 0.7834
+  },
+  {
+   "body": "moon",
+   "twin_key": "amundsen_rim",
+   "rank": 2,
+   "earth": "39.1349_93.6628",
+   "ref": "amundsen_rim",
+   "score": 0.7684
+  },
+  {
+   "body": "moon",
+   "twin_key": "amundsen_rim",
+   "rank": 3,
+   "earth": "-18.1349_-69.9148",
+   "ref": "amundsen_rim",
+   "score": 0.7439
+  },
+  {
+   "body": "moon",
+   "twin_key": "de_gerlache_kocher_massif",
+   "rank": 1,
+   "earth": "32.8651_79.1346",
+   "ref": "de_gerlache_kocher_massif",
+   "score": 0.7294
+  },
+  {
+   "body": "moon",
+   "twin_key": "de_gerlache_kocher_massif",
+   "rank": 2,
+   "earth": "-24.4982_-68.3893",
+   "ref": "de_gerlache_kocher_massif",
+   "score": 0.7138
+  },
+  {
+   "body": "moon",
+   "twin_key": "de_gerlache_kocher_massif",
+   "rank": 3,
+   "earth": "-27.1349_-69.6255",
+   "ref": "de_gerlache_kocher_massif",
+   "score": 0.7083
+  },
+  {
+   "body": "moon",
+   "twin_key": "de_gerlache_rim_1",
+   "rank": 1,
+   "earth": "-24.4982_-68.3893",
+   "ref": "de_gerlache_rim_1",
+   "score": 0.7501
+  },
+  {
+   "body": "moon",
+   "twin_key": "de_gerlache_rim_1",
+   "rank": 2,
+   "earth": "-27.1349_-69.6255",
+   "ref": "de_gerlache_rim_1",
+   "score": 0.7497
+  },
+  {
+   "body": "moon",
+   "twin_key": "de_gerlache_rim_1",
+   "rank": 3,
+   "earth": "-18.1349_-69.9148",
+   "ref": "de_gerlache_rim_1",
+   "score": 0.7074
+  },
+  {
+   "body": "moon",
+   "twin_key": "connecting_ridge",
+   "rank": 1,
+   "earth": "32.8651_79.1346",
+   "ref": "connecting_ridge",
+   "score": 0.7716
+  },
+  {
+   "body": "moon",
+   "twin_key": "connecting_ridge",
+   "rank": 2,
+   "earth": "-27.8651_-69.3219",
+   "ref": "connecting_ridge",
+   "score": 0.7617
+  },
+  {
+   "body": "moon",
+   "twin_key": "connecting_ridge",
+   "rank": 3,
+   "earth": "28.5018_33.7807",
+   "ref": "connecting_ridge",
+   "score": 0.7394
+  },
+  {
+   "body": "moon",
+   "twin_key": "connecting_ridge_extension",
+   "rank": 1,
+   "earth": "32.8651_79.1346",
+   "ref": "connecting_ridge_extension",
+   "score": 0.7697
+  },
+  {
+   "body": "moon",
+   "twin_key": "connecting_ridge_extension",
+   "rank": 2,
+   "earth": "-24.4982_-68.3893",
+   "ref": "connecting_ridge_extension",
+   "score": 0.7569
+  },
+  {
+   "body": "moon",
+   "twin_key": "connecting_ridge_extension",
+   "rank": 3,
+   "earth": "-27.1349_-69.6255",
+   "ref": "connecting_ridge_extension",
+   "score": 0.7522
+  },
+  {
+   "body": "moon",
+   "twin_key": "im2_athena",
+   "rank": 1,
+   "earth": "-24.8651_-68.0929",
+   "ref": "im2_athena",
+   "score": 0.8079
+  },
+  {
+   "body": "moon",
+   "twin_key": "im2_athena",
+   "rank": 2,
+   "earth": "-20.4982_-69.0865",
+   "ref": "im2_athena",
+   "score": 0.7911
+  },
+  {
+   "body": "moon",
+   "twin_key": "im2_athena",
+   "rank": 3,
+   "earth": "32.1349_54.7756",
+   "ref": "im2_athena",
+   "score": 0.7841
+  },
+  {
+   "body": "moon",
+   "twin_key": "shackleton_borde_s",
+   "rank": 1,
+   "earth": "-29.4982_-69.5145",
+   "ref": "shackleton_borde_s",
+   "score": 0.8126
+  },
+  {
+   "body": "moon",
+   "twin_key": "shackleton_borde_s",
+   "rank": 2,
+   "earth": "38.8651_89.2087",
+   "ref": "shackleton_borde_s",
+   "score": 0.798
+  },
+  {
+   "body": "moon",
+   "twin_key": "shackleton_borde_s",
+   "rank": 3,
+   "earth": "-15.4982_-74.3563",
+   "ref": "shackleton_borde_s",
+   "score": 0.7594
+  },
+  {
+   "body": "moon",
+   "twin_key": "shackleton",
+   "rank": 1,
+   "earth": "-29.4982_-69.5145",
+   "ref": "shackleton",
+   "score": 0.8215
+  },
+  {
+   "body": "moon",
+   "twin_key": "shackleton",
+   "rank": 2,
+   "earth": "38.8651_89.2087",
+   "ref": "shackleton",
+   "score": 0.7995
+  },
+  {
+   "body": "moon",
+   "twin_key": "shackleton",
+   "rank": 3,
+   "earth": "-15.4982_-74.3563",
+   "ref": "shackleton",
+   "score": 0.7625
+  },
+  {
+   "body": "moon",
+   "twin_key": "malla_polar",
+   "rank": 1,
+   "earth": "-25.1349_-67.2012",
+   "ref": "malla30km_0097",
+   "score": 0.8228
+  },
+  {
+   "body": "moon",
+   "twin_key": "malla_polar",
+   "rank": 2,
+   "earth": "30.1349_-7.3438",
+   "ref": "malla30km_0019",
+   "score": 0.8039
+  },
+  {
+   "body": "moon",
+   "twin_key": "malla_polar",
+   "rank": 3,
+   "earth": "36.5018_-116.9395",
+   "ref": "malla30km_0103",
+   "score": 0.7933
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo11",
+   "rank": 1,
+   "earth": "43.8651_101.9926",
+   "ref": "apollo11",
+   "score": 0.7801
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo11",
+   "rank": 2,
+   "earth": "40.5018_99.2062",
+   "ref": "apollo11",
+   "score": 0.7646
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo11",
+   "rank": 3,
+   "earth": "12.5018_42.6476",
+   "ref": "apollo11",
+   "score": 0.7579
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo12",
+   "rank": 1,
+   "earth": "22.5018_14.2121",
+   "ref": "apollo12",
+   "score": 0.7109
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo12",
+   "rank": 2,
+   "earth": "20.5018_9.0865",
+   "ref": "apollo12",
+   "score": 0.6876
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo12",
+   "rank": 3,
+   "earth": "25.5018_6.6036",
+   "ref": "apollo12",
+   "score": 0.6683
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo14",
+   "rank": 1,
+   "earth": "22.5018_11.8774",
+   "ref": "apollo14",
+   "score": 0.8039
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo14",
+   "rank": 2,
+   "earth": "16.8651_52.7247",
+   "ref": "apollo14",
+   "score": 0.7924
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo14",
+   "rank": 3,
+   "earth": "26.8651_62.9217",
+   "ref": "apollo14",
+   "score": 0.7874
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo15",
+   "rank": 1,
+   "earth": "-21.8651_-68.3687",
+   "ref": "apollo15",
+   "score": 0.7803
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo15",
+   "rank": 2,
+   "earth": "-26.4982_-67.1988",
+   "ref": "apollo15",
+   "score": 0.7799
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo15",
+   "rank": 3,
+   "earth": "42.5018_88.3537",
+   "ref": "apollo15",
+   "score": 0.7653
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo16",
+   "rank": 1,
+   "earth": "23.1349_6.6176",
+   "ref": "apollo16",
+   "score": 0.8126
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo16",
+   "rank": 2,
+   "earth": "27.1349_61.2449",
+   "ref": "apollo16",
+   "score": 0.8018
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo16",
+   "rank": 3,
+   "earth": "-19.4982_13.6546",
+   "ref": "apollo16",
+   "score": 0.7968
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo17",
+   "rank": 1,
+   "earth": "38.8651_89.5528",
+   "ref": "apollo17",
+   "score": 0.8099
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo17",
+   "rank": 2,
+   "earth": "39.1349_93.6628",
+   "ref": "apollo17",
+   "score": 0.8006
+  },
+  {
+   "body": "moon",
+   "twin_key": "apollo17",
+   "rank": 3,
+   "earth": "28.5018_33.7807",
+   "ref": "apollo17",
+   "score": 0.7974
+  },
+  {
+   "body": "moon",
+   "twin_key": "change3",
+   "rank": 1,
+   "earth": "20.8651_32.7404",
+   "ref": "change3",
+   "score": 0.7919
+  },
+  {
+   "body": "moon",
+   "twin_key": "change3",
+   "rank": 2,
+   "earth": "25.1349_5.1096",
+   "ref": "change3",
+   "score": 0.7364
+  },
+  {
+   "body": "moon",
+   "twin_key": "change3",
+   "rank": 3,
+   "earth": "-21.8651_15.3185",
+   "ref": "change3",
+   "score": 0.6969
+  },
+  {
+   "body": "moon",
+   "twin_key": "change4",
+   "rank": 1,
+   "earth": "24.8651_22.0257",
+   "ref": "change4",
+   "score": 0.7483
+  },
+  {
+   "body": "moon",
+   "twin_key": "change4",
+   "rank": 2,
+   "earth": "20.1349_30.7212",
+   "ref": "change4",
+   "score": 0.7474
+  },
+  {
+   "body": "moon",
+   "twin_key": "change4",
+   "rank": 3,
+   "earth": "24.1349_-5.8399",
+   "ref": "change4",
+   "score": 0.7405
+  },
+  {
+   "body": "moon",
+   "twin_key": "change5",
+   "rank": 1,
+   "earth": "25.1349_5.1096",
+   "ref": "change5",
+   "score": 0.7865
+  },
+  {
+   "body": "moon",
+   "twin_key": "change5",
+   "rank": 2,
+   "earth": "20.8651_32.7404",
+   "ref": "change5",
+   "score": 0.7476
+  },
+  {
+   "body": "moon",
+   "twin_key": "change5",
+   "rank": 3,
+   "earth": "26.1349_42.7410",
+   "ref": "change5",
+   "score": 0.7162
+  },
+  {
+   "body": "moon",
+   "twin_key": "change6",
+   "rank": 1,
+   "earth": "25.8651_17.0618",
+   "ref": "change6",
+   "score": 0.8224
+  },
+  {
+   "body": "moon",
+   "twin_key": "change6",
+   "rank": 2,
+   "earth": "29.1349_19.1219",
+   "ref": "change6",
+   "score": 0.8182
+  },
+  {
+   "body": "moon",
+   "twin_key": "change6",
+   "rank": 3,
+   "earth": "27.5018_2.0344",
+   "ref": "change6",
+   "score": 0.8076
+  },
+  {
+   "body": "moon",
+   "twin_key": "foso_marius_hills",
+   "rank": 1,
+   "earth": "29.5018_33.3781",
+   "ref": "foso_marius_hills",
+   "score": 0.8089
+  },
+  {
+   "body": "moon",
+   "twin_key": "foso_marius_hills",
+   "rank": 2,
+   "earth": "23.5018_39.8529",
+   "ref": "foso_marius_hills",
+   "score": 0.7951
+  },
+  {
+   "body": "moon",
+   "twin_key": "foso_marius_hills",
+   "rank": 3,
+   "earth": "-27.4982_16.3057",
+   "ref": "foso_marius_hills",
+   "score": 0.7865
+  },
+  {
+   "body": "moon",
+   "twin_key": "foso_mare_tranquillitatis",
+   "rank": 1,
+   "earth": "23.8651_3.6765",
+   "ref": "foso_mare_tranquillitatis",
+   "score": 0.8138
+  },
+  {
+   "body": "moon",
+   "twin_key": "foso_mare_tranquillitatis",
+   "rank": 2,
+   "earth": "20.8651_30.4327",
+   "ref": "foso_mare_tranquillitatis",
+   "score": 0.7778
+  },
+  {
+   "body": "moon",
+   "twin_key": "foso_mare_tranquillitatis",
+   "rank": 3,
+   "earth": "24.1349_40.4051",
+   "ref": "foso_mare_tranquillitatis",
+   "score": 0.7537
+  },
+  {
+   "body": "moon",
+   "twin_key": "foso_mare_ingenii",
+   "rank": 1,
+   "earth": "23.5018_44.2647",
+   "ref": "foso_mare_ingenii",
+   "score": 0.8006
+  },
+  {
+   "body": "moon",
+   "twin_key": "foso_mare_ingenii",
+   "rank": 2,
+   "earth": "25.1349_4.8108",
+   "ref": "foso_mare_ingenii",
+   "score": 0.7783
+  },
+  {
+   "body": "moon",
+   "twin_key": "foso_mare_ingenii",
+   "rank": 3,
+   "earth": "27.5018_40.2935",
+   "ref": "foso_mare_ingenii",
+   "score": 0.7385
+  },
+  {
+   "body": "mars",
+   "twin_key": "viking2",
+   "rank": 1,
+   "earth": "30.1349_-2.0312",
+   "ref": "viking2",
+   "score": 0.8175
+  },
+  {
+   "body": "mars",
+   "twin_key": "viking2",
+   "rank": 2,
+   "earth": "18.8651_19.2898",
+   "ref": "viking2",
+   "score": 0.8013
+  },
+  {
+   "body": "mars",
+   "twin_key": "viking2",
+   "rank": 3,
+   "earth": "16.5018_49.0730",
+   "ref": "viking2",
+   "score": 0.7956
+  },
+  {
+   "body": "mars",
+   "twin_key": "mars_pathfinder",
+   "rank": 1,
+   "earth": "19.5018_9.0744",
+   "ref": "mars_pathfinder",
+   "score": 0.8483
+  },
+  {
+   "body": "mars",
+   "twin_key": "mars_pathfinder",
+   "rank": 2,
+   "earth": "27.5018_38.7753",
+   "ref": "mars_pathfinder",
+   "score": 0.8307
+  },
+  {
+   "body": "mars",
+   "twin_key": "mars_pathfinder",
+   "rank": 3,
+   "earth": "19.5018_2.4905",
+   "ref": "mars_pathfinder",
+   "score": 0.8275
+  },
+  {
+   "body": "mars",
+   "twin_key": "spirit_gusev",
+   "rank": 1,
+   "earth": "21.8651_17.0560",
+   "ref": "spirit_gusev",
+   "score": 0.8496
+  },
+  {
+   "body": "mars",
+   "twin_key": "spirit_gusev",
+   "rank": 2,
+   "earth": "29.5018_37.0971",
+   "ref": "spirit_gusev",
+   "score": 0.8288
+  },
+  {
+   "body": "mars",
+   "twin_key": "spirit_gusev",
+   "rank": 3,
+   "earth": "30.8651_59.5312",
+   "ref": "spirit_gusev",
+   "score": 0.8192
+  },
+  {
+   "body": "mars",
+   "twin_key": "meridiani",
+   "rank": 1,
+   "earth": "22.5018_33.4728",
+   "ref": "meridiani",
+   "score": 0.8549
+  },
+  {
+   "body": "mars",
+   "twin_key": "meridiani",
+   "rank": 2,
+   "earth": "19.5018_7.6431",
+   "ref": "meridiani",
+   "score": 0.833
+  },
+  {
+   "body": "mars",
+   "twin_key": "meridiani",
+   "rank": 3,
+   "earth": "28.1349_37.1619",
+   "ref": "meridiani",
+   "score": 0.8123
+  },
+  {
+   "body": "mars",
+   "twin_key": "gale",
+   "rank": 1,
+   "earth": "44.8651_93.2955",
+   "ref": "gale",
+   "score": 0.5835
+  },
+  {
+   "body": "mars",
+   "twin_key": "gale",
+   "rank": 2,
+   "earth": "39.1349_94.0116",
+   "ref": "gale",
+   "score": 0.5748
+  },
+  {
+   "body": "mars",
+   "twin_key": "gale",
+   "rank": 3,
+   "earth": "-21.4982_-68.6583",
+   "ref": "gale",
+   "score": 0.5504
+  },
+  {
+   "body": "mars",
+   "twin_key": "jezero",
+   "rank": 1,
+   "earth": "38.8651_90.9289",
+   "ref": "jezero",
+   "score": 0.8206
+  },
+  {
+   "body": "mars",
+   "twin_key": "jezero",
+   "rank": 2,
+   "earth": "31.1349_60.0316",
+   "ref": "jezero",
+   "score": 0.8006
+  },
+  {
+   "body": "mars",
+   "twin_key": "jezero",
+   "rank": 3,
+   "earth": "31.1349_56.2342",
+   "ref": "jezero",
+   "score": 0.798
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_deuteronilus_mensae",
+   "rank": 1,
+   "earth": "18.8651_9.3466",
+   "ref": "ez_deuteronilus_mensae",
+   "score": 0.8347
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_deuteronilus_mensae",
+   "rank": 2,
+   "earth": "19.1349_36.2691",
+   "ref": "ez_deuteronilus_mensae",
+   "score": 0.8179
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_deuteronilus_mensae",
+   "rank": 3,
+   "earth": "29.5018_63.7500",
+   "ref": "ez_deuteronilus_mensae",
+   "score": 0.8174
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_protonilus_mensae",
+   "rank": 1,
+   "earth": "-24.8651_-68.3893",
+   "ref": "ez_protonilus_mensae",
+   "score": 0.8232
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_protonilus_mensae",
+   "rank": 2,
+   "earth": "29.1349_60.0310",
+   "ref": "ez_protonilus_mensae",
+   "score": 0.8164
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_protonilus_mensae",
+   "rank": 3,
+   "earth": "20.1349_18.6058",
+   "ref": "ez_protonilus_mensae",
+   "score": 0.8119
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_hebrus_valles",
+   "rank": 1,
+   "earth": "18.1349_11.6193",
+   "ref": "ez_hebrus_valles",
+   "score": 0.8665
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_hebrus_valles",
+   "rank": 2,
+   "earth": "21.5018_30.9556",
+   "ref": "ez_hebrus_valles",
+   "score": 0.8483
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_hebrus_valles",
+   "rank": 3,
+   "earth": "23.8651_3.9706",
+   "ref": "ez_hebrus_valles",
+   "score": 0.8377
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_jezero_syrtis_isidis",
+   "rank": 1,
+   "earth": "37.5018_88.6086",
+   "ref": "ez_jezero_syrtis_isidis",
+   "score": 0.8348
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_jezero_syrtis_isidis",
+   "rank": 2,
+   "earth": "-23.4982_-68.9706",
+   "ref": "ez_jezero_syrtis_isidis",
+   "score": 0.828
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_jezero_syrtis_isidis",
+   "rank": 3,
+   "earth": "30.5018_34.5312",
+   "ref": "ez_jezero_syrtis_isidis",
+   "score": 0.8137
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_mawrth_vallis",
+   "rank": 1,
+   "earth": "-24.8651_-69.5751",
+   "ref": "ez_mawrth_vallis",
+   "score": 0.843
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_mawrth_vallis",
+   "rank": 2,
+   "earth": "31.8651_55.6013",
+   "ref": "ez_mawrth_vallis",
+   "score": 0.8073
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_mawrth_vallis",
+   "rank": 3,
+   "earth": "43.1349_100.5074",
+   "ref": "ez_mawrth_vallis",
+   "score": 0.8009
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_columbus_crater",
+   "rank": 1,
+   "earth": "22.1349_6.3327",
+   "ref": "ez_columbus_crater",
+   "score": 0.8264
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_columbus_crater",
+   "rank": 2,
+   "earth": "24.8651_7.2036",
+   "ref": "ez_columbus_crater",
+   "score": 0.7915
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_columbus_crater",
+   "rank": 3,
+   "earth": "31.1349_-4.5253",
+   "ref": "ez_columbus_crater",
+   "score": 0.7764
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_hellas_rim",
+   "rank": 1,
+   "earth": "-23.1349_-70.1471",
+   "ref": "ez_hellas_rim",
+   "score": 0.8469
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_hellas_rim",
+   "rank": 2,
+   "earth": "22.1349_19.1732",
+   "ref": "ez_hellas_rim",
+   "score": 0.8272
+  },
+  {
+   "body": "mars",
+   "twin_key": "ez_hellas_rim",
+   "rank": 3,
+   "earth": "11.5018_42.3805",
+   "ref": "ez_hellas_rim",
+   "score": 0.8057
+  },
+  {
+   "body": "mars",
+   "twin_key": "candor_chasma_oeste_depositos_estratificados",
+   "rank": 1,
+   "earth": "-24.4982_-68.0929",
+   "ref": "candor_chasma_oeste_depositos_estratificados",
+   "score": 0.7821
+  },
+  {
+   "body": "mars",
+   "twin_key": "candor_chasma_oeste_depositos_estratificados",
+   "rank": 2,
+   "earth": "39.1349_93.6628",
+   "ref": "candor_chasma_oeste_depositos_estratificados",
+   "score": 0.7571
+  },
+  {
+   "body": "mars",
+   "twin_key": "candor_chasma_oeste_depositos_estratificados",
+   "rank": 3,
+   "earth": "-18.1349_-69.9148",
+   "ref": "candor_chasma_oeste_depositos_estratificados",
+   "score": 0.7378
+  },
+  {
+   "body": "mars",
+   "twin_key": "kasei_valles_isla_aerodinamica",
+   "rank": 1,
+   "earth": "24.8651_34.7727",
+   "ref": "kasei_valles_isla_aerodinamica",
+   "score": 0.821
+  },
+  {
+   "body": "mars",
+   "twin_key": "kasei_valles_isla_aerodinamica",
+   "rank": 2,
+   "earth": "34.8651_57.2817",
+   "ref": "kasei_valles_isla_aerodinamica",
+   "score": 0.8075
+  },
+  {
+   "body": "mars",
+   "twin_key": "kasei_valles_isla_aerodinamica",
+   "rank": 3,
+   "earth": "30.8651_-5.7812",
+   "ref": "kasei_valles_isla_aerodinamica",
+   "score": 0.7994
+  },
+  {
+   "body": "mars",
+   "twin_key": "olympus_mons_flanco_norte_abanicos_lava",
+   "rank": 1,
+   "earth": "45.1349_94.0385",
+   "ref": "olympus_mons_flanco_norte_abanicos_lava",
+   "score": 0.3709
+  },
+  {
+   "body": "mars",
+   "twin_key": "olympus_mons_flanco_norte_abanicos_lava",
+   "rank": 2,
+   "earth": "46.5018_85.2487",
+   "ref": "olympus_mons_flanco_norte_abanicos_lava",
+   "score": 0.3335
+  },
+  {
+   "body": "mars",
+   "twin_key": "olympus_mons_flanco_norte_abanicos_lava",
+   "rank": 3,
+   "earth": "-0.8651_-91.1061",
+   "ref": "olympus_mons_flanco_norte_abanicos_lava",
+   "score": 0.2543
+  },
+  {
+   "body": "mars",
+   "twin_key": "gasa_crater_barrancos_activos",
+   "rank": 1,
+   "earth": "21.5018_18.7934",
+   "ref": "gasa_crater_barrancos_activos",
+   "score": 0.8162
+  },
+  {
+   "body": "mars",
+   "twin_key": "gasa_crater_barrancos_activos",
+   "rank": 2,
+   "earth": "38.1349_89.2087",
+   "ref": "gasa_crater_barrancos_activos",
+   "score": 0.8153
+  },
+  {
+   "body": "mars",
+   "twin_key": "gasa_crater_barrancos_activos",
+   "rank": 3,
+   "earth": "32.5018_62.7885",
+   "ref": "gasa_crater_barrancos_activos",
+   "score": 0.8006
+  },
+  {
+   "body": "mars",
+   "twin_key": "newton_crater_interior_barrancos",
+   "rank": 1,
+   "earth": "37.1349_-110.2602",
+   "ref": "newton_crater_interior_barrancos",
+   "score": 0.7648
+  },
+  {
+   "body": "mars",
+   "twin_key": "newton_crater_interior_barrancos",
+   "rank": 2,
+   "earth": "40.5018_78.5900",
+   "ref": "newton_crater_interior_barrancos",
+   "score": 0.7535
+  },
+  {
+   "body": "mars",
+   "twin_key": "newton_crater_interior_barrancos",
+   "rank": 3,
+   "earth": "13.1349_41.8056",
+   "ref": "newton_crater_interior_barrancos",
+   "score": 0.7381
+  },
+  {
+   "body": "mars",
+   "twin_key": "holden_crater_depositos_suroeste",
+   "rank": 1,
+   "earth": "36.5018_-116.9395",
+   "ref": "holden_crater_depositos_suroeste",
+   "score": 0.7991
+  },
+  {
+   "body": "mars",
+   "twin_key": "holden_crater_depositos_suroeste",
+   "rank": 2,
+   "earth": "39.5018_93.6628",
+   "ref": "holden_crater_depositos_suroeste",
+   "score": 0.7962
+  },
+  {
+   "body": "mars",
+   "twin_key": "holden_crater_depositos_suroeste",
+   "rank": 3,
+   "earth": "31.1349_57.1835",
+   "ref": "holden_crater_depositos_suroeste",
+   "score": 0.7871
+  },
+  {
+   "body": "mars",
+   "twin_key": "eberswalde_delta",
+   "rank": 1,
+   "earth": "-23.8651_-68.6765",
+   "ref": "eberswalde_delta",
+   "score": 0.8281
+  },
+  {
+   "body": "mars",
+   "twin_key": "eberswalde_delta",
+   "rank": 2,
+   "earth": "38.5018_90.9289",
+   "ref": "eberswalde_delta",
+   "score": 0.7878
+  },
+  {
+   "body": "mars",
+   "twin_key": "eberswalde_delta",
+   "rank": 3,
+   "earth": "-26.4982_-69.9096",
+   "ref": "eberswalde_delta",
+   "score": 0.7836
+  },
+  {
+   "body": "mars",
+   "twin_key": "arcadia_planitia_crater_hielo",
+   "rank": 1,
+   "earth": "23.1349_26.9118",
+   "ref": "arcadia_planitia_crater_hielo",
+   "score": 0.8721
+  },
+  {
+   "body": "mars",
+   "twin_key": "arcadia_planitia_crater_hielo",
+   "rank": 2,
+   "earth": "20.1349_6.2019",
+   "ref": "arcadia_planitia_crater_hielo",
+   "score": 0.846
+  },
+  {
+   "body": "mars",
+   "twin_key": "arcadia_planitia_crater_hielo",
+   "rank": 3,
+   "earth": "19.8651_-11.5363",
+   "ref": "arcadia_planitia_crater_hielo",
+   "score": 0.824
+  },
+  {
+   "body": "mars",
+   "twin_key": "deuteronilus_mensae_lda",
+   "rank": 1,
+   "earth": "33.1349_57.4461",
+   "ref": "deuteronilus_mensae_lda",
+   "score": 0.7893
+  },
+  {
+   "body": "mars",
+   "twin_key": "deuteronilus_mensae_lda",
+   "rank": 2,
+   "earth": "39.5018_93.6628",
+   "ref": "deuteronilus_mensae_lda",
+   "score": 0.7793
+  },
+  {
+   "body": "mars",
+   "twin_key": "deuteronilus_mensae_lda",
+   "rank": 3,
+   "earth": "27.5018_56.0830",
+   "ref": "deuteronilus_mensae_lda",
+   "score": 0.7617
+  },
+  {
+   "body": "mars",
+   "twin_key": "aram_chaos_bloques_estratificados",
+   "rank": 1,
+   "earth": "-26.1349_-69.6084",
+   "ref": "aram_chaos_bloques_estratificados",
+   "score": 0.8173
+  },
+  {
+   "body": "mars",
+   "twin_key": "aram_chaos_bloques_estratificados",
+   "rank": 2,
+   "earth": "23.1349_5.4412",
+   "ref": "aram_chaos_bloques_estratificados",
+   "score": 0.8149
+  },
+  {
+   "body": "mars",
+   "twin_key": "aram_chaos_bloques_estratificados",
+   "rank": 3,
+   "earth": "19.8651_18.8073",
+   "ref": "aram_chaos_bloques_estratificados",
+   "score": 0.8119
+  },
+  {
+   "body": "mars",
+   "twin_key": "mawrth_vallis_filosilicatos",
+   "rank": 1,
+   "earth": "30.5018_60.7812",
+   "ref": "mawrth_vallis_filosilicatos",
+   "score": 0.8018
+  },
+  {
+   "body": "mars",
+   "twin_key": "mawrth_vallis_filosilicatos",
+   "rank": 2,
+   "earth": "31.5018_53.7025",
+   "ref": "mawrth_vallis_filosilicatos",
+   "score": 0.7986
+  },
+  {
+   "body": "mars",
+   "twin_key": "mawrth_vallis_filosilicatos",
+   "rank": 3,
+   "earth": "44.8651_92.1591",
+   "ref": "mawrth_vallis_filosilicatos",
+   "score": 0.7889
+  },
+  {
+   "body": "mars",
+   "twin_key": "nili_fossae_llanuras_carbonatos",
+   "rank": 1,
+   "earth": "20.5018_18.0288",
+   "ref": "nili_fossae_llanuras_carbonatos",
+   "score": 0.8392
+  },
+  {
+   "body": "mars",
+   "twin_key": "nili_fossae_llanuras_carbonatos",
+   "rank": 2,
+   "earth": "24.8651_9.2787",
+   "ref": "nili_fossae_llanuras_carbonatos",
+   "score": 0.836
+  },
+  {
+   "body": "mars",
+   "twin_key": "nili_fossae_llanuras_carbonatos",
+   "rank": 3,
+   "earth": "22.1349_35.8074",
+   "ref": "nili_fossae_llanuras_carbonatos",
+   "score": 0.8348
+  }
+ ],
+ "sources": {
+  "moon_pole": "LOLA LDEM_80S_40MPP_ADJ, 40 m (NASA PGDA, Barker et al. 2023)",
+  "moon": "SLDEM2015, 59 m (LOLA + Kaguya TC)",
+  "mars": "HRSC+MOLA blend v2, 200 m (USGS)",
+  "earth": "Copernicus DEM GLO-90, 90 m"
+ }
+}
