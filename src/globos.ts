@@ -40,7 +40,7 @@ const UI_TEXT: UiText = {
     "pick.label": "Sitio que se compara con la Tierra",
     "pick.show": "Buscar análogos",
     "pick.note": "Sitios de referencia de la Luna y de Marte (ventanas de {win} km) y parches de Marte con relieve HiRISE ({patch} km). «Buscar análogos» los marca en los globos junto a sus lugares más parecidos de la Tierra; también puedes tocar los sitios en los globos.",
-    "intro.short": "TerraTwin busca en toda la Tierra los lugares que más se parecen a sitios de la Luna y de Marte. Los rombos son esos sitios; los puntos de la Tierra, sus parecidos. Toca uno para ver en qué se parecen y en qué no.",
+    "intro.short": "TerraTwin busca en la Tierra terrenos parecidos a sitios de la Luna y de Marte.",
     "net.down": "Las imágenes externas (Esri, NASA Trek) no cargan. Se ven las imágenes globales incluidas en la app; los puntos, las fichas y la comparación de terreno siguen funcionando.",
     "net.slow": "Las imágenes externas (Esri, NASA Trek) tardan en cargar. Mientras tanto se ven las imágenes globales incluidas en la app; todo lo demás funciona.",
     "net.retry": "Reintentar",
@@ -67,7 +67,7 @@ const UI_TEXT: UiText = {
     "pick.label": "Site compared with Earth",
     "pick.show": "Find analogs",
     "pick.note": "Moon and Mars reference sites ({win} km windows) and Mars patches with HiRISE relief ({patch} km). \"Find analogs\" marks them on the globes together with their most similar places on Earth; you can also tap the sites on the globes.",
-    "intro.short": "TerraTwin searches all of Earth's land for the places most like sites on the Moon and Mars. Diamonds are those sites; dots on Earth are their look-alikes. Tap one to see where they match and where they don't.",
+    "intro.short": "TerraTwin finds Earth terrain that resembles sites on the Moon and Mars.",
     "net.down": "External imagery (Esri, NASA Trek) is not loading. You are seeing the global images built into the app; the points, the details and the terrain comparison still work.",
     "net.slow": "External imagery (Esri, NASA Trek) is slow to load. Meanwhile you are seeing the global images built into the app; everything else works.",
     "net.retry": "Retry",
@@ -752,9 +752,9 @@ let netTimer = 0;
 function syncNetwork() {
   const states = Object.values(globes).map((g) => g.tiles.health());
   const next: TileHealth = states.includes("down") ? "down" : states.includes("slow") ? "slow" : "ok";
+  clearTimeout(netTimer);
   if (next === network) return;
   // Para quitar el aviso se espera un poco: un mosaico suelto que llega no lo hace parpadear.
-  clearTimeout(netTimer);
   if (next === "ok") { netTimer = window.setTimeout(() => applyNetwork("ok"), 1500); return; }
   applyNetwork(next);
 }
@@ -1404,7 +1404,7 @@ function gridMetricsOf(elevation: Float32Array, n: number, cell: number): GridMe
   };
 }
 
-function setComparison(item: Item) {
+function setComparison(item: Item, loadNow = true) {
   const subject: Subject = { item, patch: item.patch, ref: item.ref };
   compare.subject = subject;
   if (subject.patch) [compare.analogs, compare.ranked] = patchAnalogs(subject.patch);
@@ -1412,7 +1412,7 @@ function setComparison(item: Item) {
   compare.analog = compare.analogs[0];
   pickSelect.value = item.id;
   renderComparisonTexts();
-  if (compare.analog) void selectAnalog(compare.analog, false);
+  if (loadNow && compare.analog) void selectAnalog(compare.analog, false);
 }
 const pickSelect = $<HTMLSelectElement>("#hirise-site");
 pickSelect.addEventListener("change", () => {
@@ -1511,6 +1511,7 @@ async function selectAnalog(analog: Analog, fly = true) {
       const [a, b] = await Promise.all([
         loadL0(`ref_${refId}.f32`, n, request.signal), loadL0(`e_${earth}.f32`, n, request.signal),
       ]);
+      if (request.signal.aborted || compare.failed) return;
       const ma = gridMetricsOf(a, n, cell);
       const mb = gridMetricsOf(b, n, cell);
       compare.gridMetrics = [ma, mb];
@@ -1756,7 +1757,12 @@ function fillGoto() {
         : (bestScore(b.item) - bestScore(a.item))));
     if (!list.length) return "";
     // Dos ventanas del mismo análogo (p. ej. «Puna de Atacama (…)») tienen el mismo nombre: se distinguen por la posición.
-    const repeated = new Set(list.map((x) => x.text).filter((text, i, all) => all.indexOf(text) !== i));
+    const seen = new Set<string>();
+    const repeated = new Set<string>();
+    for (const { text } of list) {
+      if (seen.has(text)) repeated.add(text);
+      else seen.add(text);
+    }
     return `<optgroup label="${esc(t("gl.group", { body: bodyName(globe), n: list.length }))}">${list.map(({ item, text }) =>
       `<option value="${esc(item.id)}">${esc(repeated.has(text) ? `${text} · ${coord(item.lat, item.lon)}` : text)}</option>`).join("")}</optgroup>`;
   });
@@ -1939,7 +1945,10 @@ const jezero = refById.get("jezero")!;
 const jezeroRelief = new THREE.Group();
 jezeroRelief.visible = false;
 globes.mars.scene.add(jezeroRelief);
-if (renderer) {
+let jezeroReliefRequested = false;
+function loadJezeroRelief() {
+  if (!renderer || jezeroReliefRequested) return;
+  jezeroReliefRequested = true;
   const center = direction(jezero.lat, jezero.lon);
   const east = new THREE.Vector3().crossVectors(center, new THREE.Vector3(0, 1, 0)).negate().normalize();
   const north = new THREE.Vector3().crossVectors(center, east).normalize();
@@ -1957,8 +1966,11 @@ if (renderer) {
     const relief = new THREE.Mesh(grid, new THREE.MeshBasicMaterial({ map, color: 0xc29c83, depthTest: false, depthWrite: false }));
     relief.renderOrder = -95.5;
     jezeroRelief.add(relief);
-    requestRender();
-  }, undefined, () => grid.dispose());
+    requestRender(globes.mars);
+  }, undefined, () => {
+    jezeroReliefRequested = false;
+    grid.dispose();
+  });
 }
 
 function pickPathPoint(x: number, y: number, { width, height } = marsPanel.getBoundingClientRect()): RoutePoint | null {
@@ -1983,6 +1995,7 @@ const pathPlanner = mountPathPlanner({
     pathMain.classList.toggle("is-planning", active);
     pathMain.classList.toggle("is-map-unavailable", !renderer || contextLost);
     jezeroRelief.visible = active;
+    if (active) loadJezeroRelief();
     browseToolbar.hidden = browseTitle.hidden = globes.moon.panel.hidden = legend.hidden = browseInstructions.hidden = active;
     detail.hidden = active || !selected;
     pathZoom.hidden = !active;
@@ -2016,7 +2029,7 @@ const pathPlanner = mountPathPlanner({
     stage.setAttribute("aria-label", t(active ? "path.stage" : "gl.stageLabel"));
     hideTip();
     for (const globe of Object.values(globes)) {
-      cancelAnimationFrame(globe.animation);
+      stopFlight(globe);
       globe.panel.classList.remove("is-over-point");
       if (active) {
         browsePositions.set(globe.id, globe.camera.position.clone());
@@ -2037,7 +2050,7 @@ const pathPlanner = mountPathPlanner({
       globes.mars.camera.position.copy(direction(18.47, 77.36)).setLength(1 + MIN_ALTITUDE.mars);
       globes.mars.controls.update();
     }
-    requestRender();
+    measure();
   },
   setDrawing(active) {
     pathHover = null;
@@ -2150,4 +2163,15 @@ onLangChange(() => {
 });
 paintTexts();
 const startItem = itemById.get("patch:jezero") ?? items.find((i) => i.kind === "patch");
-if (startItem) setComparison(startItem);
+if (startItem) {
+  setComparison(startItem, false);
+  terrainCanvas.style.visibility = "hidden";
+  for (const button of terrainButtons) button.disabled = true;
+  // Keep the default cards available; terrain downloads and the second WebGL context can wait.
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    observer.disconnect();
+    if (!compare.pending && compare.analog) void selectAnalog(compare.analog, false);
+  }, { rootMargin: "160px" });
+  observer.observe(terrainStage);
+}

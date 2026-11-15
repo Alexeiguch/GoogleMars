@@ -47,7 +47,7 @@ export async function abrirNavegador() {
   const gpu = process.env.E2E_GPU || 'sw';
   const args = gpu === 'sw'
     ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
-    : ['--use-angle=d3d11', '--ignore-gpu-blocklist'];
+    : ['--ignore-gpu-blocklist'];
   return chromium.launch({ channel: process.env.E2E_CANAL || 'chrome', headless: process.env.E2E_VER !== '1', args });
 }
 

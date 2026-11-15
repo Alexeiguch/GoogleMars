@@ -315,4 +315,3 @@ lectura, la carpeta local `pipeline/data/`. El resto del informe no se ha tocado
 Comprobado y **sin cambio**: las referencias lunares L0 del polo sur son 140 ventanas, de las que puntúan 139
 (sección 2). En `results.json → references` aparecen 141 entradas del polo porque `rank` añade una entrada de
 grupo, `malla_polar`, que no es una ventana (`kind: "grupo"`, `group_only: true`).
-

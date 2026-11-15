@@ -1,9 +1,11 @@
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
+import { webResults } from "./scripts/web-results.ts";
 
 // Dos páginas: el mapa global Luna/Marte (luna-marte.html) y los globos 3D de la Luna, la Tierra y Marte
 // (globos.html), que incluyen la comparación 3D de terreno del antiguo visor. index.html solo redirige a globos.html.
 export default defineConfig({
+  plugins: [webResults()],
   base: "./",
   build: {
     rolldownOptions: {

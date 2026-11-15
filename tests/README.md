@@ -41,7 +41,7 @@ La prueba de idioma deja el informe completo (cadenas ofensoras y todo el texto 
 
 ## Qué comprueba cada archivo
 
-Las pruebas usan solo texto visible, roles ARIA, etiquetas HTML y los atributos de contrato `data-intro` y
+Las pruebas usan principalmente texto visible, roles ARIA, etiquetas HTML y los atributos de contrato `data-intro` y
 `data-aviso="sin-red"`: ningún id ni clase CSS de la app (la única clase es `.leaflet-container`, de Leaflet,
 para no confundir las teselas del mapa con las imágenes de la ficha).
 
@@ -53,6 +53,7 @@ para no confundir las teselas del mapa con las imágenes de la ficha).
 | `04-carga.test.mjs` | (e) Cada página en los dos idiomas a 1920x1080 y 375x812: sin errores de consola, sin excepciones, sin peticiones locales fallidas (404…), icono de pestaña que carga (cada `link[rel~=icon]` declarado, o `/favicon.ico` si no hay ninguno, responde 200 con una imagen; se comprueba con una petición propia porque Chrome cachea el fallo del favicon y solo lo pide en la primera página, y por eso el 404 de `/favicon.ico` no cuenta en «errores de consola»), sin desborde horizontal (`scrollWidth ≤ innerWidth`) y con el elemento `[data-intro]` (C5) entero y visible sin desplazarse, en el idioma de la página. Los mosaicos externos que no cargan (red de la sala) se anotan pero no hacen fallar. |
 | `05-sin-red.test.mjs` | (f) Sin red externa (C3): se aborta todo lo que no sea localhost. Las dos páginas siguen mostrando su contenido (el guion del mapa y los globos con dibujo), cargan imágenes locales de `/imagery/` y muestran un aviso visible `[data-aviso="sin-red"]` con `role="status"` y texto en inglés. |
 | `06-cifras.test.mjs` | (g) Las cifras de la ficha del gemelo 1 de Shackleton salen de `src/data/results.json`: la prueba lee el JSON, localiza el grupo por su nombre, y compara con lo que se ve, con el redondeo de la app: coordenadas del guion (2 decimales) y de la ficha (3), puntuación de la fila y del grupo, altitud media, barras (total, terreno, superficie, clima) y la columna del gemelo en la tabla de rasgos. Nada escrito a mano. |
+| `07-planificador.test.mjs` | En móvil y sin red externa: la portada conserva el enlace al planificador, el ejemplo de Jezero obtiene ocho rutas y perfiles sin cargar la comparación de globos al entrar, y tras recargar se recupera el candidato elegido. |
 
 ## Resultado en la app base (15/11, antes de fusionar las ramas de la noche)
 

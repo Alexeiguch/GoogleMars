@@ -42,7 +42,6 @@ function readSavedDraft(): Draft | null {
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 export function mountPathPlanner(globe: PathGlobe) {
-  const planner = $("path-tools");
   const plannerLink = $<HTMLAnchorElement>("path-link");
   const browseLink = $<HTMLAnchorElement>("gl-browse-link");
   const sourcesLink = $<HTMLAnchorElement>("gl-sources-link");
@@ -232,7 +231,6 @@ export function mountPathPlanner(globe: PathGlobe) {
     const next = location.hash === HASH;
     if (next === active) return;
     active = next;
-    planner.hidden = !active;
     if (active) {
       plannerLink.setAttribute("aria-current", "page");
       browseLink.removeAttribute("aria-current");

@@ -19,6 +19,10 @@
   </head>
   <body>
     <main class="gl">
+      <script>
+        // Aplica el diseño del planificador antes del primer pintado al abrir su enlace directo.
+        if (location.hash === "#path-planner") document.currentScript.parentElement.classList.add("is-planning");
+      </script>
       <header class="masthead">
         <h1><span data-i18n="site.title">TerraTwin</span></h1>
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
@@ -31,7 +35,7 @@
 
       <div class="gl-toolbar">
         <h2 class="gl-title" id="gl-browse-title" data-i18n="nav.globes">Globos 3D</h2>
-        <p class="gl-intro" data-intro data-ui="intro.short">TerraTwin busca en toda la Tierra los lugares que más se parecen a sitios de la Luna y de Marte.</p>
+        <p class="gl-intro" data-intro data-ui="intro.short">TerraTwin busca en la Tierra terrenos parecidos a sitios de la Luna y de Marte.</p>
         <div class="gl-mode">
           <div class="gl-seg" role="group" aria-label="Puntos que se muestran" data-i18n-attr="aria-label:gl.modeLabel">
             <button type="button" data-mode="best" aria-pressed="true" data-i18n="gl.best">Mejores</button>
@@ -51,7 +55,7 @@
         </div>
       </div>
 
-      <section class="path-toolbar" id="path-tools" aria-labelledby="path-title" hidden>
+      <section class="path-toolbar" id="path-tools" aria-labelledby="path-title">
         <div class="path-toolbar-head">
           <h2 class="gl-title" id="path-title" data-i18n="path.title">Planificador de rutas</h2>
           <div class="path-search-actions">
@@ -115,7 +119,7 @@
       <section id="path-comparison" class="path-comparison-host" aria-label="Comparación de rutas" data-i18n-attr="aria-label:path.comparison" hidden></section>
     </main>
     <!-- Comparación de un sitio HiRISE de Marte con sus análogos de la Tierra (antes, el «Visor 3D de Marte»).
-         Siempre visible (Jezero por defecto); también se abre al tocar un parche HiRISE en el globo de Marte. -->
+         Jezero por defecto en la vista de globos; también se abre al tocar un parche HiRISE en el globo de Marte. -->
     <div class="gl-more" id="gl-more">
       <section class="gl-pick" aria-labelledby="pick-title">
         <header class="step-head"><span class="step-num" aria-hidden="true">01</span><h2 id="pick-title" data-ui="step.pick">Elige un sitio de la Luna o de Marte</h2></header>

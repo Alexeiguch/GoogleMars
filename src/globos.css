@@ -508,7 +508,10 @@ main.gl {
 /* Path Planner shares the globe canvas and the app's existing controls. */
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 /* The legend and the intro figures describe the browse view. */
-.is-planning :is(.gl-toolbar, .gl-legend), main.gl.is-planning + .gl-footer .gl-about { display: none; }
+main.gl:not(.is-planning) #path-tools,
+.is-planning :is(.gl-toolbar, .gl-legend, .gl-panel[data-globe="moon"]),
+main.gl.is-planning ~ .gl-more,
+main.gl.is-planning ~ .gl-footer .gl-about { display: none; }
 main.gl.is-planning {
   height: auto;
   min-height: 0;
@@ -560,7 +563,7 @@ main.gl.is-planning {
   height: clamp(320px, 49svh, 560px);
 }
 .is-planning .gl-panel { z-index: 1; }
-.is-planning .gl-panel[data-globe="mars"] { border: 0; }
+.is-planning .gl-panel[data-globe="mars"] { order: -1; border: 0; }
 .is-planning.is-map-unavailable .gl-body, .is-planning #gl-error { display: none; }
 .is-planning .gl-label b { font-family: var(--font-display); }
 .is-planning .gl-label span { display: none; }

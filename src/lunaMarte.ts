@@ -11,7 +11,7 @@ import "./lunaMarte.css";
 import "./prefs";
 import L from "leaflet";
 import { getLang, hasMsg, locale, onLangChange, t, tr, type Lang } from "./i18n";
-import rawResults from "./data/results.json";
+import rawResults from "virtual:terratwin-results/map";
 import { bindMapaTextos, m, noteOrNull } from "./mapa.textos";
 
 // ---- tipos del results.json ----------------------------------------------------

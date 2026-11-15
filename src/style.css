@@ -157,30 +157,6 @@ main.gl > .masthead { max-width: none; }
 .mark::after { content: ""; position: absolute; inset: 4px; background: var(--accent); }
 /* La página Luna/Marte calcula su alto con la cabecera antigua (82 px): se corrige con el alto nuevo. */
 :root:has(.lm-layout) { --panel-h: calc(100vh - 114px - 24px); }
-/* Lema e insignia del reto (src/prefs.ts), solo texto: sin logotipo de la NASA.
-   En pantallas anchas .brand-line no pinta caja: el lema va junto al título y la insignia a la derecha. */
-.brand-line { display: contents; }
-.brand-tagline {
-  flex: 0 1 auto;
-  min-width: 0;
-  padding-left: 16px;
-  border-left: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.3;
-}
-.brand-event {
-  order: 1;
-  flex: none;
-  display: grid;
-  margin-left: auto;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.25;
-  text-align: right;
-}
-.brand-event__name { color: var(--text); font-weight: 500; letter-spacing: .01em; }
-
 /* Vistas como pestañas: cada una lleva el color del cuerpo que protagoniza. */
 .views {
   order: 3;
@@ -236,8 +212,6 @@ main.gl > .masthead { max-width: none; }
 
 /* Idioma y tema (src/prefs.ts) */
 .prefs { order: 2; display: flex; align-items: center; gap: 10px; flex: none; margin-left: auto; }
-/* Con la insignia delante, es ella la que empuja a la derecha. */
-.brand-line ~ .prefs { margin-left: 0; }
 .lang-switch { display: flex; border: 1px solid var(--control-border); }
 .lang-switch button, .theme-toggle {
   min-height: 40px;
@@ -427,23 +401,8 @@ footer a:hover { color: var(--text); }
   .intro { grid-template-columns: minmax(0, 1fr); padding-top: 32px; }
 }
 
-/* Cabecera estrecha. Fila 1: TerraTwin + preferencias. Fila 2: lema e insignia (en una línea si caben). Fila 3: vistas. */
 @media (max-width: 860px) {
   .masthead h1 { flex: 1 1 auto; min-height: 56px; }
-  .brand-line ~ .prefs { order: 0; margin-left: auto; }
-  .brand-line {
-    order: 1;
-    flex: 1 1 100%;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 2px 16px;
-    min-width: 0;
-    padding-bottom: 10px;
-  }
-  .brand-tagline { padding-left: 0; border-left: 0; font-size: 14px; }
-  .brand-event { display: block; margin-left: 0; text-align: left; font-size: 11.5px; }
 }
 
 @media (max-width: 640px) {

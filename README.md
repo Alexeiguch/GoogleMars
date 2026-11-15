@@ -249,6 +249,7 @@ src/data/path-earth.json          regiones terrestres del planificador
 public/terrain/path-*.i16.gz      mallas de elevación del planificador (las escriben scripts/export-path-*.py)
 src/i18n.ts, prefs.ts             textos en español e inglés
 src/data/results.json             referencias, rankings, gemelos y validación (lo escribe analogs.rank)
+scripts/web-results.ts            selecciona los campos de results.json que carga cada página
 src/data/catalog.json             parches de 2 km (lo escribe analogs.patches)
 public/terrain/*.f32              rejillas de 100 × 100 de los parches de 2 km
 public/terrain/l0/                cuadrículas de altura de 30 km (las escribe analogs.height_grids)
