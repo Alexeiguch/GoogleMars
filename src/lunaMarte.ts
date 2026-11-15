@@ -220,43 +220,56 @@ let attribution = t("lm.attribution");
 let localAttribution = m("localAttribution");
 
 // ---- sin red: capa base local y aviso (contrato C3) ----------------------------------------
-// public/imagery/earth.webp es una imagen global equirectangular (2:1). El mapa es Web Mercator, así que cada
-// tesela se dibuja fila a fila tomando de la imagen la latitud que le toca. Va siempre debajo de los mosaicos de
-// Esri: si estos fallan o tardan, el mapa no queda negro.
-const earthImage = new Promise<HTMLImageElement | null>((resolve) => {
-  const img = new Image();
-  img.decoding = "async";
-  img.onload = () => resolve(img);
-  img.onerror = () => resolve(null);
-  img.src = `${BASE}imagery/earth.webp`;
-});
-const LocalEarth = L.GridLayer.extend({
-  createTile(this: L.GridLayer, coords: L.Coords, done: L.DoneCallback) {
-    const tile = document.createElement("canvas");
-    const size = this.getTileSize();
-    tile.width = size.x;
-    tile.height = size.y;
-    earthImage.then((img) => {
-      const n = 2 ** coords.z;
-      const ctx = tile.getContext("2d");
-      if (img && ctx && coords.y >= 0 && coords.y < n) {
-        const x = ((coords.x % n) + n) % n;
-        const sx = (x / n) * img.naturalWidth;
-        const sw = img.naturalWidth / n;
-        for (let j = 0; j < size.y; j++) {
-          const yf = (coords.y + (j + 0.5) / size.y) / n;                        // 0 = 85,05° N, 1 = 85,05° S
-          const lat = (Math.atan(Math.sinh(Math.PI * (1 - 2 * yf))) * 180) / Math.PI;
-          const sy = Math.min(img.naturalHeight - 1, Math.max(0, ((90 - lat) / 180) * img.naturalHeight - 0.5));
-          ctx.drawImage(img, sx, sy, sw, 1, 0, j, size.x, 1);
-        }
+// public/imagery/earth.webp es una imagen global equirectangular (2:1). El mapa es Web Mercator: la primera vez que
+// hace falta se reproyecta una sola vez a un lienzo Mercator cuadrado (fila a fila, con la latitud de cada fila) y
+// cada tesela es un recorte de ese lienzo. La capa solo se crea cuando los mosaicos de Esri fallan o tardan, y va
+// debajo de ellos (zIndex 0): en el caso normal no cuesta nada.
+let localLayer: L.GridLayer | undefined;
+function addLocalEarth() {
+  if (localLayer) return;
+  const mercator = new Promise<HTMLCanvasElement | null>((resolve) => {
+    const img = new Image();
+    img.decoding = "async";
+    img.onerror = () => resolve(null);
+    img.onload = () => {
+      const S = Math.min(2048, img.naturalWidth);
+      const c = document.createElement("canvas");
+      c.width = S;
+      c.height = S;
+      const ctx = c.getContext("2d");
+      if (!ctx) return resolve(null);
+      for (let j = 0; j < S; j++) {
+        const yf = (j + 0.5) / S;                                                  // 0 = 85,05° N, 1 = 85,05° S
+        const lat = (Math.atan(Math.sinh(Math.PI * (1 - 2 * yf))) * 180) / Math.PI;
+        const sy = Math.min(img.naturalHeight - 1, Math.max(0, ((90 - lat) / 180) * img.naturalHeight - 0.5));
+        ctx.drawImage(img, 0, sy, img.naturalWidth, 1, 0, j, S, 1);
       }
-      done(undefined, tile);
-    });
-    return tile;
-  },
-}) as unknown as new (options?: L.GridLayerOptions) => L.GridLayer;
-new LocalEarth({ maxNativeZoom: 4, maxZoom: 13, className: "lm-local-tiles" }).addTo(map);
-const esriLayer = L.tileLayer(EARTH_TILES, { attribution, maxZoom: 13 }).addTo(map);
+      resolve(c);
+    };
+    img.src = `${BASE}imagery/earth.webp`;
+  });
+  const LocalEarth = L.GridLayer.extend({
+    createTile(this: L.GridLayer, coords: L.Coords, done: L.DoneCallback) {
+      const tile = document.createElement("canvas");
+      const size = this.getTileSize();
+      tile.width = size.x;
+      tile.height = size.y;
+      void mercator.then((src) => {
+        const n = 2 ** coords.z;
+        const ctx = tile.getContext("2d");
+        if (src && ctx && coords.y >= 0 && coords.y < n) {
+          const x = ((coords.x % n) + n) % n;
+          const w = src.width / n;
+          ctx.drawImage(src, x * w, coords.y * w, w, w, 0, 0, size.x, size.y);
+        }
+        done(undefined, tile);
+      });
+      return tile;
+    },
+  }) as unknown as new (options?: L.GridLayerOptions) => L.GridLayer;
+  localLayer = new LocalEarth({ maxNativeZoom: 4, maxZoom: 13, zIndex: 0, className: "lm-local-tiles" }).addTo(map);
+}
+const esriLayer = L.tileLayer(EARTH_TILES, { attribution, maxZoom: 13, zIndex: 1 }).addTo(map);
 
 /**
  * Vigila una capa de teselas externas y avisa cuando no llegan: fallan (sin red) o tardan demasiado.
@@ -266,23 +279,23 @@ function watchTiles(layer: L.TileLayer, onState: (down: boolean) => void, slowMs
   let ok = 0;
   let err = 0;
   let down = false;
-  let timer: number | undefined;
+  // Desde cuándo se espera sin recibir ninguna tesela (la capa puede haber empezado a cargar antes de vigilarla).
+  let waitingSince = performance.now();
   const set = (v: boolean) => { if (v !== down) { down = v; onState(v); } };
-  const arm = () => {
-    window.clearTimeout(timer);
-    timer = window.setTimeout(() => { if (!ok) set(true); }, slowMs);
-  };
-  layer.on("loading", () => { ok = 0; err = 0; arm(); });
-  layer.on("tileload", () => { ok++; window.clearTimeout(timer); set(false); });
+  layer.on("loading", () => { ok = 0; err = 0; waitingSince = performance.now(); });
+  layer.on("tileload", () => { ok++; waitingSince = performance.now(); set(false); });
   layer.on("tileerror", () => { err++; if (!ok && err >= 2) set(true); });
-  layer.on("load", () => { window.clearTimeout(timer); if (!ok && err) set(true); });
+  layer.on("load", () => { if (!ok && err) set(true); });
+  // Teselas que tardan demasiado: la capa sigue cargando y no ha llegado ninguna en slowMs.
+  const timer = window.setInterval(() => {
+    if (layer.isLoading() && performance.now() - waitingSince > slowMs) set(true);
+  }, 1000);
   const offline = () => set(true);
   const online = () => layer.redraw();
   window.addEventListener("offline", offline);
   window.addEventListener("online", online);
-  layer.on("remove", () => { window.clearTimeout(timer); window.removeEventListener("offline", offline); window.removeEventListener("online", online); });
+  layer.on("remove", () => { window.clearInterval(timer); window.removeEventListener("offline", offline); window.removeEventListener("online", online); });
   if (navigator.onLine === false) set(true);
-  arm();
 }
 let mapDown = false;
 let localShown = "";
@@ -297,7 +310,11 @@ function renderAviso() {
     localShown = want;
   }
 }
-watchTiles(esriLayer, (down) => { mapDown = down; renderAviso(); });
+watchTiles(esriLayer, (down) => {
+  mapDown = down;
+  if (down) addLocalEarth();
+  renderAviso();
+});
 const legend = new L.Control({ position: "bottomright" });
 const legendBox = L.DomUtil.create("div", "lm-legend");
 legend.onAdd = () => legendBox;
@@ -1112,7 +1129,8 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
   const eyebrow = story ? m("story") : title;
   const placeLine = story ? place?.full ?? place?.title : place?.full;
   // Enlace a los globos 3D con el sitio de referencia y el gemelo en la URL (globos.ts puede leerlos para abrirlo ya elegido).
-  const refId = s.twin_key ?? wins.L0?.best_ref ?? s.best_ref;
+  // Se prefiere un id de referencia real (globos.ts nombra sus opciones "ref:<id de referencia>").
+  const refId = [s.twin_key, wins.L0?.best_ref, s.best_ref].find((id) => id && REFS.has(id)) ?? s.twin_key ?? s.best_ref;
   const url3d = `./globos.html?sitio=${encodeURIComponent(`ref:${refId}`)}&lat=${s.lat.toFixed(4)}&lon=${s.lon.toFixed(4)}`;
   const refNote = refHere?.note ? noteOrNull(refHere.note, tr(refHere.note)) : null;
 
