@@ -1,6 +1,3 @@
-import "@fontsource/barlow/latin-400.css";
-import "@fontsource/barlow/latin-500.css";
-import "@fontsource/barlow/latin-600.css";
 import "./style.css";
 import { bindUiText, type UiText } from "./prefs";
 import {
@@ -13,7 +10,7 @@ import { createViewer, slopeBands, type Mode } from "./viewer";
 
 const marsSites = sites.filter(({ planet }) => planet === "Mars");
 
-// Franja de introducción y títulos de sección: textos propios de esta página (no están en i18n.ts)
+// Texto y cifras de la franja de exploración: textos propios de esta página (no están en i18n.ts)
 // y cifras sacadas del catálogo que ya usa el visor.
 const UI_TEXT: UiText = {
   es: {
@@ -21,14 +18,12 @@ const UI_TEXT: UiText = {
     "intro.figMars": "sitios de Marte con relieve HiRISE",
     "intro.figEarth": "parches de la Tierra en el catálogo",
     "intro.figPatch": "por parche, en celdas de {cell} m",
-    "step.pick": "Elige un sitio de Marte",
   },
   en: {
     "intro.lede": "Pick a Mars site with high-resolution relief and find the places on Earth whose terrain, surface and climate match it best. Both terrains are compared in 3D at the same size and scale.",
     "intro.figMars": "Mars sites with HiRISE relief",
     "intro.figEarth": "Earth patches in the catalog",
     "intro.figPatch": "per patch, in {cell} m cells",
-    "step.pick": "Choose a Mars site",
   },
 };
 bindUiText(UI_TEXT, { cell: cellSize });
@@ -79,6 +74,8 @@ const results = document.querySelector<HTMLElement>("#results")!;
 const comparison = document.querySelector<HTMLElement>("#comparison")!;
 const details = document.querySelector<HTMLElement>("#details")!;
 const matchList = document.querySelector("#match-list")!;
+const marsCoordinate = document.querySelector("#mars-coordinate")!;
+const earthCoordinate = document.querySelector("#earth-coordinate")!;
 
 const sources = [
   ["src.marsElev", "https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/"],
@@ -104,10 +101,10 @@ function renderChrome() {
     item.append(link);
     return item;
   }));
-  legend.innerHTML = `<span>${t("v.slope")}</span>${slopeBands.map(({ label, color }) =>
+  legend.innerHTML = slopeBands.map(({ label, color }) =>
     `<span><i style="background:${color}" aria-hidden="true"></i>${label}</span>`,
-  ).join("")}`;
-  document.querySelector("#mars-count")!.textContent = t("v.siteCount", { n: marsSites.length });
+  ).join("");
+  renderCoordinates();
   for (const { site, button } of markers) {
     button.title = siteLabel(site);
     button.setAttribute("aria-label", siteLabel(site));
@@ -141,7 +138,7 @@ for (const button of modeButtons) {
   button.addEventListener("click", () => {
     const mode = button.dataset.mode as Mode;
     viewer?.setMode(mode);
-    legend.style.visibility = mode === "slope" ? "visible" : "hidden";
+    legend.hidden = mode !== "slope";
     for (const option of modeButtons) option.setAttribute("aria-pressed", String(option === button));
   });
 }
@@ -215,8 +212,12 @@ function breakdownRows(match: Match) {
 }
 
 let currentMatch: Match | undefined;
-let shownMatches: Match[] = [];
-let rankedCount = 0;
+let shownMatches: { match: Match; rank: number }[] = [];
+
+function renderCoordinates() {
+  marsCoordinate.textContent = siteCoordinates(target);
+  earthCoordinate.textContent = currentMatch ? siteCoordinates(currentMatch.site) : "";
+}
 
 /** Cabeceras y tabla de medidas del par elegido (sin volver a cargar el terreno 3D). */
 function renderDetails(match: Match) {
@@ -224,7 +225,7 @@ function renderDetails(match: Match) {
   headings.replaceChildren(...pair.map((site) => {
     const panel = document.createElement("div");
     panel.className = "site";
-    const name = document.createElement("h2");
+    const name = document.createElement("h3");
     name.textContent = site.name;
     const source = document.createElement("a");
     source.href = site.raster || site.sourceUrl;
@@ -247,7 +248,7 @@ async function selectMatch(match: Match) {
   const request = new AbortController();
   pending = request;
   const pair = [target, candidate];
-  document.querySelector("#earth-site")!.textContent = candidate.name;
+  renderCoordinates();
   globes?.flyTo(candidate);
   renderDetails(match);
 
@@ -292,7 +293,7 @@ const matchMetrics = [
 ] as const;
 
 function renderMatchList() {
-  matchList.replaceChildren(...shownMatches.map((match, index) => {
+  matchList.replaceChildren(...shownMatches.map(({ match, rank: position }, index) => {
     const { site: candidate } = match;
     const item = document.createElement("li");
     item.style.setProperty("--i", String(index)); // retardo de la entrada escalonada (style.css)
@@ -300,28 +301,24 @@ function renderMatchList() {
     button.type = "button";
     button.dataset.site = candidate.id;
     button.setAttribute("aria-pressed", String(currentMatch?.site === candidate));
-    // Tarjeta: posición y puntuación grande arriba (decorativas: la frase completa va en .match-distance).
+    // Puesto en el ranking completo y puntuación: cifras a la vista; la frase completa va en .visually-hidden.
     const rank = document.createElement("span");
     rank.className = "match-rank";
     rank.setAttribute("aria-hidden", "true");
-    rank.textContent = String(index + 1).padStart(2, "0");
-    const big = document.createElement("span");
-    big.className = "match-score";
-    big.setAttribute("aria-hidden", "true");
-    big.textContent = num(match.total);
-    const meta = document.createElement("span");
-    meta.className = "match-meta";
-    meta.setAttribute("aria-hidden", "true");
-    meta.textContent = index === 0 ? t("v.bestOf", { n: rankedCount }).replace(/[\s·]+$/u, "") : "";
+    rank.textContent = String(position);
     const name = document.createElement("span");
     name.className = "match-name";
     name.textContent = candidate.name;
     const origin = document.createElement("span");
-    origin.className = `match-origin ${candidate.origin ?? ""}`;
+    origin.className = "match-origin";
     origin.textContent = originLabel(candidate);
     const score = document.createElement("span");
     score.className = "match-distance";
-    score.textContent = `${index === 0 ? t("v.bestOf", { n: rankedCount }) : ""}${t("v.score", { v: num(match.total) })}`;
+    score.setAttribute("aria-hidden", "true");
+    score.textContent = num(match.total);
+    const spoken = document.createElement("span");
+    spoken.className = "visually-hidden";
+    spoken.textContent = `${t("v.rank", { n: position })}. ${t("v.score", { v: num(match.total) })}.`;
     const bars = document.createElement("span");
     bars.className = "match-bars";
     bars.innerHTML = matchMetrics.map(({ key, icon }) => `
@@ -330,7 +327,7 @@ function renderMatchList() {
         <i aria-hidden="true" style="--v:${match[key]}"></i>
         <span class="match-metric-value">${num(match[key])}</span>
       </span>`).join("");
-    button.append(rank, big, name, origin, meta, score, bars);
+    button.append(rank, name, score, origin, bars, spoken);
     button.addEventListener("click", () => void selectMatch(match));
     item.append(button);
     return item;
@@ -356,8 +353,7 @@ function selectSite(site: Site) {
   }).slice(0, 5);
   const bestCurated = ranked.find(({ site: s }) => s.origin === "curated");
   if (bestCurated && !shown.includes(bestCurated)) shown[shown.length - 1] = bestCurated;
-  shownMatches = shown;
-  rankedCount = ranked.length;
+  shownMatches = shown.map(match => ({ match, rank: ranked.indexOf(match) + 1 }));
   currentMatch = undefined;
   renderMatchList();
   results.hidden = false;
@@ -369,9 +365,8 @@ picker.addEventListener("change", () => {
   const site = marsSites.find(({ id }) => id === picker.value);
   if (site) selectSite(site);
 });
-document.querySelector("#find-matches")!.addEventListener("click", () => selectSite(target));
-markers.find(({ site }) => site === target)?.button.setAttribute("aria-pressed", "true");
 renderChrome();
+selectSite(target);
 
 // Cambio de idioma: se vuelven a pintar los textos generados sin perder la selección ni recargar el 3D.
 onLangChange(() => {

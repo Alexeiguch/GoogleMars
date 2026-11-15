@@ -1,8 +1,5 @@
 // Página «Globos 3D»: Luna | Tierra | Marte en un solo canvas (un contexto WebGL), con viewports y scissor
 // como src/globes.ts. Se dibuja solo cuando algo cambia (sin bucle continuo).
-import "@fontsource/barlow/latin-400.css";
-import "@fontsource/barlow/latin-500.css";
-import "@fontsource/barlow/latin-600.css";
 import "./style.css";
 import "./globos.css";
 import { bindUiText, type UiText } from "./prefs";
@@ -106,7 +103,7 @@ const MARKER_RADIUS = 1.0002;
 // Los puntos van encima de las imágenes de los planetas: colores fijos, iguales en los dos temas.
 const COLOR: Record<Body, string> = { moon: "#c9d1e0", mars: "#d69a70" };
 // Las barras del panel de detalle siguen el tema.
-const BAR_COLOR: Record<Body, string> = { moon: "var(--moon)", mars: "var(--accent)" };
+const BAR_COLOR: Record<Body, string> = { moon: "var(--moon)", mars: "var(--mars)" };
 const PATCH_COLOR = "#efe6da";
 const HEAT_RAMP: Record<Body, [string, string]> = { moon: ["#46506a", "#eef3ff"], mars: ["#6e3a1f", "#ffc79a"] };
 

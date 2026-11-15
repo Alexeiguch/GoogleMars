@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#151517">
+    <meta name="theme-color" content="#0a1020">
     <script>
       // Idioma y tema antes de pintar (sin parpadeo). Ver src/prefs.ts e src/i18n.ts.
       (function () {
@@ -16,9 +16,9 @@
     <title data-i18n="v.docTitle">Análogos terrestres · Visor 3D</title>
   </head>
   <body>
-    <main>
-      <header class="masthead">
-        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">Análogos terrestres</span></h1>
+    <header class="site-header">
+      <div class="masthead">
+        <a class="wordmark" href="./"><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">Análogos terrestres</span></a>
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
           <a href="./" aria-current="page" data-i18n="nav.viewer">Visor 3D de Marte</a>
           <a href="./luna-marte.html" data-i18n="nav.map">Mapa Luna y Marte</a>
@@ -26,26 +26,32 @@
           <a href="./globos.html#path-planner" data-i18n="path.title">Planificador de rutas</a>
           <a href="#sources"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
         </nav>
-      </header>
-      <section class="intro" aria-labelledby="intro-title">
-        <div class="intro__text">
-          <h2 class="intro__title" id="intro-title" data-i18n="nav.viewer">Visor 3D de Marte</h2>
-          <p class="intro__lede" data-ui="intro.lede"></p>
-        </div>
-        <dl class="intro__figures">
-          <div class="fig fig--mars"><dt data-ui="intro.figMars"></dt><dd id="fig-mars"></dd></div>
-          <div class="fig fig--earth"><dt data-ui="intro.figEarth"></dt><dd id="fig-earth"></dd></div>
-          <div class="fig"><dt data-ui="intro.figPatch"></dt><dd id="fig-patch"></dd></div>
-        </dl>
-      </section>
-      <section class="globe-section" aria-label="Globos de los planetas" data-i18n-attr="aria-label:v.globesLabel">
-        <header class="step-head"><span class="step-num" aria-hidden="true">01</span><h2 data-ui="step.pick">Elige un sitio de Marte</h2></header>
-        <div class="panel globe-panel">
-          <div class="globe-headings ruled">
-            <div><h2><span data-i18n="planet.mars">Marte</span> <span id="mars-count"></span></h2><div class="site-controls"><select id="mars-site" aria-label="Sitio de terreno de Marte" data-i18n-attr="aria-label:v.marsPicker"></select><button id="find-matches" type="button" data-i18n="v.find">Buscar análogos</button></div></div>
-            <div><h2 data-i18n="planet.earth">Tierra</h2><span id="earth-site" aria-live="polite"></span></div>
+      </div>
+    </header>
+    <main class="viewer-page">
+      <section class="globe-section" aria-labelledby="explore-title">
+        <div class="explore-bar">
+          <div class="explore-intro">
+            <h1 id="explore-title" data-i18n="v.exploreTitle">Compara Marte y la Tierra</h1>
+            <p class="intro__lede" data-ui="intro.lede"></p>
           </div>
-          <div class="globe-stage">
+          <div class="site-controls">
+            <label for="mars-site" data-i18n="v.chooseMars">Sitio de Marte</label>
+            <select id="mars-site"></select>
+            <a class="compare-action" href="#comparison" data-i18n="v.compareLink">Comparar terreno</a>
+          </div>
+          <dl class="intro__figures">
+            <div class="fig fig--mars"><dt data-ui="intro.figMars"></dt><dd id="fig-mars"></dd></div>
+            <div class="fig fig--earth"><dt data-ui="intro.figEarth"></dt><dd id="fig-earth"></dd></div>
+            <div class="fig"><dt data-ui="intro.figPatch"></dt><dd id="fig-patch"></dd></div>
+          </dl>
+        </div>
+        <div class="globe-stage">
+          <div class="globe-headings">
+            <div><h2 data-i18n="planet.mars">Marte</h2><p id="mars-coordinate" class="globe-coordinate"></p></div>
+            <div><h2 data-i18n="planet.earth">Tierra</h2><p id="earth-coordinate" class="globe-coordinate"></p></div>
+          </div>
+          <div class="globe-viewports">
             <canvas id="globes" aria-label="Globos de Marte y la Tierra. Arrastra Marte para girarlo." data-i18n-attr="aria-label:v.globesCanvas"></canvas>
             <div id="mars-drag" aria-hidden="true"></div>
             <div id="mars-pins"></div>
@@ -54,42 +60,40 @@
           </div>
         </div>
       </section>
-      <section class="results" id="results" aria-labelledby="matches-title" hidden>
-        <div class="result-title step-head"><span class="step-num" aria-hidden="true">02</span><h2 id="matches-title" data-i18n="v.matchesTitle">Análogos en la Tierra</h2><a href="#comparison"><span data-i18n="v.compareLink">Comparar terreno</span> <span aria-hidden="true">↓</span></a></div>
-        <ol class="match-list" id="match-list" aria-label="Sitios de la Tierra ordenados por terreno, superficie y clima" data-i18n-attr="aria-label:v.matchListLabel"></ol>
-      </section>
-      <section class="comparison" aria-label="Comparación de terreno" data-i18n-attr="aria-label:v.comparisonLabel" id="comparison" hidden>
-        <header class="step-head"><span class="step-num" aria-hidden="true">03</span><h2 data-i18n="v.compareLink">Comparar terreno</h2></header>
-        <div class="panel comparison-panel">
-        <div class="toolbar">
-          <div class="modes" role="group" aria-label="Color del terreno" data-i18n-attr="aria-label:v.colorLabel">
-            <button type="button" data-mode="relief" aria-pressed="false" data-i18n="v.relief">Relieve</button>
-            <button type="button" data-mode="slope" aria-pressed="true" data-i18n="v.slope">Pendiente</button>
+      <div class="comparison-workspace">
+        <section class="comparison" aria-labelledby="comparison-title" id="comparison" tabindex="-1" hidden>
+          <h2 id="comparison-title" data-i18n="v.compareLink">Comparar terreno</h2>
+          <div class="toolbar">
+            <div class="modes" role="group" aria-label="Color del terreno" data-i18n-attr="aria-label:v.colorLabel">
+              <button type="button" data-mode="relief" aria-pressed="false" data-i18n="v.relief">Relieve</button>
+              <button type="button" data-mode="slope" aria-pressed="true" data-i18n="v.slope">Pendiente</button>
+            </div>
+            <div class="camera-actions" role="group" aria-label="Cámara compartida" data-i18n-attr="aria-label:v.cameraLabel">
+              <button type="button" id="top-view" data-i18n="v.topView">Vista cenital</button>
+              <button type="button" id="reset-view" data-i18n="v.resetView">Restablecer vista</button>
+            </div>
           </div>
-          <div class="camera-actions" role="group" aria-label="Cámara compartida" data-i18n-attr="aria-label:v.cameraLabel">
-            <button type="button" id="top-view" data-i18n="v.topView">Vista cenital</button>
-            <button type="button" id="reset-view" data-i18n="v.resetView">Restablecer vista</button>
+          <div class="site-grid" id="site-headings"></div>
+          <div class="stage">
+            <canvas id="terrain" tabindex="0" aria-label="Vistas de terreno sincronizadas. Arrastra o usa las flechas para girar los dos terrenos. Usa la rueda o más y menos para acercar." data-i18n-attr="aria-label:v.terrainCanvas"></canvas>
+            <p id="viewer-error" role="status" hidden></p>
           </div>
-        </div>
-        <div class="site-grid ruled" id="site-headings"></div>
-        <div class="stage">
-          <canvas id="terrain" tabindex="0" aria-label="Vistas de terreno sincronizadas. Arrastra o usa las flechas para girar los dos terrenos. Usa la rueda o más y menos para acercar." data-i18n-attr="aria-label:v.terrainCanvas"></canvas>
-          <p id="viewer-error" role="status" hidden></p>
-        </div>
-        <div class="map-footer">
-          <div class="legend" id="legend" aria-label="Pendiente en grados" data-i18n-attr="aria-label:v.legendLabel"></div>
-          <span id="grid-scale"></span>
-        </div>
-        </div>
-      </section>
+          <div class="map-footer">
+            <div class="legend" id="legend" aria-label="Pendiente en grados" data-i18n-attr="aria-label:v.legendLabel"></div>
+            <span id="grid-scale"></span>
+          </div>
+        </section>
+        <section class="results" id="results" aria-labelledby="matches-title" hidden>
+          <div class="result-title"><h2 id="matches-title" data-i18n="v.matchesTitle">Análogos en la Tierra</h2><a href="#comparison"><span data-i18n="v.compareLink">Comparar terreno</span></a></div>
+          <ol class="match-list" role="list" id="match-list" aria-label="Sitios de la Tierra ordenados por terreno, superficie y clima" data-i18n-attr="aria-label:v.matchListLabel"></ol>
+        </section>
+      </div>
       <section class="details" id="details" aria-labelledby="metrics-title" hidden>
-        <header class="step-head"><span class="step-num" aria-hidden="true">04</span><h2 id="metrics-title" data-i18n="v.metricsTitle">Medidas del terreno</h2></header>
-        <div class="panel table-panel">
-          <table>
-            <thead><tr><th scope="col" data-i18n="v.measure">Medida</th><th scope="col" data-i18n="planet.mars">Marte</th><th scope="col" data-i18n="planet.earth">Tierra</th></tr></thead>
-            <tbody id="metrics"></tbody>
-          </table>
-        </div>
+        <h2 id="metrics-title" data-i18n="v.metricsTitle">Medidas del terreno</h2>
+        <table>
+          <thead><tr><th scope="col" data-i18n="v.measure">Medida</th><th scope="col" data-i18n="planet.mars">Marte</th><th scope="col" data-i18n="planet.earth">Tierra</th></tr></thead>
+          <tbody id="metrics"></tbody>
+        </table>
       </section>
       <footer id="sources">
         <h2 data-i18n="sources.title">Fuentes de datos</h2><ul id="source-list"></ul>

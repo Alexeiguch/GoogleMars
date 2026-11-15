@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#151517">
+    <meta name="theme-color" content="#0a1020">
     <script>
       // Idioma y tema antes de pintar (sin parpadeo). Ver src/prefs.ts e src/i18n.ts.
       (function () {
@@ -16,9 +16,9 @@
     <title data-i18n="gl.docTitle">Análogos terrestres · Globos 3D</title>
   </head>
   <body>
-    <main class="gl">
-      <header class="masthead">
-        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">Análogos terrestres</span></h1>
+    <header class="site-header">
+      <div class="masthead">
+        <a class="wordmark" href="./"><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">Análogos terrestres</span></a>
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
           <a href="./" data-i18n="nav.viewer">Visor 3D de Marte</a>
           <a href="./luna-marte.html" data-i18n="nav.map">Mapa Luna y Marte</a>
@@ -26,10 +26,11 @@
           <a href="#path-planner" id="path-link" data-i18n="path.title">Planificador de rutas</a>
           <a href="#sources" id="gl-sources-link"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
         </nav>
-      </header>
-
+      </div>
+    </header>
+    <main class="gl">
       <div class="gl-toolbar">
-        <h2 class="gl-title" id="gl-browse-title" data-i18n="nav.globes">Globos 3D</h2>
+        <h1 class="gl-title" id="gl-browse-title" data-i18n="nav.globes">Globos 3D</h1>
         <div class="gl-mode">
           <div class="gl-seg" role="group" aria-label="Puntos que se muestran" data-i18n-attr="aria-label:gl.modeLabel">
             <button type="button" data-mode="best" aria-pressed="true" data-i18n="gl.best">Mejores</button>
@@ -50,7 +51,7 @@
 
       <section class="path-toolbar" id="path-tools" aria-labelledby="path-title" hidden>
         <div class="path-toolbar-head">
-          <h2 class="gl-title" id="path-title" data-i18n="path.title">Planificador de rutas</h2>
+          <h1 class="gl-title" id="path-title" data-i18n="path.title">Planificador de rutas</h1>
           <div class="path-search-actions">
             <div class="path-distance" id="path-distance" aria-hidden="true">
               <strong id="path-distance-value"></strong>

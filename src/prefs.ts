@@ -1,10 +1,13 @@
 // Botones de idioma (ES/EN) y tema (claro/oscuro) e insignia del reto en la cabecera de las tres páginas.
 // El tema y el idioma iniciales los fija el script en línea del <head> para que no haya parpadeo.
+import "@fontsource/fira-sans/latin-400.css";
+import "@fontsource/fira-sans/latin-500.css";
+import "@fontsource/inter/latin-600.css";
+import "@fontsource/inter/latin-700.css";
 import { applyStatic, getLang, onLangChange, setLang, t, type Lang } from "./i18n";
 
 type Theme = "light" | "dark";
 const THEME_KEY = "analogs-theme";
-const THEME_COLOR: Record<Theme, string> = { dark: "#151517", light: "#f4f1ec" };
 
 /**
  * Textos de interfaz nuevos de cada página (introducción, títulos de sección…) que no están en i18n.ts.
@@ -48,7 +51,7 @@ box.innerHTML = `
   <button type="button" class="theme-toggle">${sun}${moon}</button>`;
 document.querySelector(".masthead")?.append(box);
 
-// Insignia de la NASA junto al título, como contexto del reto (no implica respaldo de la NASA).
+// Insignia de la NASA junto al nombre del sitio, como contexto del reto (no implica respaldo de la NASA).
 // Sus textos viven aquí y no en i18n.ts para no tocar el diccionario compartido.
 const BRAND_TEXT: Record<Lang, { lead: string; event: string }> = {
   es: { lead: "Proyecto para", event: "NASA Space Apps Challenge 2026" },
@@ -59,7 +62,7 @@ brand.className = "brand-event";
 brand.innerHTML = `
   <img class="brand-event__logo" src="${import.meta.env.BASE_URL}brand/nasa-logo.svg" alt="NASA" width="43" height="36" decoding="async">
   <span class="brand-event__text"><span class="brand-event__lead"></span> <span class="brand-event__name"></span></span>`;
-document.querySelector(".masthead h1")?.after(brand);
+document.querySelector(".masthead .wordmark")?.after(brand);
 
 function syncBrand() {
   const text = BRAND_TEXT[getLang()];
@@ -78,7 +81,6 @@ function syncTheme() {
   const label = t(currentTheme() === "dark" ? "prefs.toLight" : "prefs.toDark");
   themeButton.setAttribute("aria-label", label);
   themeButton.title = label;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLOR[currentTheme()]);
 }
 
 for (const button of langButtons) button.addEventListener("click", () => setLang(button.dataset.lang as Lang));

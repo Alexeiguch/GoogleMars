@@ -1,99 +1,84 @@
-/* «Cartografía de misión»: tokens y estilos base de las tres vistas.
-   El color dice de qué cuerpo es un dato (Marte óxido, Luna gris azulado, Tierra verde azulado);
-   la «tinta» (texto invertido) marca la acción principal y lo seleccionado.
-   --accent sigue siendo el color de Marte: lo usan lunaMarte.css y globos.ts con ese sentido.
+/* Tokens y estilos base de las tres vistas (rediseño de inspiración NASA).
+   Cabecera azul noche fija en los dos temas, amarillo «señal» para la acción principal y lo elegido,
+   Inter para títulos y Fira Sans para el texto (las fuentes las carga src/prefs.ts).
+   --accent es el acento de la interfaz; el color de cada cuerpo en los datos va en --mars, --moon y --earth.
    El tema lo fija el script del <head> en <html data-theme>; ver src/prefs.ts. */
-@import "@fontsource/barlow-condensed/latin-500.css";
-@import "@fontsource/barlow-condensed/latin-600.css";
-@import "@fontsource/barlow-condensed/latin-700.css";
-@import "@fontsource/ibm-plex-mono/latin-400.css";
-@import "@fontsource/ibm-plex-mono/latin-500.css";
-
 :root {
   color-scheme: dark;
-  --ground: #151517;
-  --surface: #1c1c20;
-  --sunken: #101012;
-  --hover: #25252a;
-  --border: #2f2e34;
-  /* Retícula, reglas y marcas de esquina (decorativo, nunca texto). */
-  --rule: #4a4850;
-  --text: #f2f0ec;
-  --muted: #a8a5ad;
-  /* Color por cuerpo: ≥ 4.5:1 sobre todas las superficies. */
-  --mars: #e08a5f;
-  --moon: #b8c3d6;
-  --earth: #6fc1a5;
-  --accent: var(--mars);
-  /* Tinta: acción principal y selección. */
-  --action: #f2f0ec;
-  --action-ink: #151517;
-  --ok: #8cc49f;
-  --info: #8fb3d9;
-  --warn: #d9b26f;
-  --story: #d8d5da;
-  --overlay: rgba(21, 21, 23, .9);
-  --pin-dot: #eaa27e;
+  --ground: #10131b;
+  --surface: #181d29;
+  --sunken: #0a1020;
+  --hover: #242e45;
+  --border: #39445a;
   /* Borde de controles (selects, botones con marco): ≥ 3:1 contra el fondo. */
-  --control-border: #6b6770;
-  --accent-ink: #151517;
-  --accent-soft: rgba(224, 138, 95, .13);
-  --selection: rgba(224, 138, 95, .32);
-  --font-body: "Barlow", system-ui, sans-serif;
-  --font-display: "Barlow Condensed", "Barlow", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --control-border: #6c7a96;
+  --text: #f5f7ff;
+  --muted: #b2bdd2;
+  --accent: #e7f434;
+  --signal: #e7f434;
+  --signal-ink: #1b1b1b;
+  --blue: #1b2b85;
+  --selected: #252f50;
+  /* Color por cuerpo en los datos: Marte óxido, Luna gris azulado, Tierra verde azulado. */
+  --mars: #e08a5f;
+  --moon: #b9c7df;
+  --earth: #6fc1a5;
+  --ok: #8cc49f;
+  --info: #9ec5ff;
+  --warn: #efc47a;
+  --story: #d1d9e9;
+  --overlay: #181d29f5;
+  --display: "Inter", system-ui, sans-serif;
   /* Movimiento: corto y con salida rápida. */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --t-fast: 120ms;
   --t-base: 200ms;
   --t-enter: 280ms;
-  --pad: 32px;
+  --pad: clamp(20px, 4vw, 60px);
+  /* Alto de .site-header: lo usan globos.css y lunaMarte.css para llenar la pantalla. */
+  --header-h: 73px;
   color: var(--text);
   background: var(--ground);
-  font: 400 16px/1.5 var(--font-body);
+  font: 400 16px/1.45 "Fira Sans", system-ui, sans-serif;
   font-synthesis: none;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --ground: #f4f1ec;
-  --surface: #fbfaf7;
-  --sunken: #ebe7e0;
-  --hover: #ece8e1;
-  --border: #d9d3ca;
-  --rule: #b3ab9f;
-  --text: #1b1a1d;
-  --muted: #5d5862;
+  --ground: #f1f4fa;
+  --surface: #fff;
+  --sunken: #e5ebf7;
+  --hover: #e8eefb;
+  --border: #bdc9df;
+  --control-border: #7b879e;
+  --text: #111a30;
+  --muted: #465570;
+  --accent: #0050d8;
+  --selected: #e4edff;
   --mars: #a5502a;
-  --moon: #536585;
+  --moon: #4b638a;
   --earth: #237460;
-  --action: #1b1a1d;
-  --action-ink: #fbfaf7;
-  --ok: #2f7a4a;
-  --info: #3b6b9c;
-  --warn: #9a6d18;
-  --story: #3a363c;
-  --overlay: rgba(251, 250, 247, .93);
-  --pin-dot: #c8693a;
-  --control-border: #8a837a;
-  --accent-ink: #fbfaf7;
-  --accent-soft: rgba(165, 80, 42, .09);
-  --selection: rgba(165, 80, 42, .2);
+  --ok: #256845;
+  --info: #175593;
+  --warn: #81530b;
+  --story: #354561;
+  --overlay: #fffffff5;
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; }
-main { max-width: 1560px; margin-inline: auto; padding: 0 var(--pad) 48px; }
+main, .masthead { width: 100%; max-width: 1560px; margin-inline: auto; padding-inline: var(--pad); }
+main { padding-bottom: 44px; }
 h1, h2, h3, p { margin: 0; }
-/* Títulos en display condensada en las tres vistas (también los de la página Luna/Marte). */
-h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: .005em; }
-/* Cifras de tabla en monoespaciada tabular: coordenadas, porcentajes y medidas. */
-td:not(:first-child), .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: .875em; letter-spacing: -.01em; }
-a { color: var(--text); text-underline-offset: .26em; }
-button { font: inherit; }
-button:focus-visible, a:focus-visible, canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-select:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-::selection { background: var(--selection); color: var(--text); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; }
+a { color: inherit; text-underline-offset: .24em; }
+button, select { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+:where(button, select, summary, a, canvas, [tabindex]):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+::selection { color: var(--signal-ink); background: var(--signal); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 html { scrollbar-color: var(--border) transparent; }
 :where(button, a, select, summary) { -webkit-tap-highlight-color: transparent; }
 /* Transiciones de color comunes: cortas y solo en las propiedades que cambian. */
@@ -110,44 +95,32 @@ html { scrollbar-color: var(--border) transparent; }
 }
 
 /* Cambio de vista: la cabecera se queda quieta (misma posición en las tres páginas) y el contenido entra.
-   Se descartó @view-transition entre páginas: en este navegador lanzaba errores «Page already revealed». */
-/* Parte de un estado ya visible (opacidad .4): si el navegador no llega a pintar la animación, el contenido se lee igual. */
+   Parte de un estado ya visible (opacidad .4): si el navegador no llega a pintar la animación, el contenido se lee igual. */
 @keyframes rise { from { opacity: .4; transform: translateY(8px); } }
-main > :not(.masthead), body > footer { animation: rise var(--t-enter) var(--ease-out) both; }
-main > .intro { animation-delay: 0ms; }
-main > :not(.masthead):not(.intro) { animation-delay: 60ms; }
+main > *, body > footer { animation: rise var(--t-enter) var(--ease-out) 60ms both; }
 
-.toolbar, .map-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+/* ---- Cabecera: azul noche en los dos temas ---- */
+.site-header {
+  --accent: var(--signal);
+  --text: #fff;
+  --muted: #c8d2ee;
+  --border: #404d73;
+  --control-border: #7383b6;
+  --ground: #0a1020;
+  --mars: #e08a5f;
+  --moon: #b9c7df;
+  --earth: #6fc1a5;
+  background: var(--ground);
+  color: var(--text);
+  border-bottom: 1px solid #283559;
 }
-
-/* ---- Cabecera: dos niveles. Arriba título, insignia y preferencias; abajo, las vistas como pestañas. ---- */
-.masthead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 24px;
-  border-bottom: 1px solid var(--border);
-}
-.masthead h1 {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 68px;
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: .03em;
-  text-transform: uppercase;
-}
-.mark { width: 18px; height: 18px; border: 1.5px solid var(--accent); transform: rotate(45deg); position: relative; flex: none; }
-.mark::after { content: ""; position: absolute; inset: 4px; background: var(--accent); }
-/* La página Luna/Marte calcula su alto con la cabecera antigua (82 px): se corrige con el alto nuevo. */
-:root:has(.lm-layout) { --panel-h: calc(100vh - 114px - 24px); }
-/* Insignia del reto junto al título (src/prefs.ts). Contexto del evento, no respaldo de la NASA. */
+.masthead { min-height: 72px; display: flex; align-items: center; gap: 12px 24px; }
+.wordmark { display: inline-flex; align-items: center; gap: 12px; flex: none; font: 700 20px/1.1 var(--display); text-decoration: none; letter-spacing: -.035em; }
+.mark { position: relative; flex: 0 0 26px; aspect-ratio: 1; }
+.mark::before, .mark::after { content: ""; position: absolute; width: 15px; height: 15px; border: 1.5px solid currentColor; border-radius: 50%; }
+.mark::before { inset: 2px auto auto 1px; color: #fff; }
+.mark::after { inset: auto 1px 2px auto; color: var(--signal); }
+/* Insignia del reto junto al nombre del sitio (src/prefs.ts). Contexto del evento, no respaldo de la NASA. */
 .brand-event {
   display: flex;
   align-items: center;
@@ -160,113 +133,72 @@ main > :not(.masthead):not(.intro) { animation-delay: 60ms; }
   font-size: 12px;
   line-height: 1.25;
 }
-.brand-event__logo { display: block; width: auto; height: 34px; flex: none; }
+.brand-event__logo { display: block; width: auto; height: 32px; flex: none; }
 .brand-event__text { display: grid; }
-.brand-event__name { color: var(--text); font-weight: 500; letter-spacing: .01em; }
-
-/* Vistas como pestañas: cada una lleva el color del cuerpo que protagoniza. */
-.views {
-  order: 3;
-  flex-basis: 100%;
-  display: flex;
-  align-items: stretch;
-  border-top: 1px solid var(--border);
-}
-.views a {
-  --tab: var(--text);
-  position: relative;
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 20px;
-  border-right: 1px solid var(--border);
-  color: var(--muted);
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  text-decoration: none;
-}
-.views a:first-child { border-left: 1px solid var(--border); }
-.views a[href="./"] { --tab: var(--mars); }
-.views a[href="./luna-marte.html"] { --tab: var(--moon); }
-.views a[href="./globos.html"] { --tab: var(--earth); }
-.views a::after {
-  content: "";
-  position: absolute;
-  inset: auto -1px -1px;
-  height: 3px;
-  background: transparent;
-  transition: background-color var(--t-base) var(--ease-out);
-}
-.views a:hover { color: var(--text); background: var(--hover); }
-.views a[aria-current="page"] { color: var(--text); background: var(--surface); }
-.views a[aria-current="page"]::after { background: var(--tab); }
-.views a:focus-visible { outline-offset: -3px; }
-/* «Fuentes de datos» es un ancla de la página, no una vista: va aparte, a la derecha. */
-.views a[href="#sources"] {
-  margin-left: auto;
-  padding-right: 0;
-  border: 0;
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-transform: none;
-}
-.views a[href="#sources"]:hover { background: none; text-decoration: underline; }
-
-/* Idioma y tema (src/prefs.ts) */
-.prefs { order: 2; display: flex; align-items: center; gap: 10px; flex: none; margin-left: auto; }
-.lang-switch { display: flex; border: 1px solid var(--control-border); }
-.lang-switch button, .theme-toggle {
-  min-height: 40px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-.lang-switch button { min-width: 44px; padding: 0 10px; font-family: var(--font-mono); font-size: 13px; font-weight: 500; letter-spacing: .06em; }
+.brand-event__name { color: var(--text); font-weight: 500; }
+.views { display: flex; flex-wrap: nowrap; align-self: stretch; align-items: stretch; gap: 0 22px; margin-left: auto; }
+.views a { display: inline-flex; align-items: center; gap: .35em; border-block-end: 2px solid transparent; font-size: 15px; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.views a:hover { color: #fff; }
+.views a[aria-current="page"] { color: #fff; border-block-end-color: var(--signal); }
+.prefs { display: flex; align-items: center; gap: 8px; flex: none; }
+.lang-switch { display: flex; border: 1px solid var(--control-border); border-radius: 4px; overflow: hidden; }
+.lang-switch button, .theme-toggle { min-height: 34px; border: 0; background: transparent; color: var(--muted); }
+.lang-switch button { min-width: 32px; padding: 0 7px; font-size: 13px; font-weight: 500; }
 .lang-switch button + button { border-left: 1px solid var(--control-border); }
-.lang-switch button:hover, .theme-toggle:hover { color: var(--text); background: var(--hover); }
-.lang-switch button[aria-pressed="true"] { background: var(--action); color: var(--action-ink); }
-.theme-toggle { display: grid; place-items: center; width: 42px; border: 1px solid var(--control-border); color: var(--text); }
+.lang-switch button:hover, .theme-toggle:hover { color: #fff; background: #263358; }
+.lang-switch button[aria-pressed="true"] { background: #e8edff; color: var(--ground); }
+.theme-toggle { display: grid; place-items: center; width: 36px; border: 1px solid var(--control-border); border-radius: 4px; color: #fff; }
 .lang-switch button:active, .theme-toggle:active { transform: scale(.96); }
 .lang-switch button, .theme-toggle { transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out); }
-.theme-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.theme-toggle svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 /* Se muestra el icono del tema al que se cambia. */
 .theme-toggle .icon-moon, :root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
 :root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
 
-/* ---- Franja de introducción: título de la vista, qué se ve y cifras clave sacadas de los datos ---- */
-.intro {
+/* ---- Franja de exploración (visor 3D): título, qué se ve, cifras clave y selector de Marte ---- */
+.globe-section {
+  --accent: var(--signal);
+  --text: #fff;
+  --muted: #cbd6f6;
+  --border: #4a5cb0;
+  --mars: #e08a5f;
+  --earth: #6fc1a5;
+  color-scheme: dark;
+  color: var(--text);
+  background: #0b1638;
+  margin-inline: calc(-1 * var(--pad));
+}
+.explore-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) min(100%, 440px);
   align-items: end;
-  gap: 24px 56px;
-  padding: 44px 0 32px;
+  gap: 20px 48px;
+  padding: 30px var(--pad) 26px;
+  background: var(--blue);
 }
-.intro__title {
-  font-size: clamp(44px, 5.2vw, 76px);
-  font-weight: 700;
-  line-height: .9;
-  letter-spacing: 0;
-  text-transform: uppercase;
-  text-wrap: balance;
-}
-.intro__lede { margin-top: 16px; max-width: 60ch; color: var(--story); font-size: 17px; line-height: 1.5; text-wrap: pretty; }
-.intro__figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--rule); }
-.fig { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 8px; padding: 14px 16px 0 0; }
+.explore-bar h1 { font-size: 2.5rem; letter-spacing: -.04em; line-height: 1.06; font-weight: 700; text-wrap: balance; }
+.explore-bar .intro__lede { margin-top: 12px; color: var(--muted); font-size: 16px; }
+.explore-bar .intro__figures { margin-top: 22px; max-width: 640px; }
+.site-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 10px; width: 100%; }
+.site-controls label { grid-column: 1 / -1; color: var(--muted); font-size: 14px; }
+.site-controls select, .compare-action { min-height: 44px; padding-inline: 12px; border-radius: 4px; font-weight: 500; }
+.site-controls select { min-width: 0; border: 1px solid #8092d1; color: #fff; background: #121e5c; }
+.site-controls select:hover { border-color: #b4c0ec; }
+.compare-action { display: inline-flex; align-items: center; justify-content: center; background: var(--signal); color: var(--signal-ink); text-decoration: none; white-space: nowrap; }
+.compare-action:hover { background: #f5ff87; }
+.compare-action:active { background: #cbd821; }
+
+/* Texto de introducción y cifras sacadas de los datos (visor 3D y pie de los globos 3D). */
+.intro { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: end; gap: 24px 56px; }
+.intro__lede { max-width: 62ch; color: var(--story); font-size: 17px; line-height: 1.5; text-wrap: pretty; }
+.intro__figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--border); }
+.fig { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 6px; padding: 12px 16px 0 0; }
 .fig + .fig { padding-left: 16px; border-left: 1px solid var(--border); }
 .fig dd {
   margin: 0;
   color: var(--fig, var(--text));
-  font-family: var(--font-mono);
-  font-size: clamp(28px, 2.8vw, 42px);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -.03em;
+  font: 700 clamp(26px, 2.4vw, 36px)/1 var(--display);
+  letter-spacing: -.04em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -275,238 +207,178 @@ main > :not(.masthead):not(.intro) { animation-delay: 60ms; }
 .fig--moon { --fig: var(--moon); }
 .fig--earth { --fig: var(--earth); }
 
-/* ---- Secciones numeradas: elegir sitio → ver análogos → comparar terreno → medidas ---- */
-.step-head { display: flex; align-items: center; gap: 14px; margin: 0 0 14px; }
-.step-num {
-  flex: none;
-  padding: 3px 7px 2px;
-  border: 1px solid var(--rule);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: .04em;
+/* ---- Globos de Marte y la Tierra ---- */
+.globe-headings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); pointer-events: none; position: absolute; inset: 0 0 auto; z-index: 1; }
+.globe-headings > div { padding: 24px var(--pad) 0; }
+.globe-headings h2 { font-size: clamp(1.75rem, 4.5vw, 4rem); line-height: 1; letter-spacing: -.04em; font-weight: 700; }
+.globe-coordinate { color: var(--muted); font-size: 14px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.globe-stage {
+  position: relative;
+  height: clamp(300px, 28vw, 420px);
+  overflow: hidden;
+  isolation: isolate;
+  background: #101c42;
 }
-.step-head h2 { font-size: 30px; font-weight: 600; line-height: 1; letter-spacing: .02em; text-transform: uppercase; }
-.step-head::after { content: ""; order: 2; flex: 1; height: 1px; background: var(--border); }
-.step-head > a { order: 3; font-size: 14px; white-space: nowrap; }
-.globe-section, .results, .comparison, .details { margin-top: 40px; }
-.globe-section { margin-top: 8px; }
-.results, .comparison, .details { animation: rise var(--t-enter) var(--ease-out) both; }
-
-/* ---- Paneles de instrumento: línea fina y marcas de esquina ---- */
-.panel { position: relative; border: 1px solid var(--border); background: var(--surface); }
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  z-index: 3;
-  pointer-events: none;
-  --tick: var(--muted);
-  background:
-    linear-gradient(var(--tick), var(--tick)) 0 0 / 14px 2px,
-    linear-gradient(var(--tick), var(--tick)) 0 0 / 2px 14px,
-    linear-gradient(var(--tick), var(--tick)) 100% 0 / 14px 2px,
-    linear-gradient(var(--tick), var(--tick)) 100% 0 / 2px 14px,
-    linear-gradient(var(--tick), var(--tick)) 0 100% / 14px 2px,
-    linear-gradient(var(--tick), var(--tick)) 0 100% / 2px 14px,
-    linear-gradient(var(--tick), var(--tick)) 100% 100% / 14px 2px,
-    linear-gradient(var(--tick), var(--tick)) 100% 100% / 2px 14px;
-  background-repeat: no-repeat;
+.globe-viewports { position: relative; height: 100%; }
+.globe-stage::before, .globe-stage::after { content: ""; position: absolute; pointer-events: none; }
+.globe-stage::before {
+  inset: 0 50% 0 0;
+  z-index: -1;
+  background: #101831;
 }
-/* Regla con marcas cada 24 px bajo las cabeceras de los paneles 3D. */
-.ruled {
-  border-bottom: 1px solid var(--border);
-  background-image: repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px 24px);
-  background-size: 100% 5px;
-  background-position: left bottom;
-  background-repeat: no-repeat;
-}
-/* Chip de color del cuerpo junto al nombre. */
-.body-chip { display: inline-block; width: 10px; height: 10px; margin-right: 10px; vertical-align: .12em; background: var(--chip); }
-
-.comparison-panel { background: var(--surface); }
-.toolbar { flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid var(--border); }
-.modes { display: inline-flex; border: 1px solid var(--control-border); }
-.camera-actions { display: flex; gap: 8px; }
-.toolbar button {
-  min-height: 40px;
-  padding: 0 14px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
-}
-.modes button + button { border-left: 1px solid var(--control-border); }
-.camera-actions button { border: 1px solid var(--control-border); }
-.toolbar button:hover { color: var(--text); background: var(--hover); }
-.toolbar button[aria-pressed="true"] { background: var(--action); color: var(--action-ink); }
-.toolbar button:not(:disabled):active { transform: scale(.97); }
-.toolbar button:disabled { opacity: .5; cursor: default; }
-
-.site-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.site { padding: 16px 20px 14px; animation: rise var(--t-enter) var(--ease-out) both; }
-.site + .site { border-left: 1px solid var(--border); animation-delay: 50ms; }
-.planet { color: var(--muted); font-size: 14px; }
-.site h2 { font-size: 28px; font-weight: 600; line-height: 1.05; }
-.site h2::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 10px; vertical-align: .14em; background: var(--mars); }
-.site + .site h2::before { background: var(--earth); }
-.site a { display: inline-block; margin-top: 6px; font-family: var(--font-mono); font-size: 13px; letter-spacing: -.01em; }
-.site p { margin-top: 4px; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
-
-/* El terreno 3D es lo protagonista de la comparación: más alto en pantallas grandes. */
-.stage { position: relative; height: clamp(255px, 36vw, min(520px, 62vh)); }
-.stage::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  border-left: 1px solid var(--border);
-  pointer-events: none;
-}
+.globe-stage::after { inset: 0 auto 0 50%; border-left: 1px solid #415489; }
 canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 canvas:active { cursor: grabbing; }
-canvas[hidden] { display: none; }
-#viewer-error { position: absolute; top: 0; z-index: 1; margin: 12px 20px; padding: 12px; background: var(--surface); }
-.map-footer { min-height: 48px; padding: 8px 16px; border-top: 1px solid var(--border); }
-.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 14px; }
-.legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-family: var(--font-mono); font-size: 13px; }
-.legend span:first-child { font-family: var(--font-body); font-size: 14px; color: var(--muted); }
-.legend i { width: 12px; height: 12px; }
-#grid-scale { color: var(--muted); font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+#globes { cursor: default; }
+#mars-drag { position: absolute; inset: 0 50% 0 0; cursor: grab; touch-action: none; }
+#mars-drag:active { cursor: grabbing; }
+.globe-pin {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: none;
+  color: #fff;
+  padding: 0;
+}
+.globe-pin::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: #111a30;
+}
+.globe-pin:hover, .globe-pin:focus-visible, .globe-pin[aria-pressed="true"] { z-index: 3; }
+.globe-pin:hover::before, .globe-pin:focus-visible::before, .globe-pin[aria-pressed="true"]::before, #earth-pin::before {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #101831;
+  outline: 1px solid var(--signal);
+  background: var(--signal);
+}
+.globe-pin span {
+  display: none;
+  position: absolute;
+  left: 23px;
+  padding: 3px 7px;
+  max-width: min(230px, 24vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: #0a1020;
+  color: #fff;
+  border: 1px solid #56678f;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.globe-pin:hover span, .globe-pin:focus-visible span, .globe-pin[aria-pressed="true"] span { display: block; }
+#earth-pin { pointer-events: none; }
+#globe-error, #viewer-error { position: absolute; z-index: 1; inset: 12px 16px auto; padding: 12px; background: var(--surface); color: var(--text); }
+#globe-error { top: auto; bottom: 12px; color: #fff; background: #121e40; }
 
-/* ---- Tabla de medidas: Marte y Tierra con su color; cifras en mono ---- */
-.table-panel { padding: 6px 20px 14px; }
-/* Etiqueta y valores cerca: la tabla se lee de un vistazo también a 1440 px. */
+/* ---- Comparación del terreno (izquierda) y análogos (columna derecha) ---- */
+.comparison-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 30%);
+  align-items: start;
+  gap: 28px;
+  margin-top: 32px;
+}
+.results, .comparison, .details { animation: rise var(--t-enter) var(--ease-out) both; }
+.comparison { scroll-margin-top: 20px; min-width: 0; }
+.comparison > h2, .result-title h2, .details h2 { font-size: 1.35rem; letter-spacing: -.025em; }
+.comparison > h2, .result-title { margin-bottom: 12px; }
+.toolbar, .map-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; padding: 8px 12px; }
+.toolbar { background: var(--surface); border: 1px solid var(--border); }
+.modes, .camera-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.toolbar button { border: 1px solid transparent; border-radius: 4px; padding: 0 10px; min-height: 38px; background: transparent; color: var(--muted); font-size: 14px; font-weight: 500; transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out); }
+.toolbar button:hover { color: var(--text); background: var(--hover); }
+.toolbar button[aria-pressed="true"] { background: var(--signal); color: var(--signal-ink); }
+.toolbar button:not(:disabled):active { transform: scale(.97); }
+.toolbar button:disabled { opacity: .6; }
+.site-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--sunken); border: solid var(--border); border-width: 0 1px; }
+.site { padding: 14px 16px 5px; min-width: 0; animation: rise var(--t-enter) var(--ease-out) both; }
+.site + .site { border-left: 1px solid var(--border); animation-delay: 50ms; }
+.site h3 { font-size: 1rem; line-height: 1.2; overflow-wrap: anywhere; }
+/* Chip con el color del cuerpo junto al nombre de cada sitio. */
+.site h3::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 8px; vertical-align: .08em; background: var(--mars); }
+.site + .site h3::before { background: var(--earth); }
+.site a { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.site a:hover { color: var(--text); }
+.stage { position: relative; height: clamp(220px, 30vw, min(460px, 60vh)); background: var(--sunken); border-inline: 1px solid var(--border); }
+.stage::after { content: ""; position: absolute; inset: 0 auto 0 50%; border-left: 1px solid var(--border); pointer-events: none; }
+.map-footer { min-height: 48px; background: var(--surface); border: 1px solid var(--border); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.legend i { width: 10px; height: 10px; }
+#grid-scale { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* Lista de análogos: puesto, nombre y puntuación, y el desglose por criterio con su cifra. */
+.result-title a { display: none; }
+.match-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--border); }
+/* Entrada escalonada al buscar (--i lo pone main.ts). */
+.match-list li { border-bottom: 1px solid var(--border); animation: rise var(--t-enter) var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms); }
+.match-list button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 3px 8px;
+  width: 100%;
+  padding: 12px 10px;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+}
+.match-list button:hover { background: var(--hover); }
+.match-list button[aria-pressed="true"] { background: var(--selected); box-shadow: inset 2px 0 var(--accent); }
+.match-list button:focus-visible { position: relative; z-index: 1; outline-offset: -2px; }
+.match-rank { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.match-name { font-weight: 500; overflow-wrap: anywhere; }
+.match-distance { font: 600 1.15rem/1.2 var(--display); font-variant-numeric: tabular-nums; }
+.match-list button[aria-pressed="true"] :is(.match-rank, .match-distance) { color: var(--accent); }
+.match-origin { grid-column: 2 / -1; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.match-bars { grid-column: 2 / -1; display: grid; gap: 5px; margin-top: 6px; }
+.match-metric { display: grid; grid-template-columns: 92px minmax(0, 1fr) 34px; align-items: center; gap: 8px; }
+.match-metric-label { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 12.5px; }
+.match-metric-label svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+.match-metric-value { color: var(--text); font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; }
+.match-metric i { height: 4px; background: var(--border); position: relative; }
+.match-metric i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: clamp(0%, calc(var(--v) * 100%), 100%); background: var(--info); transform-origin: left; animation: grow var(--t-enter) var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms + 80ms); }
+@keyframes grow { from { transform: scaleX(0); } }
+
+/* ---- Medidas: Marte y Tierra con su color ---- */
+.details { margin-top: 32px; }
+.details h2, footer h2 { font-size: 1.25rem; }
 .details table { max-width: 920px; }
-table { width: 100%; border-collapse: collapse; margin-top: 5px; font-variant-numeric: tabular-nums; }
-th, td { padding: 9px 0 9px 16px; border-bottom: 1px solid var(--border); text-align: right; }
+table { width: 100%; border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 0 9px 12px; border-bottom: 1px solid var(--border); text-align: right; }
 th:first-child { padding-left: 0; text-align: left; }
 th { font-weight: 500; }
-thead th { color: var(--muted); font-family: var(--font-display); font-size: 15px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+thead th, tr.group th { font-size: 14px; color: var(--muted); }
 .details thead th:nth-child(2) { color: var(--mars); }
 .details thead th:nth-child(3) { color: var(--earth); }
+tr.group th { padding-top: 18px; }
 td { width: 20%; }
 tbody tr:not(.group):hover > * { background: var(--hover); }
-tr.group th { padding-top: 22px; color: var(--text); font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; text-align: left; }
-td strong { font-weight: 500; color: var(--earth); font-size: 1.15em; }
+td strong { font: 600 1.1em var(--display); color: var(--earth); }
 
 /* ---- Pie: fuentes de datos ---- */
-footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--rule); }
-footer h2 { font-size: 24px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
-footer ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px 32px; margin: 12px 0 0; padding: 0; list-style: none; }
+footer { margin-top: 28px; }
+footer ul { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 8px 0 0; padding: 0; list-style: none; }
 footer a { color: var(--muted); font-size: 14px; }
 footer a:hover { color: var(--text); }
-
-@media (max-width: 900px) {
-  .intro { grid-template-columns: minmax(0, 1fr); padding-top: 32px; }
-}
-
-@media (max-width: 640px) {
-  :root { --pad: 16px; }
-  .masthead { gap: 0 12px; }
-  /* Fila 1: título. Fila 2: insignia + preferencias. Fila 3: vistas. */
-  .masthead h1 { flex-basis: 100%; min-height: 56px; font-size: 24px; }
-  .masthead .brand-event { order: 1; flex: 1 1 0; min-width: 0; padding: 0 0 10px; border-left: 0; font-size: 11.5px; }
-  .masthead .prefs { order: 2; padding-bottom: 10px; }
-  .brand-event__logo { height: 32px; }
-  .brand-event__name { max-width: 17ch; }
-  /* Tres pestañas a partes iguales; el texto baja a dos líneas si no cabe. */
-  .views a { flex: 1 1 0; justify-content: center; padding: 6px 8px; font-size: 15px; line-height: 1.1; text-align: center; }
-  .views a[href="#sources"] { display: none; }
-  .intro { padding: 26px 0 22px; gap: 18px; }
-  .intro__title { font-size: 42px; }
-  .intro__lede { font-size: 15px; margin-top: 12px; }
-  .fig { padding-right: 8px; }
-  .fig + .fig { padding-left: 10px; }
-  .fig dd { font-size: 24px; }
-  .fig dt { font-size: 12px; }
-  .step-head h2 { font-size: 24px; }
-  .globe-section, .results, .comparison, .details { margin-top: 32px; }
-  .toolbar, .map-footer { padding-inline: 12px; }
-  .site { padding-inline: 12px; }
-  .site h2 { font-size: 20px; }
-  .site a { font-size: 11.5px; }
-  .stage { height: clamp(165px, 48vw, 250px); }
-  .map-footer { flex-wrap: wrap; gap: 5px; }
-  .table-panel { padding-inline: 12px; }
-  th, td { font-size: 14px; }
-  /* Áreas táctiles de 44 px. */
-  .lang-switch button, .theme-toggle, .toolbar button { min-height: 44px; }
-  .theme-toggle { width: 44px; }
-  .toolbar { gap: 8px; }
-}
-
-/* ---- 01 · Globos de Marte y la Tierra ---- */
-.globe-panel { background: var(--sunken); }
-.globe-headings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background-color: var(--surface); }
-.globe-headings > div { padding: 16px 20px 16px; }
-.globe-headings > div + div { border-left: 1px solid var(--border); }
-.globe-headings h2 { font-size: 28px; font-weight: 600; line-height: 1; letter-spacing: .03em; text-transform: uppercase; }
-.globe-headings h2::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 10px; vertical-align: .1em; background: var(--mars); }
-.globe-headings > div + div h2::before { background: var(--earth); }
-#mars-count { color: var(--muted); font-family: var(--font-mono); font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; margin-left: 8px; }
-.site-controls { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
-.site-controls select { flex: 1; min-width: 0; max-width: 420px; }
-.site-controls select, .site-controls button {
-  min-height: 44px;
-  background: var(--ground);
-  color: var(--text);
-  border: 1px solid var(--control-border);
-  padding: 3px 10px;
-  font: inherit;
-  font-size: 15px;
-}
-/* Acción principal de la página: buscar análogos del sitio elegido (tinta llena). */
-.site-controls button {
-  cursor: pointer;
-  white-space: nowrap;
-  padding-inline: 20px;
-  background: var(--action);
-  border-color: var(--action);
-  color: var(--action-ink);
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
-}
-.site-controls button:hover { background: color-mix(in srgb, var(--action) 84%, var(--ground)); }
-.site-controls button:active { transform: scale(.97); }
-.site-controls select:hover, .gl-field select:hover { border-color: var(--muted); }
-.site a { color: var(--muted); text-decoration: none; }
-.site a:hover { color: var(--text); text-decoration: underline; }
-#mars-pins button { width: 24px; height: 24px; }
-#mars-pins button::before { width: 7px; height: 7px; border-width: 1px; background: var(--pin-dot); }
-#mars-pins button span { display: none; left: 21px; max-width: min(240px, 25vw); overflow: hidden; text-overflow: ellipsis; }
-#mars-pins button[aria-pressed="true"], #mars-pins button:focus-visible, #mars-pins button:hover { z-index: 2; }
-#mars-pins button[aria-pressed="true"] span, #mars-pins button:focus-visible span, #mars-pins button:hover span { display: block; pointer-events: none; }
-#mars-pins button[aria-pressed="true"]::before { width: 11px; height: 11px; border-width: 2px; }
-@media (max-width: 640px) {
-  /* El selector y «Buscar análogos» pasan a una fila completa bajo los dos títulos (sin tocar el markup). */
-  .globe-headings { grid-template-areas: "mars earth" "ctrl ctrl"; }
-  .globe-headings > div:first-child { display: contents; }
-  .globe-headings > div:first-child > h2 { grid-area: mars; padding: 10px 12px 3px; }
-  .globe-headings > div:last-child { grid-area: earth; }
-  .site-controls { grid-area: ctrl; flex-wrap: nowrap; gap: 8px; padding: 6px 12px 8px; border-top: 1px solid var(--border); }
-  .site-controls select { flex: 1; max-width: none; }
-  .site-controls select, .site-controls button { min-height: 44px; }
-  .site-controls { margin-top: 0; }
-  .site-controls button { padding-inline: 14px; font-size: 15px; }
-  .site h2 { overflow-wrap: anywhere; }
-}
-#mars-pins button:focus-visible::before, button.globe-pin:focus-visible::before { outline: 2px solid var(--accent); outline-offset: 3px; }
-#mars-pins button:focus-visible, button.globe-pin:focus-visible { outline: none; }
+#ranking-method { margin-top: 16px; font-size: 14px; }
+#ranking-method summary { cursor: pointer; width: fit-content; font-weight: 500; }
+#ranking-method p { margin-top: 7px; color: var(--muted); max-width: 68ch; }
 
 /* Controles de Leaflet con los tokens del sitio (los usa la página Luna/Marte). */
-.leaflet-bar { border: 1px solid var(--control-border) !important; border-radius: 0 !important; box-shadow: none !important; }
+.leaflet-bar { border: 1px solid var(--control-border) !important; border-radius: 4px !important; overflow: hidden; box-shadow: none !important; }
 .leaflet-bar a, .leaflet-bar a:hover {
   background: var(--surface);
   color: var(--text);
@@ -515,129 +387,69 @@ footer a:hover { color: var(--text); }
 }
 .leaflet-bar a:hover { background: var(--hover); }
 .leaflet-bar a.leaflet-disabled { background: var(--surface); color: var(--muted); opacity: .6; }
-.leaflet-bar a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; position: relative; z-index: 1; }
+.leaflet-bar a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; position: relative; z-index: 1; }
 .leaflet-container .leaflet-control-attribution { background: var(--overlay); color: var(--muted); }
 .leaflet-container .leaflet-control-attribution a { color: var(--text); }
-#earth-site { color: var(--muted); font-size: 15px; min-height: 44px; margin-top: 14px; display: flex; align-items: center; }
-/* Los globos son lo protagonista: ocupan casi toda la primera pantalla. */
-.globe-stage { position: relative; height: clamp(210px, 38vw, min(560px, 60vh)); overflow: hidden; }
-.globe-stage::after {
-  position: absolute;
-  inset: 0 auto 0 50%;
-  border-left: 1px solid var(--border);
-  content: "";
-  pointer-events: none;
-}
-.globe-pin {
-  position: absolute;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  transform: translate(-50%, -50%);
-  border: 0;
-  background: none;
-  color: #fff;
-  padding: 0;
-}
-.globe-pin[hidden] { display: none; }
-.globe-pin::before {
-  content: "";
-  grid-area: 1 / 1;
-  border: 2px solid #fff;
-  outline: 1px solid #211b1c;
-  border-radius: 50%;
-  width: 12px;
-  height: 12px;
-  background: #171719;
-}
-button.globe-pin { cursor: pointer; }
-button.globe-pin:hover::before, button.globe-pin:focus-visible::before { background: var(--accent); }
-.globe-pin span {
-  position: absolute;
-  left: 38px;
-  padding: 3px 7px;
-  background: var(--ground);
-  color: var(--text);
-  border: 1px solid var(--border);
-  font-size: 14px;
-  white-space: nowrap;
-}
-#earth-pin { pointer-events: none; }
-#globe-error { position: absolute; margin: 12px 20px; }
 
-/* ---- 02 · Análogos: tarjetas con puntuación grande y barras ---- */
-.match-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-/* Entrada escalonada al buscar (--i lo pone main.ts). */
-.match-list li { animation: rise var(--t-enter) var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms); }
-.match-list button {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "rank score" "name name" "origin origin" "meta meta" "bars bars";
-  align-content: start;
-  gap: 0 12px;
-  width: 100%;
-  height: 100%;
-  padding: 14px 16px 16px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
-}
-.match-list button:hover { border-color: var(--control-border); background: var(--hover); }
-.match-list button:active { transform: scale(.985); }
-/* El análogo elegido: marco de tinta de 2 px, de un vistazo. */
-.match-list button[aria-pressed="true"] { border-color: var(--action); box-shadow: inset 0 0 0 1px var(--action); background: var(--surface); }
-.match-list button:focus-visible { position: relative; z-index: 2; outline-offset: 3px; }
-.match-rank { grid-area: rank; align-self: start; color: var(--muted); font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; }
-.match-score {
-  grid-area: score;
-  color: var(--earth);
-  font-family: var(--font-mono);
-  font-size: 34px;
-  font-weight: 500;
-  line-height: .9;
-  letter-spacing: -.04em;
-  font-variant-numeric: tabular-nums;
-}
-.match-name { grid-area: name; margin-top: 10px; font-size: 18px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
-.match-origin { grid-area: origin; display: block; margin-top: 3px; color: var(--muted); font-size: 13px; }
-.match-origin.global { color: var(--earth); }
-.match-meta { grid-area: meta; color: var(--muted); font-family: var(--font-mono); font-size: 12px; min-height: 1.4em; }
-/* La frase completa de la puntuación queda para lectores de pantalla; a la vista va la cifra grande. */
-.match-distance { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.match-bars { grid-area: bars; display: grid; gap: 7px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-.match-metric { display: grid; grid-template-columns: 92px minmax(0, 1fr) 42px; align-items: center; gap: 8px; }
-.match-metric-label { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 13px; }
-.match-metric-label svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
-.match-metric-value { color: var(--text); font: 400 12px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
-.match-metric i { height: 6px; background: var(--hover); position: relative; }
-.match-metric i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: clamp(0%, calc(var(--v) * 100%), 100%); background: var(--earth); transform-origin: left; animation: grow var(--t-enter) var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms + 80ms); }
-@keyframes grow { from { transform: scaleX(0); } }
-
-@media (max-width: 640px) {
-  .globe-headings > div { padding: 12px; }
-  .globe-headings h2 { font-size: 21px; }
-  .globe-stage { height: 190px; }
-  .globe-pin span { left: 31px; font-size: 12px; }
-  .match-list { grid-template-columns: 1fr; gap: 10px; }
-  .match-score { font-size: 30px; }
+/* Con la insignia del reto y cinco vistas (677 px en español) la cabecera solo cabe en una fila
+   desde unos 1460 px: por debajo, las vistas bajan a una segunda fila. */
+@media (max-width: 1479px) {
+  :root { --header-h: 98px; }
+  .masthead { min-height: 0; flex-wrap: wrap; gap: 0 20px; }
+  .wordmark, .brand-event, .prefs { margin-block: 10px; }
+  .prefs { margin-left: auto; }
+  .views { order: 3; flex-wrap: wrap; width: 100%; margin: 0; min-height: 40px; border-top: 1px solid #1d2846; }
+  .views a { min-height: 40px; }
+  .views a[href="#sources"] { margin-left: auto; }
 }
 
-#globes { cursor: default; }
-#mars-drag { position: absolute; inset: 0 50% 0 0; cursor: grab; touch-action: none; }
-#mars-drag:active { cursor: grabbing; }
-#ranking-method { margin-top: 20px; font-size: 14px; }
-#ranking-method summary { cursor: pointer; width: fit-content; font-weight: 500; }
-#ranking-method p { margin-top: 8px; color: var(--muted); max-width: 66ch; }
+@media (max-width: 940px) {
+  .comparison-workspace { gap: 18px; }
+  .explore-bar { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .explore-bar h1 { font-size: 2rem; }
+  .site-controls { max-width: 440px; }
+  .intro { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 700px) {
+  :root { --pad: 16px; --header-h: 146px; }
+  /* Fila 1: nombre y preferencias. Fila 2: insignia. Fila 3: vistas como pestañas iguales. */
+  .masthead { gap: 0 10px; }
+  .wordmark { font-size: 17px; gap: 7px; }
+  .brand-event { order: 2; flex: 1 1 100%; margin: 0 0 10px; padding-left: 0; border-left: 0; font-size: 11.5px; }
+  .brand-event__logo { height: 28px; }
+  .views { order: 3; gap: 0; }
+  .views a { flex: 1 1 0; justify-content: center; min-height: 44px; padding: 4px 4px 2px; font-size: 13px; line-height: 1.15; text-align: center; white-space: normal; }
+  .views a[href="#sources"] { display: none; }
+  .lang-switch button, .theme-toggle { min-height: 40px; }
+  .theme-toggle { width: 40px; }
+  .explore-bar { gap: 14px; padding-block: 19px; }
+  .explore-bar h1 { font-size: 1.75rem; text-wrap: initial; }
+  .explore-bar .intro__lede { font-size: 15px; margin-top: 8px; }
+  .explore-bar .intro__figures { margin-top: 16px; }
+  .fig { padding-right: 8px; }
+  .fig + .fig { padding-left: 10px; }
+  .fig dd { font-size: 24px; }
+  .fig dt { font-size: 12px; }
+  .site-controls { width: 100%; }
+  .site-controls select { padding-inline: 6px; }
+  .compare-action { padding-inline: 9px; font-size: 14px; }
+  .globe-headings { position: relative; }
+  .globe-headings > div { padding-top: 13px; }
+  .globe-headings h2 { font-size: 1.65rem; }
+  .globe-coordinate { font-size: 12px; }
+  .globe-stage { height: auto; }
+  .globe-viewports { height: clamp(167px, 45vw, 225px); }
+  .globe-pin span { left: 14px; max-width: 19vw; font-size: 11px; }
+  .comparison-workspace { grid-template-columns: minmax(0, 1fr); margin-top: 22px; }
+  .result-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .result-title a { display: inline; font-size: 13px; }
+  .site { padding: 10px 8px 2px; }
+  .site h3, .toolbar button { font-size: 13px; }
+  .site a { font-size: 11px; }
+  .toolbar, .map-footer { padding-inline: 6px; }
+  .toolbar button { padding-inline: 6px; min-height: 44px; }
+  .stage { height: clamp(165px, 48vw, 250px); }
+  .match-metric { grid-template-columns: 88px minmax(0, 1fr) 34px; }
+  th, td { font-size: 14px; }
+}
