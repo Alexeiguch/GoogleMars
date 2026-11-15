@@ -331,6 +331,7 @@
 
 .lm-eyebrow { margin: 14px 0 0; color: var(--muted); font-size: 13px; letter-spacing: .02em; }
 .lm-detail { border-bottom: 0; }
+.lm-detail > .lm-loading { padding-inline: 0; }
 .lm-detail h2 { margin: 4px 0 6px; font-size: 26px; line-height: 1.15; text-wrap: balance; }
 .lm-meta { margin-top: 3px; font-size: 13.5px; line-height: 1.4; }
 
@@ -411,7 +412,8 @@
   .lm-srcnote summary { display: flex; align-items: center; }
   .lm-link { display: inline-flex; align-items: center; }
   .leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }
-  .lm footer a { display: inline-block; padding-block: 11px; }
+  .lm footer a { display: inline-block; padding-block: 12px; }
+  .lm-pick select { min-height: 44px; }
 }
 @media (max-width: 640px) {
   .lm-detail, .lm-section, .lm-refname, .lm-valid, .lm-refs, .lm-pickhint, .lm-fold > summary, .lm-fold-note, .lm-loading { padding-inline: 12px; }
