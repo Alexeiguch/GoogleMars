@@ -126,8 +126,8 @@ main > :not(.masthead):not(.intro) { animation-delay: 60ms; }
 
 /* ---- Cabecera: dos niveles. Arriba la marca TerraTwin, el lema, la insignia del reto y las preferencias;
    abajo, las vistas como pestañas. Misma identidad que el pitch: solo texto, Barlow Condensed 600.
-   El ancho se limita aquí (y no solo en main) para que la cabecera quede en el mismo sitio en el mapa
-   y en Globos 3D, cuyo main ocupa toda la pantalla. ---- */
+   El ancho se limita aquí igual que el main del mapa; en Globos 3D (main a todo el ancho) se quita el
+   límite justo debajo para que la cabecera quede alineada con la barra y los globos. ---- */
 .masthead {
   display: flex;
   flex-wrap: wrap;
@@ -138,6 +138,9 @@ main > :not(.masthead):not(.intro) { animation-delay: 60ms; }
   margin-inline: auto;
   border-bottom: 1px solid var(--border);
 }
+/* En Globos 3D la barra y los globos ocupan todo el ancho: la cabecera los acompaña para quedar alineada
+   con su propio contenido (en el mapa sigue limitada, como su main). */
+main.gl > .masthead { max-width: none; }
 .masthead h1 {
   display: flex;
   align-items: center;
