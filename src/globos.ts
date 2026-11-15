@@ -37,8 +37,14 @@ const UI_TEXT: UiText = {
     "detail.compare": "Comparar el terreno en 3D",
     "step.pick": "Elige un sitio de la Luna o de Marte",
     "pick.label": "Sitio que se compara con la Tierra",
-    "pick.show": "Verlo en los globos",
-    "pick.note": "Sitios de referencia de la Luna y de Marte (ventanas de 30 km) y parches de Marte con relieve HiRISE (2 km). También puedes tocarlos en los globos.",
+    "pick.show": "Buscar análogos",
+    "pick.note": "Sitios de referencia de la Luna y de Marte (ventanas de 30 km) y parches de Marte con relieve HiRISE (2 km). «Buscar análogos» ordena sus lugares más parecidos de la Tierra y los marca en los globos; también puedes tocar los sitios en los globos.",
+    "intro.short": "TerraTwin busca en toda la Tierra los lugares que más se parecen a sitios de la Luna y de Marte. Los rombos son esos sitios y los puntos de la Tierra, sus parecidos: toca uno, o elige un sitio, para ver en qué se parecen y en qué no.",
+    "net.down": "Las imágenes externas (Esri, NASA Trek) no cargan. Se muestran las imágenes globales incluidas en la app; los puntos, las fichas y la comparación de terreno en 3D siguen funcionando.",
+    "net.slow": "Las imágenes externas (Esri, NASA Trek) tardan en cargar. Mientras tanto se muestran las imágenes globales incluidas en la app; todo lo demás funciona.",
+    "net.retry": "Reintentar",
+    "tiles.loading": "Cargando detalle…",
+    "scale.resampled": "Tierra: Copernicus GLO-{native} ({native} m) remuestreado a {c} m, más fino que el dato: sus pendientes salen algo más suaves",
     "pick.refs": "{body} · sitios de referencia (30 km)",
     "more.forRef": "Para {site} ({body}), una ventana de {w} km: sus {n} gemelos de la Tierra, comparados con la misma ventana y la misma escala.",
     "flat.scale": "Relieve sombreado en 2D · {w} × {w} km · el relieve 3D de este sitio aún no está exportado",
@@ -58,8 +64,14 @@ const UI_TEXT: UiText = {
     "detail.compare": "Compare the terrain in 3D",
     "step.pick": "Choose a Moon or Mars site",
     "pick.label": "Site compared with Earth",
-    "pick.show": "Show it on the globes",
-    "pick.note": "Moon and Mars reference sites (30 km windows) and Mars patches with HiRISE relief (2 km). You can also tap them on the globes.",
+    "pick.show": "Find analogs",
+    "pick.note": "Moon and Mars reference sites (30 km windows) and Mars patches with HiRISE relief (2 km). \"Find analogs\" ranks the most similar places on Earth and marks them on the globes; you can also tap the sites on the globes.",
+    "intro.short": "TerraTwin searches all of Earth's land for the places most like Moon and Mars sites. Diamonds are those sites and the dots on Earth are their look-alikes: tap one, or pick a site, to see where they match and where they do not.",
+    "net.down": "External imagery (Esri, NASA Trek) is not loading. You are seeing the global images built into the app; the points, the details and the 3D terrain comparison still work.",
+    "net.slow": "External imagery (Esri, NASA Trek) is slow to load. Meanwhile you are seeing the global images built into the app; everything else works.",
+    "net.retry": "Retry",
+    "tiles.loading": "Loading detail…",
+    "scale.resampled": "Earth: Copernicus GLO-{native} ({native} m) resampled to {c} m, finer than the data, so its slopes read slightly gentler",
     "pick.refs": "{body} · reference sites (30 km)",
     "more.forRef": "For {site} ({body}), a {w} km window: its {n} Earth twins, compared with the same window and the same scale.",
     "flat.scale": "2D shaded relief · {w} × {w} km · the 3D relief for this site has not been exported yet",
@@ -302,7 +314,8 @@ const errorBox = $<HTMLElement>("#gl-error");
 const pixelRatio = Math.min(devicePixelRatio, 2);
 let renderer: THREE.WebGLRenderer | null = null;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  // preserveDrawingBuffer: al mover un globo solo se vuelve a dibujar ese; los otros dos conservan su imagen.
+  renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(pixelRatio);
 } catch {
   errorBox.hidden = false;
@@ -403,6 +416,10 @@ type Globe = {
   items: Item[];
   home: THREE.Vector3;
   animation: number;
+  /** Vuelo de cámara en curso: no se piden mosaicos de las alturas intermedias. */
+  flying: boolean;
+  /** Faltan mosaicos por llegar para la vista actual (indicador «Cargando detalle…»). */
+  loading: boolean;
   rect: { x: number; y: number; w: number; h: number };
   tiles: TileLayer;
 };
@@ -523,6 +540,13 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
   scene.add(sphere);
   const light = new THREE.DirectionalLight(0xfff3e7, 1.35);
   scene.add(light, new THREE.AmbientLight(0xffffff, 1.05));
+  const tiles = new TileLayer({
+    ...TILE_SOURCES[id],
+    onLoad: () => requestRender(globes[id]),
+    onHealth: () => syncNetwork(),
+  });
+  if (renderer) tiles.setAnisotropy(Math.min(8, renderer.capabilities.getMaxAnisotropy()));
+  scene.add(tiles.group);
   const texture = TEXTURES[id];
   if (texture && renderer) {
     loadGlobeTexture(`${import.meta.env.BASE_URL}imagery/${texture}`, (map) => {
@@ -531,12 +555,15 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
       material.color.setRGB(gain, gain, gain, THREE.SRGBColorSpace);
       material.map = map;
       material.needsUpdate = true;
+      // En Marte la imagen local es el mismo mosaico Viking que los primeros niveles de mosaicos, con más
+      // detalle: esos niveles ni se piden ni se dibujan (al acercar se ve la imagen local hasta que llega CTX).
+      const width = (map.image as { width?: number } | null)?.width;
+      if (LOCAL_IS_TILE_IMAGERY[id] && width) tiles.setLocalBase(width);
       requestRender();
-    });
+    }, () => tiles.setNoLocalBase());
+  } else if (renderer) {
+    tiles.setNoLocalBase();
   }
-  const tiles = new TileLayer({ ...TILE_SOURCES[id], onLoad: () => requestRender() });
-  if (renderer) tiles.setAnisotropy(Math.min(8, renderer.capabilities.getMaxAnisotropy()));
-  scene.add(tiles.group);
   if (id === "moon" && renderer) scene.add(southPoleCap(() => requestRender()));
   const own = items.filter((item) => item.globe === id);
   const layers: Layer[] = [];
@@ -564,10 +591,14 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
     const altitude = camera.position.length() - 1;
     controls.rotateSpeed = 0.55 * THREE.MathUtils.clamp(altitude / (HOME_DISTANCE - 1), 1e-5, 1.6);
     hideTip();
-    requestRender();
+    requestRender(globes[id]);
   });
-  globes[id] = { id, panel, scene, camera, light, controls, layers, items: own, home, animation: 0, rect: { x: 0, y: 0, w: 0, h: 0 }, tiles };
+  globes[id] = {
+    id, panel, scene, camera, light, controls, layers, items: own, home, animation: 0, flying: false, loading: false,
+    rect: { x: 0, y: 0, w: 0, h: 0 }, tiles,
+  };
 }
+const globeList = Object.values(globes);
 
 // ---------------------------------------------------------------------------------------------
 // Zoom por altura: rueda y pellizco
