@@ -1,4 +1,4 @@
-// Botones de idioma (ES/EN) y tema (claro/oscuro) e insignia del reto en la cabecera de las tres páginas.
+// Botones de idioma (ES/EN) y tema (claro/oscuro), lema de TerraTwin e insignia del reto en la cabecera de las páginas.
 // El tema y el idioma iniciales los fija el script en línea del <head> para que no haya parpadeo.
 import { applyStatic, getLang, onLangChange, setLang, t, type Lang } from "./i18n";
 
@@ -48,23 +48,57 @@ box.innerHTML = `
   <button type="button" class="theme-toggle">${sun}${moon}</button>`;
 document.querySelector(".masthead")?.append(box);
 
-// Insignia de la NASA junto al título, como contexto del reto (no implica respaldo de la NASA).
-// Sus textos viven aquí y no en i18n.ts para no tocar el diccionario compartido.
-const BRAND_TEXT: Record<Lang, { lead: string; event: string }> = {
-  es: { lead: "Proyecto para", event: "NASA Space Apps Challenge 2026" },
-  en: { lead: "Built for", event: "NASA Space Apps Challenge 2026" },
+// Marca TerraTwin: lema junto al título e insignia del reto, solo con texto.
+// No se usa ninguna imagen de la NASA (las reglas de Space Apps prohíben su logotipo); el nombre del reto sí puede citarse.
+// Estos textos viven aquí y no en i18n.ts para no tocar el diccionario compartido.
+const BRAND_TEXT: Record<Lang, { tagline: string; lead: string; event: string; description: string }> = {
+  es: {
+    tagline: "La Luna y Marte, en la Tierra.",
+    lead: "Proyecto para",
+    event: "NASA Space Apps Challenge 2026",
+    description: "TerraTwin busca en toda la tierra firme lugares parecidos a las zonas candidatas para una base lunar y a sitios de Marte, y dice en qué se parecen y en qué no.",
+  },
+  en: {
+    tagline: "Find the Moon and Mars on Earth.",
+    lead: "Built for",
+    event: "NASA Space Apps Challenge 2026",
+    description: "TerraTwin searches all of Earth's land for places that resemble the candidate zones for a Moon base and sites on Mars, and tells you where they match and where they do not.",
+  },
 };
-const brand = document.createElement("p");
-brand.className = "brand-event";
+const brand = document.createElement("div");
+brand.className = "brand-line";
 brand.innerHTML = `
-  <img class="brand-event__logo" src="${import.meta.env.BASE_URL}brand/nasa-logo.svg" alt="NASA" width="43" height="36" decoding="async">
-  <span class="brand-event__text"><span class="brand-event__lead"></span> <span class="brand-event__name"></span></span>`;
+  <p class="brand-tagline"></p>
+  <p class="brand-event"><span class="brand-event__lead"></span> <span class="brand-event__name"></span></p>`;
 document.querySelector(".masthead h1")?.after(brand);
+
+// Icono de la página y descripción: se añaden aquí si el HTML no los trae, para que las dos páginas los compartan.
+function ensureHead<T extends HTMLElement>(selector: string, create: () => T): T {
+  const found = document.head.querySelector<T>(selector);
+  if (found) return found;
+  const el = create();
+  document.head.append(el);
+  return el;
+}
+ensureHead<HTMLLinkElement>('link[rel~="icon"]', () => {
+  const link = document.createElement("link");
+  link.rel = "icon";
+  link.type = "image/svg+xml";
+  link.href = `${import.meta.env.BASE_URL}favicon.svg`;
+  return link;
+});
+const description = ensureHead<HTMLMetaElement>('meta[name="description"]', () => {
+  const meta = document.createElement("meta");
+  meta.name = "description";
+  return meta;
+});
 
 function syncBrand() {
   const text = BRAND_TEXT[getLang()];
+  brand.querySelector(".brand-tagline")!.textContent = text.tagline;
   brand.querySelector(".brand-event__lead")!.textContent = text.lead;
   brand.querySelector(".brand-event__name")!.textContent = text.event;
+  description.content = text.description;
 }
 
 const langButtons = box.querySelectorAll<HTMLButtonElement>("[data-lang]");

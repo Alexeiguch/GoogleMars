@@ -1,5 +1,8 @@
 // Idioma (es/en) compartido por las dos páginas.
 // El idioma inicial lo fija el script en línea del <head> de cada HTML (localStorage → idioma del navegador).
+import { DATOS_EN } from "./i18n.datos.en";
+import { NOMBRES_ID } from "./i18n.datos.ids";
+
 export type Lang = "es" | "en";
 export const LANG_KEY = "analogs-lang";
 
@@ -7,7 +10,7 @@ type Params = Record<string, string | number>;
 
 const messages: Record<Lang, Record<string, string>> = {
   es: {
-    "site.title": "Análogos terrestres",
+    "site.title": "TerraTwin",
     "nav.label": "Vistas",
     "nav.viewer": "Visor 3D de Marte",
     "nav.map": "Mapa Luna y Marte",
@@ -23,7 +26,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "planet.moon": "Luna",
 
     // Globos 3D (globos.html, globos.ts)
-    "gl.docTitle": "Análogos terrestres · Globos 3D",
+    "gl.docTitle": "TerraTwin · Globos 3D",
     "gl.modeLabel": "Puntos que se muestran",
     "gl.best": "Mejores",
     "gl.all": "Todos",
@@ -102,7 +105,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "gl.src.marsTiles": "Marte de cerca · Viking MDIM 2.1 vía NASA Mars Trek y mosaico CTX beta01 (NASA/JPL/MSSS/Caltech Murray Lab/Esri)",
 
     // Visor 3D (index.html, main.ts)
-    "v.docTitle": "Análogos terrestres · Visor 3D",
+    "v.docTitle": "TerraTwin · Visor 3D",
     "v.globesLabel": "Globos de los planetas",
     "v.marsPicker": "Sitio de terreno de Marte",
     "v.find": "Buscar análogos",
@@ -173,7 +176,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "src.earthImg": "Imagen de la Tierra · NASA Blue Marble",
 
     // Mapa Luna/Marte (luna-marte.html, lunaMarte.ts)
-    "lm.docTitle": "Análogos de la Luna y Marte",
+    "lm.docTitle": "TerraTwin · Mapa de la Luna y Marte",
     "lm.layoutLabel": "Análogos de la Luna y Marte en toda la Tierra",
     "lm.tabsLabel": "Cuerpo de referencia",
     "lm.tabMoon": "Luna",
@@ -226,7 +229,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "lm.breaks": "Dónde se rompe la analogía",
     "lm.altEarth": "Relieve sombreado del sitio terrestre",
     "lm.altRef": "Relieve sombreado de {name}",
-    "lm.noImage": "Imagen aún no generada (ejecuta analogs.relief_images)",
+    "lm.noImage": "Todavía no hay imagen de relieve de este lugar.",
     "lm.noMoonMosaic": "No hay un mosaico de fotos del polo sur lunar que se pueda usar en un mapa web: los mapas planos lo deforman y gran parte está en sombra permanente. Usa la vista de relieve (LRO LOLA).",
 
     // Mapa Luna/Marte · v2 (referencias, multiescala, bibliografía)
@@ -354,7 +357,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "lm.src.marsMini": "Minimapa de Marte · Viking MDIM 2.1",
   },
   en: {
-    "site.title": "Earth Analogs",
+    "site.title": "TerraTwin",
     "nav.label": "Views",
     "nav.viewer": "Mars 3D viewer",
     "nav.map": "Moon & Mars map",
@@ -370,7 +373,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "planet.moon": "Moon",
 
     // 3D globes (globos.html, globos.ts)
-    "gl.docTitle": "Earth Analogs · 3D globes",
+    "gl.docTitle": "TerraTwin · 3D globes",
     "gl.modeLabel": "Points shown",
     "gl.best": "Best",
     "gl.all": "All",
@@ -448,7 +451,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "gl.src.moonTiles": "Moon close-up · LRO WAC 100 m mosaic (NASA/GSFC/Arizona State University), via NASA Moon Trek",
     "gl.src.marsTiles": "Mars close-up · Viking MDIM 2.1 via NASA Mars Trek and the CTX beta01 mosaic (NASA/JPL/MSSS/Caltech Murray Lab/Esri)",
 
-    "v.docTitle": "Earth Analogs · 3D viewer",
+    "v.docTitle": "TerraTwin · 3D viewer",
     "v.globesLabel": "Planet globes",
     "v.marsPicker": "Mars terrain site",
     "v.find": "Find analogs",
@@ -518,7 +521,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "src.marsImg": "Mars imagery · Viking MDIM 2.1",
     "src.earthImg": "Earth imagery · NASA Blue Marble",
 
-    "lm.docTitle": "Moon and Mars analogs",
+    "lm.docTitle": "TerraTwin · Moon & Mars map",
     "lm.layoutLabel": "Moon and Mars analogs across the whole Earth",
     "lm.tabsLabel": "Reference body",
     "lm.tabMoon": "Moon",
@@ -571,7 +574,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "lm.breaks": "Where the analogy breaks down",
     "lm.altEarth": "Shaded relief of the Earth site",
     "lm.altRef": "Shaded relief of {name}",
-    "lm.noImage": "Image not generated yet (run analogs.relief_images)",
+    "lm.noImage": "There is no relief image of this place yet.",
     "lm.noMoonMosaic": "There is no photo mosaic of the lunar south pole that works in a web map: flat maps distort it and much of it is in permanent shadow. Use the relief view (LRO LOLA).",
 
     "lm.introFine": " The best ones are measured again more closely: {l1} windows of 10 km and {l2} of 5 km (Moon) or 2 km (Mars).",
@@ -601,7 +604,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "lm.coordQuality": "Coordinate",
     "lm.source": "Source",
     "lm.sourceLink": "Open the source",
-    "lm.sourceNote": "Source note (in Spanish)",
+    "lm.sourceNote": "Source note",
     "lm.noSource": "No link: point generated by the method.",
     "lm.q.effres": "LOLA effective resolution (EFFRES): median {p50} m, p90 {p90} m.",
     "lm.q.hrsc": "Covered by HRSC (R400 = {r}, MOLA fraction {m}).",
@@ -701,7 +704,9 @@ const messages: Record<Lang, Record<string, string>> = {
 
 /**
  * Textos que llegan en español desde los datos (src/data/results.json y catalog.json, generados por el pipeline).
- * Se traducen por su texto exacto; si el pipeline cambia un texto y no está aquí, se muestra en español.
+ * Se traducen por su texto exacto (aquí y en i18n.datos.en.ts) o con las reglas de dataRules, que componen
+ * las notas con parte variable. Si el pipeline cambia un texto y no queda cubierto, se muestra en español:
+ * noche/tools/marca-datos-traducidos.mjs recorre los datos y falla cuando eso ocurre.
  */
 const dataEn: Record<string, string> = {
   "Pendiente típica (°)": "Typical slope (°)",
@@ -746,18 +751,6 @@ const dataEn: Record<string, string> = {
   "Ladakh / Tso Kar, India (estación análoga Luna/Marte)": "Ladakh / Tso Kar, India (Moon/Mars analog station)",
   "Puna de Atacama (análogo de Marte y astrobiología)": "Puna de Atacama (Mars and astrobiology analog)",
   "Emi Koussi, Tibesti (análogo de Elysium Mons)": "Emi Koussi, Tibesti (Elysium Mons analog)",
-
-  "Alta cordillera de los Andes (~29,5°S), gemela del borde de Shackleton":
-    "High Andes (~29.5°S), twin of the Shackleton rim",
-  "Cuenca de Qaidam (Tíbet, China), gemela de Jezero": "Qaidam Basin (Tibet, China), twin of Jezero",
-  "Meseta de Ustyurt (Uzbekistán), gemela fría de Elysium Planitia":
-    "Ustyurt Plateau (Uzbekistan), cold twin of Elysium Planitia",
-  "Una ventana de 30 km a ~4.200 m en la frontera Chile–Argentina tiene casi la misma distribución de pendientes que el borde del cráter Shackleton (pendiente típica 14,6° frente a 14,1°; 48 % del terreno por encima de 15° frente a 47 %), con un 98 % de roca desnuda y una media anual de −6 °C. Sirve para probar movilidad de rovers y aterrizaje en laderas empinadas como las de las crestas iluminadas del polo sur lunar. No hemos encontrado estudios que la usen como análogo lunar; los Andes sí se estudian como análogo de Marte, sobre todo más al norte (Puna, Atacama).":
-    "A 30 km window at ~4,200 m on the Chile–Argentina border has almost the same slope distribution as the rim of Shackleton crater (typical slope 14.6° vs 14.1°; 48% of the terrain above 15° vs 47%), with 98% bare rock and an annual mean of −6 °C. It is useful for testing rover mobility and landing on steep slopes like those of the sunlit ridges at the lunar south pole. We have found no studies that use it as a lunar analog; the Andes are studied as a Mars analog, mostly farther north (Puna, Atacama).",
-  "Sin decírselo, el método encontró la cuenca de Qaidam como el mejor gemelo del cráter Jezero (pendiente típica 1,7° frente a 1,8°; relieve 721 m frente a 831 m; rugosidad 29 m frente a 30 m). Qaidam ya está propuesta en la literatura científica como análogo de Marte: antiguo lago evaporado a ~3.400 m, frío, seco, con mucha radiación UV, yardangs, sales y playas. Que el método la redescubra solo con datos globales es una buena prueba de que funciona.":
-    "Without being told, the method found the Qaidam Basin as the best twin of Jezero crater (typical slope 1.7° vs 1.8°; relief 721 m vs 831 m; roughness 29 m vs 30 m). Qaidam is already proposed in the scientific literature as a Mars analog: an ancient evaporated lake at ~3,400 m, cold, dry, with strong UV radiation, yardangs, salts and playas. That the method rediscovers it from global data alone is good evidence that it works.",
-  "Las llanuras del Sahara son las más parecidas a Elysium y Utopia, pero son cálidas. Ustyurt tiene el mismo terreno (pendiente típica 0,22° frente a 0,25°; relieve 74 m frente a 74 m), un 100 % de suelo desnudo y además inviernos duros (mínima de −18 °C en 2025 según ERA5). Una llanura muy plana, seca y fría es un buen sitio para ensayar aterrizajes, navegación sobre terreno sin referencias y operaciones en frío. No hemos encontrado estudios científicos que la propongan como análogo de Marte; solo comparaciones turísticas.":
-    "The Sahara plains are the closest match to Elysium and Utopia, but they are warm. Ustyurt has the same terrain (typical slope 0.22° vs 0.25°; relief 74 m vs 74 m), 100% bare ground and harsh winters as well (minimum of −18 °C in 2025 according to ERA5). A very flat, dry, cold plain is a good place to rehearse landings, navigation over featureless terrain and cold-weather operations. We have found no scientific studies proposing it as a Mars analog, only tourist comparisons.",
 
   // results.json v2: rasgos de forma, escalas y fuentes por nivel (rank.py, terrain.py)
   "Curvatura alta, p90 de |laplaciano| (1/m)": "High curvature, p90 of |Laplacian| (1/m)",
@@ -835,8 +828,8 @@ const dataEn: Record<string, string> = {
     "Without being told, the method found the Qaidam Basin (~3,250 m) as the best twin of the Jezero–Syrtis–Isidis human exploration zone, with similar terrain at all three scales: 96/100 at 30 km, 99/100 at 10 km and 96/100 at 2 km against a HiRISE patch of an inverted delta (typical slope 5.2° vs 4.5°; relief 93 m vs 102 m). Qaidam is already published as a Mars analog (an ancient evaporated lake, cold and dry, with yardangs and salts): that the method rediscovers it without knowing is evidence that it works.",
   "Meseta de Djado (Níger), gemela de las llanuras del cráter Gusev":
     "Djado Plateau (Niger), twin of the Gusev crater plains",
-  "Es el n.º 1 del ranking final de Marte. A 10 km se parece mucho a una ventana de las llanuras de Gusev donde aterrizó Spirit (pendiente típica 2,3° frente a 2,3°; p90 8,1° frente a 8,5°; 77 % llano frente a 78 %; relieve 187 m frente a 179 m: 100/100), y también a 30 km (98/100) y a 2 km (93/100 frente a un parche HiRISE de Utopia Planitia de la misma categoría). Es roca desnuda casi sin lluvia (4 mm en 2025). En una búsqueda breve (inglés y francés) no encontramos estudios que lo usen como análogo; hay trabajos regionales sobre el Teneré que no sitúan su zona aquí. Dónde falla: es caluroso (media de 23,7 °C), al contrario que Marte.":
-    "It is #1 in the final Mars ranking. At 10 km it closely resembles a window of the Gusev plains where Spirit landed (typical slope 2.3° vs 2.3°; p90 8.1° vs 8.5°; 77% flat vs 78%; relief 187 m vs 179 m: 100/100), and also at 30 km (98/100) and at 2 km (93/100 against a HiRISE patch of Utopia Planitia in the same category). It is bare rock with almost no rain (4 mm in 2025). In a brief search (English and French) we found no studies that use it as an analog; there is regional work on the Ténéré that does not place its study area here. Where it fails: it is hot (mean of 23.7 °C), unlike Mars.",
+  "Es el n.º 1 del ranking final de Marte. A 10 km se parece mucho a una ventana de las llanuras de Gusev donde aterrizó Spirit (pendiente típica 2,3° frente a 2,3°; p90 8,1° frente a 8,5°; 77 % llano frente a 77 %; relieve 187 m frente a 179 m: 100/100), y también a 30 km (98/100) y a 2 km (93/100 frente a un parche HiRISE de Utopia Planitia de la misma categoría). Es roca desnuda casi sin lluvia (4 mm en 2025). En una búsqueda breve (inglés y francés) no encontramos estudios que lo usen como análogo; hay trabajos regionales sobre el Teneré que no sitúan su zona aquí. Dónde falla: es caluroso (media de 23,7 °C), al contrario que Marte.":
+    "It is #1 in the final Mars ranking. At 10 km it closely resembles a window of the Gusev plains where Spirit landed (typical slope 2.3° vs 2.3°; p90 8.1° vs 8.5°; 77% flat vs 77%; relief 187 m vs 179 m: 100/100), and also at 30 km (98/100) and at 2 km (93/100 against a HiRISE patch of Utopia Planitia in the same category). It is bare rock with almost no rain (4 mm in 2025). In a brief search (English and French) we found no studies that use it as an analog; there is regional work on the Ténéré that does not place its study area here. Where it fails: it is hot (mean of 23.7 °C), unlike Mars.",
   "Iglesia (San Juan, Argentina, ~3.280 m), gemelo de las llanuras de Haworth":
     "Iglesia (San Juan, Argentina, ~3,280 m), twin of the Haworth plains",
   "A 5 km, esta ventana del departamento de Iglesia (San Juan, Cordillera Frontal andina) se parece a una tesela de 5 km de la región Haworth de Artemis III: pendiente típica 3,2° frente a 4,1°; p90 9,1° frente a 7,9°; 71 % llano frente a 64 %; relieve 172 m frente a 181 m (94/100). A 10 y 30 km se parece a celdas de la malla polar de 84–90°S (97/100 en las dos escalas). Es suelo desnudo al 99 %, con media de 6,4 °C, mínima de −22,1 °C y 187 mm de lluvia (ERA5, 2025). Como hipótesis, serviría para ensayar movilidad de rovers en llanuras suaves con algunas pendientes, a gran altitud. Tras 11 búsquedas en inglés y español no encontramos estudios que lo usen como análogo; los análogos andinos que aparecen (Dos Lenguas, Ojos del Salado, Maricunga) son de Marte y están a más de 150 km (distancias estimadas). Dónde falla: hay atmósfera y lluvia, la máxima llega a 26,9 °C y la similitud climática es solo 31/100.":
@@ -991,12 +984,91 @@ const dataEn: Record<string, string> = {
     "After about 13 searches in English, French and Arabic I found no study that uses or proposes this point (Tazrouk, Tamanrasset, east of the Hoggar), or anything within 75 km, as a lunar/Martian analog, rover test site or astrobiology site. Only distant Saharan analogs come up: the Ahnet basin (EPSC-DPS 2025, about 600 km, for Mars; opened) and the sites in Morocco (Ibn Battuta). The LPI-1738 abstract (2013) names the Hoggar only in passing as a volcanic center of the Sahara, without studying it. The mentions of Tassili n'Ajjer (about 450 km away) come from press notes about the names of Martian features, and I did not open them. The absence of results does not prove that no unindexed local study exists.",
 };
 
-/** Textos de los datos con una parte variable (nombres de teselas, escala de la rugosidad…). */
+Object.assign(dataEn, DATOS_EN);
+
+/** Textos de los datos con una parte variable (escala de la rugosidad…) que solo cambian en inglés. */
 const dataEnPatterns: [RegExp, string][] = [
   [/^Rugosidad a ~(.+) \(m\)$/, "Roughness at ~$1 (m)"],
-  [/^(.+) · tesela (\d+) de (\d+) km$/, "$1 · tile $2 of $3 km"],
   [/^Malla polar (\d+) km \((.+)\)$/, "Polar grid $1 km ($2)"],
-  [/^Grupo de (\d+) referencias L0 \(ver reference_points\)\.$/, "Group of $1 L0 references."],
+];
+
+const en = () => current === "en";
+/** Nombre legible de un id interno (región, sitio o tesela) citado dentro de una nota de los datos. */
+function idName(id: string): string {
+  const name = NOMBRES_ID[id];
+  if (name) return tr(name);
+  const tile = /^(.+)_t(\d+)km_(\d+)$/.exec(id);
+  if (tile && NOMBRES_ID[tile[1]]) return tr(`${NOMBRES_ID[tile[1]]} · tesela ${Number(tile[3])} de ${tile[2]} km`);
+  return id.replace(/_/g, " ");
+}
+/** Texto de un código de calidad de coordenadas (los mismos que lm.cq.* de la ficha). */
+const cqText = (code: string) => messages[current][`lm.cq.${code}`] ?? messages.es[`lm.cq.${code}`] ?? code.replace(/_/g, " ");
+/** El mismo texto como aclaración de «posición no verificada», sin repetir esas palabras si el código ya las trae. */
+const cqDetail = (code: string) => {
+  const text = cqText(code);
+  const rest = text.replace(/^(?:not verified|no verificada)\s*/, "");
+  return rest === text ? `: ${text}` : ` ${rest}`;
+};
+/** Fecha dd/mm/aaaa de los datos, escrita según el idioma. */
+const dateText = (d: string, m: string, y: string) => en()
+  ? new Date(Date.UTC(+y, +m - 1, +d)).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })
+  : `${d}/${m}/${y}`;
+const catText = (cat: string) => messages[current][`cat.${cat}`] ?? cat;
+const ID_TOKEN = /\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g;
+
+/**
+ * Notas de los datos con parte variable. Cada regla escribe el texto en el idioma actual: en inglés lo traduce
+ * y en los dos idiomas cambia los ids internos (regiones, códigos de calidad, nombres de módulos del pipeline)
+ * por frases legibles. Las cifras salen siempre de la propia nota.
+ */
+const dataRules: [RegExp, (m: RegExpExecArray) => string][] = [
+  [/^(.+) · tesela (\d+)(?: de (\d+) km)?$/, (m) => !en() ? m[0]
+    : `${tr(m[1])} · tile ${m[2]}${m[3] ? ` of ${m[3]} km` : ""}`],
+  [/^Grupo de (\d+) referencias L0 \(ver reference_points\)\.$/, (m) => en()
+    ? `Group of ${m[1]} references.` : `Grupo de ${m[1]} referencias.`],
+  // usable_note: por qué una referencia no puntúa.
+  [/^posición no verificada \(([a-z0-9_]+)\)(?:; misma posición que ([a-z0-9_]+))?(; duplicada: no se puntúa \(cuenta la primera\))?$/, (m) => en()
+    ? `position not verified${cqDetail(m[1])}${m[2] ? `; same position as ${idName(m[2])}` : ""}${m[3] ? "; duplicate: not scored (the first one counts)" : ""}`
+    : `posición no verificada${cqDetail(m[1])}${m[2] ? `; misma posición que ${idName(m[2])}` : ""}${m[3] ? "; duplicada: no puntúa (cuenta la primera)" : ""}`],
+  [/^SLDEM2015 \((.+)\)\. Solo gemelos: no entra en el ranking ni en la validación del polo sur$/, (m) => en()
+    ? `SLDEM2015 (${m[1]}). Twins only: not included in the ranking or in the south pole validation` : m[0]],
+  [/^solo MOLA según hrsc_check a (\d+) km \((R400 = [\d.]+, eq1m = [\d.]+)\): (\d+) m o peor, más grueso que el píxel de (\d+) m; no se puntúa en L0 ni se tesela en L1$/, (m) => en()
+    ? `MOLA only, according to the HRSC coverage check within ${m[1]} km (${m[2]}): ${m[3]} m or coarser, coarser than the ${m[4]} m pixel; not scored at the coarsest scale and not split into tiles at the next one`
+    : `solo MOLA, según la comprobación de cobertura HRSC a ${m[1]} km (${m[2]}): ${m[3]} m o peor, más grueso que el píxel de ${m[4]} m; no puntúa en la escala más gruesa ni se divide en teselas en la siguiente`],
+  [/^cobertura HRSC dudosa según hrsc_check a (\d+) km \((R400 = [\d.]+, eq1m = [\d.]+)\)$/, (m) => en()
+    ? `doubtful HRSC coverage, according to the coverage check within ${m[1]} km (${m[2]})`
+    : `cobertura HRSC dudosa, según la comprobación de cobertura a ${m[1]} km (${m[2]})`],
+  [/^cobertura HRSC dudosa en la tesela \((R400 = [\d.]+, eq1m = [\d.]+); sitio: (hrsc|dudoso|mola)\)$/, (m) => {
+    const site = { hrsc: ["con HRSC", "with HRSC"], dudoso: ["dudoso", "doubtful"], mola: ["solo MOLA", "MOLA only"] }[m[2] as "hrsc" | "dudoso" | "mola"];
+    return en() ? `doubtful HRSC coverage in the tile (${m[1]}; the site as a whole: ${site[1]})`
+      : `cobertura HRSC dudosa en la tesela (${m[1]}; el sitio en conjunto: ${site[0]})`;
+  }],
+  // source_note: de dónde sale la posición de cada referencia.
+  [/^teselas de (\d+) km dentro de los límites de ([a-z0-9_]+) \(tesela (\d+), ([-+][\d.]+) km E, ([-+][\d.]+) km N del centro de la región\)\. Hereda la fuente de la región [a-z0-9_]+: ([^]+)$/, (m) => en()
+    ? `Tile ${m[3]} of the ${m[1]} km tiles within the bounds of ${idName(m[2])} (${m[4]} km E, ${m[5]} km N of the region center). It inherits the source of the region: ${tr(m[6])}`
+    : `Tesela ${m[3]} de las de ${m[1]} km dentro de los límites de ${idName(m[2])} (${m[4]} km E, ${m[5]} km N del centro de la región). Hereda la fuente de la región: ${tr(m[6])}`],
+  [/^centro de ([a-z0-9_]+) \(región sin límites publicados\) \(tesela (\d+), ([-+][\d.]+) km E, ([-+][\d.]+) km N del centro de la región\)\. Hereda la fuente de la región [a-z0-9_]+: ([^]+)$/, (m) => en()
+    ? `Center of ${idName(m[1])}, a region with no published bounds (tile ${m[2]}, ${m[3]} km E, ${m[4]} km N of the region center). It inherits the source of the region: ${tr(m[5])}`
+    : `Centro de ${idName(m[1])}, región sin límites publicados (tesela ${m[2]}, ${m[3]} km E, ${m[4]} km N del centro de la región). Hereda la fuente de la región: ${tr(m[5])}`],
+  [/^ventana (\d+) de (\d+)×(\d+) \(paso (\d+) km\) alrededor de ([a-z0-9_]+) \(([-+][\d.]+) km E, ([-+][\d.]+) km N del sitio\)\. Hereda la fuente del sitio [a-z0-9_]+: ([^]+)$/, (m) => en()
+    ? `Window ${m[1]} of a ${m[2]}×${m[3]} grid (${m[4]} km step) around ${idName(m[5])} (${m[6]} km E, ${m[7]} km N of the site). It inherits the source of the site: ${tr(m[8])}`
+    : `Ventana ${m[1]} de una malla de ${m[2]}×${m[3]} (paso ${m[4]} km) alrededor de ${idName(m[5])} (${m[6]} km E, ${m[7]} km N del sitio). Hereda la fuente del sitio: ${tr(m[8])}`],
+  [/^malla regular generada \(azimutal polar, paso (\d+) km, (\d+)–(\d+)°S\): malla regular generada en la azimutal polar sur \(reference_sites\.moon_polar_grid\); no es un sitio publicado\. Regiones que contienen el punto: (.+)\.$/, (m) => {
+    const none = m[4] === "ninguna";
+    const list = none ? "" : m[4].split(", ").map(idName).join("; ");
+    return en()
+      ? `Regular grid generated by the method in the south polar azimuthal projection (${m[1]} km step, ${m[2]}–${m[3]}°S); it is not a published site. Regions that contain the point: ${none ? "none" : list}.`
+      : `Malla regular generada por el método en la proyección azimutal polar sur (paso ${m[1]} km, ${m[2]}–${m[3]}°S); no es un sitio publicado. Regiones que contienen el punto: ${none ? "ninguna" : list}.`;
+  }],
+  [/^Parche HiRISE del visor 3D \(src\/data\/catalog\.json, id '[^']+', categoría '([^']+)'\): (\d+×\d+) celdas a (\d+) m \([^)]+\), remuestreado a (\d+) m por media de áreas\. Fuente del parche: (.+?)(?:; DTM: (\S+?))?\.$/, (m) => en()
+    ? `HiRISE patch from the 3D comparison (category “${catText(m[1])}”): ${m[2]} cells at ${m[3]} m, resampled to ${m[4]} m by area averaging. Patch source: ${m[5]}${m[6] ? `; DTM: ${m[6]}` : ""}.`
+    : `Parche HiRISE de la comparación en 3D (categoría «${catText(m[1])}»): ${m[2]} celdas a ${m[3]} m, remuestreado a ${m[4]} m por media de áreas. Fuente del parche: ${m[5]}${m[6] ? `; DTM: ${m[6]}` : ""}.`],
+  [/^Shapefile 'Anthropogenic Objects' de LROC \((.+?); mantiene las coordenadas de (.+?)\), leído el (\d+)\/(\d+)\/(\d+): (\w+), (?:módulo lunar (\w+)|módulo de aterrizaje), (.+)\.$/, (m) => en()
+    ? `LROC 'Anthropogenic Objects' shapefile (${m[1]}; it keeps the coordinates of ${m[2]}), read on ${dateText(m[3], m[4], m[5])}: ${m[6]}, ${m[7] ? `lunar module ${m[7]}` : "lander"}, ${m[8]}.`
+    : m[0]],
+  [/^Lunar Pit Locations de LROC \((.+?); Atlas de fosos de LROC\), leído el (\d+)\/(\d+)\/(\d+): ([^;]+?)(?:; (\d+) m de profundidad( interior)?)?\.$/, (m) => en()
+    ? `LROC Lunar Pit Locations (${m[1]}; LROC pit atlas), read on ${dateText(m[2], m[3], m[4])}: ${m[5]}${m[6] ? `; ${m[6]} m ${m[7] ? "inner depth" : "deep"}` : ""}.`
+    : m[0]],
 ];
 
 function initialLang(): Lang {
@@ -1018,9 +1090,17 @@ export function t(key: string, params?: Params): string {
 export function tr(text: string): string;
 export function tr(text: string | null | undefined): string | null | undefined;
 export function tr(text: string | null | undefined) {
-  if (text == null || current === "es") return text;
-  const exact = dataEn[text];
-  if (exact != null) return exact;
+  if (text == null) return text;
+  if (current === "en") {
+    const exact = dataEn[text];
+    if (exact != null) return exact;
+  }
+  for (const [re, write] of dataRules) {
+    const m = re.exec(text);
+    if (m) return write(m);
+  }
+  // En español solo queda cambiar por su nombre los ids internos que alguna nota cite.
+  if (current === "es") return text.includes("_") ? text.replace(ID_TOKEN, (id) => (NOMBRES_ID[id] ? idName(id) : id)) : text;
   for (const [re, out] of dataEnPatterns) if (re.test(text)) return text.replace(re, out);
   return text;
 }
