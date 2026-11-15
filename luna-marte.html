@@ -12,49 +12,91 @@
         d.lang = l === "en" || l === "es" ? l : (/^es\b/i.test(navigator.language || "") ? "es" : "en");
         d.dataset.theme = t === "light" || t === "dark" ? t : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
       })();
+      // Textos que deben leerse antes de que cargue el script (la frase de entrada y el aviso de carga):
+      // viven aquí, en los dos idiomas, y src/mapa.textos.ts los vuelve a pintar al cambiar de idioma.
+      window.LM_EARLY = {
+        en: {
+          intro: "TerraTwin searches all of Earth's land for the places most like Moon and Mars sites: pick a site to see its twins on Earth, where the likeness holds and where it breaks.",
+          loading: "Loading the analogs…",
+          skip: "Skip to the site list",
+          ficha: "Its twin on Earth"
+        },
+        es: {
+          intro: "TerraTwin busca en toda la tierra firme los lugares más parecidos a sitios de la Luna y de Marte: elige un sitio para ver sus gemelos en la Tierra, en qué se parecen y en qué no.",
+          loading: "Cargando los análogos…",
+          skip: "Saltar a la lista de sitios",
+          ficha: "Su gemelo en la Tierra"
+        }
+      };
+      window.lmEarly = function () {
+        var s = window.LM_EARLY[document.documentElement.lang] || window.LM_EARLY.en;
+        var els = document.querySelectorAll("[data-early]");
+        for (var i = 0; i < els.length; i++) { var v = s[els[i].getAttribute("data-early")]; if (v) els[i].textContent = v; }
+      };
     </script>
-    <title data-i18n="lm.docTitle">Análogos de la Luna y Marte</title>
+    <title data-i18n="lm.docTitle">TerraTwin</title>
   </head>
   <body>
+    <a class="lm-skip" href="#panel" data-early="skip">Saltar a la lista de sitios</a>
     <main class="lm">
       <header class="masthead">
-        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">Análogos terrestres</span></h1>
+        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">TerraTwin</span></h1>
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
           <a href="./luna-marte.html" aria-current="page" data-i18n="nav.map">Mapa Luna y Marte</a>
           <a href="./globos.html" data-i18n="nav.globes">Globos 3D</a>
+          <a href="#sources"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
         </nav>
       </header>
+      <p class="lm-intro" data-intro data-early="intro">TerraTwin busca en toda la tierra firme los lugares más parecidos a sitios de la Luna y de Marte: elige un sitio para ver sus gemelos en la Tierra, en qué se parecen y en qué no.</p>
       <section class="lm-layout" aria-label="Análogos de la Luna y Marte en toda la Tierra" data-i18n-attr="aria-label:lm.layoutLabel">
-        <aside class="lm-panel" id="panel">
-          <div class="lm-tabs" role="tablist" aria-label="Cuerpo de referencia" data-i18n-attr="aria-label:lm.tabsLabel">
-            <button type="button" role="tab" data-body="moon" aria-selected="true" data-i18n="lm.tabMoon">Luna</button>
-            <button type="button" role="tab" data-body="mars" aria-selected="false" data-i18n="lm.tabMars">Marte</button>
+        <!-- 1 · Elegir un sitio de la Luna o de Marte. Lo secundario (historias, ranking, referencias, validación) va plegado debajo. -->
+        <aside class="lm-panel" id="panel" tabindex="-1">
+          <div class="lm-tabs" role="group" aria-label="Cuerpo de referencia" data-i18n-attr="aria-label:lm.tabsLabel">
+            <button type="button" data-body="moon" aria-pressed="true" data-i18n="lm.tabMoon">Luna</button>
+            <button type="button" data-body="mars" aria-pressed="false" data-i18n="lm.tabMars">Marte</button>
           </div>
+          <p class="lm-loading" id="lm-loading" role="status" data-early="loading">Cargando los análogos…</p>
           <div id="lm-results" hidden>
-            <div id="detail" class="lm-detail" aria-live="polite"></div>
-            <h2 class="lm-section" id="featured-h" data-i18n="lm.featured">Historias destacadas</h2>
-            <div id="featured" class="lm-cards"></div>
-            <h2 class="lm-section" data-i18n="lm.ranking">Ranking general</h2>
-            <div class="lm-seg lm-rank-modes" id="rank-modes" role="group" aria-label="Tipo de ranking" data-i18n-attr="aria-label:lm.rankMode" hidden>
-              <button type="button" data-rank="final" aria-pressed="true" data-i18n="lm.rankFinal">Final multiescala (30 km → 10 km → 5/2 km)</button>
-              <button type="button" data-rank="new" aria-pressed="false" data-i18n="lm.rankNew">Solo nuevos</button>
-              <button type="button" data-rank="l0" aria-pressed="false" data-i18n="lm.rankL0">A 30 km</button>
-            </div>
-            <p class="lm-note" id="rank-note" hidden data-i18n="lm.newNote">Solo candidatos lejos de los análogos conocidos y sin estudios encontrados: lo que el reto pide descubrir. «Sin revisar» = bibliografía pendiente.</p>
-            <ol class="lm-list" id="ranking"></ol>
-            <h2 class="lm-section" data-i18n="lm.refs">Referencias</h2>
-            <div class="lm-refs" id="refs"></div>
-            <h2 class="lm-section" data-i18n="lm.twinsGroups">Gemelos terrestres por grupo</h2>
+            <p class="lm-pickhint" id="pick-hint"><span class="lm-stepnum" aria-hidden="true">1</span><span id="pick-hint-text"></span></p>
+            <h2 class="lm-section" id="twins-h" data-i18n="lm.twinsGroups">Gemelos terrestres por grupo</h2>
             <div id="twins" class="lm-groups"></div>
-            <h2 class="lm-section" data-i18n="lm.validation">Validación con análogos conocidos</h2>
-            <div class="lm-valid">
-              <table id="validation"></table>
-              <p class="lm-note" id="validation-note"></p>
-            </div>
+            <button type="button" class="lm-more" id="twins-more" aria-controls="twins" hidden></button>
+
+            <details class="lm-fold" id="fold-featured">
+              <summary><h2 class="lm-section" id="featured-h" data-i18n="lm.featured">Historias destacadas</h2></summary>
+              <div id="featured" class="lm-cards"></div>
+            </details>
+            <details class="lm-fold" id="fold-ranking">
+              <summary><h2 class="lm-section" data-i18n="lm.ranking">Ranking general</h2></summary>
+              <div class="lm-seg lm-rank-modes" id="rank-modes" role="group" aria-label="Tipo de ranking" data-i18n-attr="aria-label:lm.rankMode" hidden>
+                <button type="button" data-rank="final" aria-pressed="true" data-i18n="lm.rankFinal">Final multiescala (30 km → 10 km → 5/2 km)</button>
+                <button type="button" data-rank="new" aria-pressed="false" data-i18n="lm.rankNew">Solo nuevos</button>
+                <button type="button" data-rank="l0" aria-pressed="false" data-i18n="lm.rankL0">A 30 km</button>
+              </div>
+              <p class="lm-note lm-fold-note" id="rank-note" hidden></p>
+              <ol class="lm-list" id="ranking"></ol>
+            </details>
+            <details class="lm-fold" id="fold-refs">
+              <summary><h2 class="lm-section" data-i18n="lm.refs">Referencias</h2></summary>
+              <div class="lm-refs" id="refs"></div>
+            </details>
+            <details class="lm-fold" id="fold-validation">
+              <summary><h2 class="lm-section" data-i18n="lm.validation">Validación con análogos conocidos</h2></summary>
+              <div class="lm-valid">
+                <table id="validation"></table>
+                <p class="lm-note" id="validation-note"></p>
+              </div>
+            </details>
           </div>
         </aside>
+        <!-- 2 · La ficha del gemelo: dónde está, en qué se parece y en qué no. -->
+        <article class="lm-ficha" id="ficha" aria-labelledby="ficha-h">
+          <p class="lm-pickhint lm-ficha-head"><span class="lm-stepnum" aria-hidden="true">2</span><span id="ficha-h" data-early="ficha">Su gemelo en la Tierra</span></p>
+          <div id="detail" class="lm-detail" aria-live="polite"><p class="lm-loading" data-early="loading">Cargando los análogos…</p></div>
+        </article>
         <div class="lm-map-wrap">
           <div id="map" aria-label="Mapa de la Tierra con los candidatos" data-i18n-attr="aria-label:lm.mapLabel"></div>
+          <p class="lm-aviso" id="map-aviso" role="status" data-aviso="sin-red"></p>
         </div>
       </section>
       <footer id="sources">
@@ -76,6 +118,7 @@
         </ul>
       </footer>
     </main>
+    <script>window.lmEarly();</script>
     <script type="module" src="/src/lunaMarte.ts"></script>
   </body>
 </html>
