@@ -1,8 +1,9 @@
-// Modelo de datos de la página «Globos 3D»: une results.json y catalog.json en puntos por globo.
+// Modelo de datos de la página «Globos 3D».
 // Los datos de origen no se modifican; aquí solo se leen y se fusionan.
 import rawResults from "./data/results.json";
 import { sites as catalogSites, type Site } from "./data";
 import { getLang, locale, t } from "./i18n";
+import { nasaAnalogs, type NasaAnalog } from "./nasaAnalogs";
 
 export type Body = "moon" | "mars";
 export type GlobeId = "moon" | "earth" | "mars";
@@ -73,6 +74,7 @@ export type EarthRole =
   | { kind: "twin"; body: Body; ref: string; rank: number; site: EarthSite }
   | { kind: "featured"; body: Body; ref: string; tag: string; title: string; story: string }
   | { kind: "validation"; body: Body; name: string; percentile: number }
+  | { kind: "nasa"; pair: NasaAnalog }
   | { kind: "catalog"; origin: "curated" | "global"; name: string; site: Site };
 
 /** Punto de la Tierra con todos los roles que comparten sus coordenadas (redondeadas a 0,01°). */
@@ -90,7 +92,7 @@ export type EarthPoint = {
   name: string | null;
 };
 
-const keyOf = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(2)}`;
+export const locationKey = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(2)}`;
 
 export const globeReferences = DATA.references.filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon));
 export const refById = new Map(globeReferences.map((r) => [r.id, r]));
@@ -104,7 +106,7 @@ export const BEST_MIN_SCORE: Record<Body, number> = { moon: 80, mars: 85 };
 export function buildEarthPoints(): EarthPoint[] {
   const points = new Map<string, EarthPoint>();
   const at = (lat: number, lon: number) => {
-    const key = keyOf(lat, lon);
+    const key = locationKey(lat, lon);
     let point = points.get(key);
     if (!point) {
       point = { key, lat, lon, roles: [], data: {}, color: "moon", best: false, name: null };
@@ -137,6 +139,10 @@ export function buildEarthPoints(): EarthPoint[] {
     at(site.latitude, site.longitude).roles.push({ kind: "catalog", origin: site.origin, name: site.name, site });
   }
 
+  for (const pair of nasaAnalogs) {
+    at(pair.earth.lat, pair.earth.lon).roles.push({ kind: "nasa", pair });
+  }
+
   for (const point of points.values()) {
     // «Mejores»: top 20, gemelo o historia destacada, y además con el puntaje mínimo de su cuerpo o más
     // (redondeado como se muestra en la página, para que un 80 en pantalla cuente).
@@ -160,6 +166,8 @@ function colorBody(point: EarthPoint): Body {
   if (featured) return featured.body;
   const validation = point.roles.filter((r) => r.kind === "validation");
   if (validation.length) return validation.reduce((a, b) => (b.percentile > a.percentile ? b : a)).body;
+  const nasa = point.roles.find((r) => r.kind === "nasa");
+  if (nasa) return nasa.pair.body;
   // Los sitios del catálogo vienen del visor de Marte: son candidatos a análogo de Marte.
   return "mars";
 }
@@ -168,6 +176,7 @@ function colorBody(point: EarthPoint): Body {
 function earthName(point: EarthPoint): string | null {
   for (const role of point.roles) if (role.kind === "featured") return role.title;
   for (const role of point.roles) if (role.kind === "validation" || role.kind === "catalog") return role.name;
+  for (const role of point.roles) if (role.kind === "nasa") return role.pair.earth.name;
   for (const body of BODIES) if (point.data[body]?.known_analog) return point.data[body]!.known_analog;
   return null;
 }

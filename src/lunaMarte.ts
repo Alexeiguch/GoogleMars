@@ -11,6 +11,8 @@ import "./lunaMarte.css";
 import "./prefs";
 import L from "leaflet";
 import { getLang, hasMsg, locale, onLangChange, t, tr, type Lang } from "./i18n";
+import { nasaAnalogs, nasaText, type NasaAnalog, type NasaAnalogSite } from "./nasaAnalogs";
+import rawTerrain from "./data/nasa-terrain.json";
 import rawResults from "./data/results.json";
 
 // ---- tipos del results.json ----------------------------------------------------
@@ -220,7 +222,8 @@ const legendBox = L.DomUtil.create("div", "lm-legend");
 legend.onAdd = () => legendBox;
 legend.addTo(map);
 function renderMapText() {
-  legendBox.innerHTML = t(hasFinal("moon") || hasFinal("mars") ? "lm.legendV2" : "lm.legend");
+  legendBox.innerHTML = `${t(hasFinal("moon") || hasFinal("mars") ? "lm.legendV2" : "lm.legend")}
+    <br><span class="lm-nasa-dot" aria-hidden="true"></span> ${t("lm.nasa")}`;
   const next = t("lm.attribution");
   if (next !== attribution) {
     map.attributionControl.removeAttribution(attribution).addAttribution(next);
@@ -742,6 +745,52 @@ function renderFeatured() {
   return firstKey;
 }
 
+const analogKey = (pair: NasaAnalog) => `nasa-${pair.id}`;
+type MeasuredSite = {
+  lat: number;
+  lon: number;
+  medianSlope: number;
+  steepSlope: number;
+  relief: number;
+};
+
+type NasaTerrain = {
+  earth: MeasuredSite;
+  target: MeasuredSite;
+  windowKm: number;
+  cellSizeM: number;
+  terrainSimilarity: number;
+  maximumTotalScore?: number;
+  rankedScore?: number;
+  rankedPosition?: number;
+  existingBestTotalScore?: number;
+  targetCatalogId?: string;
+  earthCatalogId?: string;
+};
+
+const nasaTerrain: Record<string, NasaTerrain | undefined> = rawTerrain;
+const nasaPicker = $<HTMLDetailsElement>("#nasa-analogs");
+
+function renderNasa() {
+  const nasaList = nasaPicker.querySelector("ul")!;
+  nasaList.replaceChildren();
+  for (const pair of nasaAnalogs.filter((entry) => entry.body === body)) {
+    const li = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("aria-pressed", "false");
+    button.innerHTML = `<span>${esc(pair.earth.name)}</span><small>${esc(pair.target.name)}</small>`;
+    li.append(button);
+    nasaList.append(li);
+    const go = register(analogKey(pair), button, (fly) => selectNasa(pair, fly));
+    const icon = L.divIcon({ className: "lm-nasa-marker", iconSize: [22, 22],
+      html: '<span class="lm-nasa-dot" aria-hidden="true"></span>' });
+    const name = `${pair.earth.name} · ${pair.target.name}`;
+    L.marker([pair.earth.lat, pair.earth.lon], { icon, title: name, alt: name, zIndexOffset: 500 })
+      .addTo(baseLayer!).on("click", () => go());
+  }
+}
+
 // ---- validación ---------------------------------------------------------------------------------
 function renderValidation() {
   const v = (DATA.validation ?? []).filter((x) => x.body === body);
@@ -792,6 +841,7 @@ function render() {
   renderRanking();
   renderTwins();
   renderRefs();
+  renderNasa();
   const firstFeatured = renderFeatured();
   renderValidation();
   $("#lm-results").hidden = false;
@@ -864,6 +914,77 @@ function literatureHtml(s: EarthSite) {
   else { head = t("lm.lit.unverified"); cls = "unverified"; }
   return `<h3 class="lm-subtitle">${t("lm.lit")}</h3>
     <div class="lm-lit ${cls}"><b>${esc(head)}</b>${name}${dist}${note}${url ? ` <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${t("lm.lit.link")}</a>` : ""}</div>`;
+}
+
+function nasaFigure(site: NasaAnalogSite, planet: string) {
+  const coords = `${site.approximate ? "≈ " : ""}${coord(site.lat, site.lon)}`;
+  const img = site.image;
+  const photo = img
+    ? `<a class="lm-nasa-photo" href="${esc(img.url)}" target="_blank" rel="noopener">
+        <img src="${esc(img.url)}" alt="${esc(nasaText(img.alt))}" decoding="async">
+      </a>`
+    : "";
+  return `<figure>${photo}<figcaption><b>${planet}</b> · ${coords}
+    ${img ? `<span class="lm-nasa-credit">${esc(img.credit)}</span>` : ""}</figcaption></figure>`;
+}
+
+function nasaTerrainTable(pair: NasaAnalog) {
+  const terrain = nasaTerrain[pair.id];
+  if (!terrain) return "";
+  const { earth, target } = terrain;
+  const metrics = [["medianSlope", "°"], ["steepSlope", "°"], ["relief", " m"]] as const;
+  const score = (value: number) => fmt(value * 100, 1);
+  const window = t("lm.nasaTerrainWindow", { km: fmt(terrain.windowKm, 0), m: fmt(terrain.cellSizeM, 0) });
+  const rows = metrics.map(([key, unit]) => `<tr><th scope="row">${t(`metric.${key}`)}</th>
+    <td>${fmt(earth[key])}${unit}</td><td>${fmt(target[key])}${unit}</td></tr>`).join("");
+  const similarity = t("lm.nasaTerrainScore", { score: score(terrain.terrainSimilarity) });
+  const best = terrain.existingBestTotalScore;
+  const weighted = terrain.maximumTotalScore != null && best != null
+    ? t("lm.nasaMaxScore", { max: score(terrain.maximumTotalScore), best: score(best) })
+    : terrain.rankedScore != null && terrain.rankedPosition != null && best != null
+      ? t("lm.nasaRankScore", { score: score(terrain.rankedScore), rank: terrain.rankedPosition, best: score(best) })
+      : "";
+  const viewer = terrain.targetCatalogId && terrain.earthCatalogId
+    ? `<a class="lm-nasa-viewer" href="./?${new URLSearchParams({ site: terrain.targetCatalogId, earth: terrain.earthCatalogId })}">${t("lm.nasaViewer")}</a>`
+    : "";
+  return `<table class="lm-table lm-nasa-metrics">
+    <caption>${window}</caption>
+    <thead><tr><th scope="col">${t("lm.nasaMetric")}</th><th scope="col">${t("planet.earth")}</th><th scope="col">${bodyName(pair.body)}</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <p class="lm-nasa-score"><strong>${similarity}</strong>${weighted ? ` <span>${weighted}</span>` : ""}</p>
+  ${viewer}`;
+}
+
+function selectNasa(pair: NasaAnalog, fly: boolean) {
+  clearMiniMaps();
+  const detail = $("#detail");
+  detail.innerHTML = `
+    <h2 tabindex="-1">${esc(pair.earth.name)} <span aria-hidden="true">↔</span> ${esc(pair.target.name)}</h2>
+    <p class="lm-story">${esc(nasaText(pair.summary))}</p>
+    <div class="lm-cmp-grid lm-nasa-images">
+      ${nasaFigure(pair.earth, t("planet.earth"))}
+      ${nasaFigure(pair.target, bodyName(pair.body))}
+    </div>
+    ${nasaTerrainTable(pair)}
+    <ul class="lm-nasa-sources">${pair.sources.map((source) =>
+      `<li><a href="${esc(source.url)}" target="_blank" rel="noopener">${esc(nasaText(source.label))}</a></li>`
+    ).join("")}</ul>`;
+  for (const img of detail.querySelectorAll("img")) {
+    const showFallback = () => {
+      img.parentElement?.replaceChildren(t("lm.noImage"));
+    };
+    if (img.complete && img.naturalWidth === 0) showFallback();
+    else img.addEventListener("error", showFallback, { once: true });
+  }
+  if (fly) {
+    nasaPicker.open = false;
+    const animate = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    map.flyTo([pair.earth.lat, pair.earth.lon], 8, { animate, duration: 1.2 });
+    detail.querySelector("h2")?.focus({ preventScroll: true });
+    const scrollTarget = matchMedia("(max-width: 860px)").matches ? detail : nasaPicker;
+    scrollTarget.scrollIntoView({ block: "nearest", behavior: animate ? "smooth" : "instant" });
+  }
 }
 
 function select(s: EarthSite, title: string, story: string | null = null, fly = true) {
@@ -964,6 +1085,12 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
 
 // ---- comparación lado a lado -------------------------------------------------------------------------
 let miniMaps: L.Map[] = [];
+
+function clearMiniMaps() {
+  for (const map of miniMaps) map.remove();
+  miniMaps = [];
+}
+
 const rel = (name: string) => `${BASE}relieve/${name}`;
 
 /** Imágenes candidatas (la primera que exista): nombres v2 por nivel y, en L0, los de v1 como respaldo. */
@@ -1019,8 +1146,7 @@ function boxBounds(lat: number, lon: number, radiusKm: number, halfKm: number): 
 const NICE_KM = [0.2, 0.5, 1, 2, 5, 10, 20];
 
 function showCompare(s: EarthSite, wins: Partial<Record<Level, Win>>, lv: Level, mode: "relief" | "real") {
-  for (const m of miniMaps) m.remove();
-  miniMaps = [];
+  clearMiniMaps();
   const grid = $("#cmp");
   const scale = $("#cmp-scale");
   const info = $("#cmp-info");
@@ -1103,9 +1229,9 @@ function showCompare(s: EarthSite, wins: Partial<Record<Level, Win>>, lv: Level,
 
 // ---- pestañas Luna / Marte -----------------------------------------------------------------------------
 const tabs = document.querySelectorAll<HTMLButtonElement>("[data-body]");
-function setBody(next: Body) {
+function setBody(next: Body, pair?: NasaAnalog) {
   body = next;
-  currentKey = null;
+  currentKey = pair ? analogKey(pair) : null;
   refSel = null;
   openGroups.clear();
   for (const tab of tabs) tab.setAttribute("aria-selected", String(tab.dataset.body === body));
@@ -1114,7 +1240,10 @@ function setBody(next: Body) {
 }
 for (const tab of tabs) tab.addEventListener("click", () => setBody(tab.dataset.body as Body));
 renderMapText();
-setBody(new URLSearchParams(location.search).get("cuerpo") === "marte" ? "mars" : "moon");
+const pageParams = new URLSearchParams(location.search);
+const initialPair = nasaAnalogs.find((pair) => pair.id === pageParams.get("analog"));
+setBody(initialPair?.body ?? (pageParams.get("cuerpo") === "marte" ? "mars" : "moon"), initialPair);
+if (initialPair) map.setView([initialPair.earth.lat, initialPair.earth.lon], 8);
 
 // Cambio de idioma: se repinta todo lo generado y se reabre el mismo sitio sin mover el mapa.
 onLangChange(() => {

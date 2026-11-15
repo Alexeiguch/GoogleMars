@@ -16,6 +16,23 @@
     }
   },
   {
+    "id": "ulysses-colles",
+    "name": "Ulysses Colles",
+    "planet": "Mars",
+    "category": "Volcanic terrain",
+    "latitude": 5.563,
+    "longitude": -122.968,
+    "source": "HiRISE · NASA/JPL/UArizona",
+    "sourceUrl": "https://www.uahirise.org/dtm/dtm.php?ID=PSP_008262_1855",
+    "raster": "https://hirise-pds.lpl.arizona.edu/PDS/DTM/PSP/ORB_008200_008299/PSP_008262_1855_ESP_042652_1855/DTEED_008262_1855_042652_1855_A01.IMG",
+    "metrics": {
+      "medianSlope": 20.94276422926611,
+      "steepSlope": 24.04472212338163,
+      "medianElevation": 4815.68896484375,
+      "relief": 321.8040039062498
+    }
+  },
+  {
     "planet": "Earth",
     "name": "Hanaupah Canyon fan",
     "latitude": 36.223,

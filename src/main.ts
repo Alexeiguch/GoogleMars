@@ -337,7 +337,7 @@ function renderMatchList() {
   }));
 }
 
-function selectSite(site: Site) {
+function selectSite(site: Site, earthId?: string) {
   target = site;
   picker.value = site.id;
   globes?.selectMars(site);
@@ -362,7 +362,8 @@ function selectSite(site: Site) {
   renderMatchList();
   results.hidden = false;
   document.querySelector<HTMLElement>("#ranking-method")!.hidden = false;
-  if (ranked[0]) void selectMatch(ranked[0]);
+  const match = ranked.find(({ site }) => site.id === earthId) ?? ranked[0];
+  if (match) void selectMatch(match);
 }
 
 picker.addEventListener("change", () => {
@@ -372,6 +373,9 @@ picker.addEventListener("change", () => {
 document.querySelector("#find-matches")!.addEventListener("click", () => selectSite(target));
 markers.find(({ site }) => site === target)?.button.setAttribute("aria-pressed", "true");
 renderChrome();
+const pageParams = new URLSearchParams(location.search);
+const linkedSite = marsSites.find(({ id }) => id === pageParams.get("site"));
+if (linkedSite) selectSite(linkedSite, pageParams.get("earth") ?? undefined);
 
 // Cambio de idioma: se vuelven a pintar los textos generados sin perder la selección ni recargar el 3D.
 onLangChange(() => {

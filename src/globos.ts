@@ -15,10 +15,11 @@ import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { categoryLabel, type Site } from "./data";
 import { getLang, locale, onLangChange, t, tr } from "./i18n";
 import {
-  BEST_MIN_SCORE, BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, globeReferences, isHeadlineRef, marsPatches,
+  BEST_MIN_SCORE, BODIES, DATA, bodyName, buildEarthPoints, coord, fmt, globeReferences, isHeadlineRef, locationKey, marsPatches,
   refById, topSite, twinKeyOf, twinsOf,
   windowName, type Body, type EarthPoint, type EarthRole, type GlobeId, type Reference,
 } from "./globosData";
+import { nasaAnalogs, nasaText, type NasaAnalog } from "./nasaAnalogs";
 import { TileLayer, direction, type TileLayerOptions } from "./tiles";
 import { mountPathPlanner } from "./pathPlanner";
 import { EARTH_RADIUS_KM, interpolateRoutePoint, MARS_RADIUS_KM, type RoutePoint } from "./pathRoute";
@@ -132,7 +133,7 @@ function rgb(color: string): [number, number, number] {
 // ---------------------------------------------------------------------------------------------
 // Modelo de puntos
 
-type Kind = "ref" | "patch" | "earth" | "heat";
+type Kind = "ref" | "patch" | "earth" | "nasa" | "heat";
 type Item = {
   id: string;
   globe: GlobeId;
@@ -151,6 +152,7 @@ type Item = {
   ref?: Reference;
   patch?: Site;
   earth?: EarthPoint;
+  nasaPairs?: NasaAnalog[];
   heat?: { body: Body; score: number };
   layer?: Layer;
   index?: number;
@@ -187,11 +189,32 @@ for (const patch of marsPatches) {
     raw: patch.name, named: true, shape: Shape.Disc, size: SIZE.patch, color: rgb(PATCH_COLOR), priority: 1, patch,
   });
 }
+const planetaryLocations = new Map<string, Item>();
+const nasaTargets = new Map<string, Item>();
+function planetaryKey(globe: GlobeId, lat: number, lon: number) {
+  return `${globe}:${locationKey(lat, lon)}`;
+}
+for (const item of items) {
+  const key = planetaryKey(item.globe, item.lat, item.lon);
+  if (!planetaryLocations.has(key)) planetaryLocations.set(key, item);
+}
+for (const pair of nasaAnalogs) {
+  const { name, lat, lon } = pair.target;
+  const key = planetaryKey(pair.body, lat, lon);
+  const item = planetaryLocations.get(key) ?? add({
+    id: `nasa:${pair.id}`, globe: pair.body, kind: "nasa", lat, lon, raw: name, named: true,
+    shape: Shape.Ring, size: SIZE.validation, color: rgb(COLOR[pair.body]), priority: 2,
+  });
+  planetaryLocations.set(key, item);
+  nasaTargets.set(pair.id, item);
+  (item.nasaPairs ??= []).push(pair);
+}
+
 for (const point of earthPoints) {
   const has = (kind: EarthRole["kind"]) => point.roles.some((r) => r.kind === kind);
   const [shape, size, priority] = has("featured") ? [Shape.Star, SIZE.featured, 4]
     : point.best ? [Shape.Disc, SIZE.site, 3]
-    : has("validation") ? [Shape.Ring, SIZE.validation, 2]
+    : has("validation") || has("nasa") ? [Shape.Ring, SIZE.validation, 2]
     : [Shape.Disc, SIZE.catalog, 1];
   const item = add({
     id: `earth:${point.key}`, globe: "earth", kind: "earth", lat: point.lat, lon: point.lon,
@@ -218,7 +241,12 @@ for (const body of BODIES) {
 }
 /** Nombre visible en el idioma actual; si el punto no tiene nombre, «Ventana de 30 km · lat, lon». */
 const label = (item: Item) => (item.raw ? tr(item.raw) : windowName(item.lat, item.lon));
-const earthKey = (lat: number, lon: number) => `${lat.toFixed(2)},${lon.toFixed(2)}`;
+const nasaEarth = (pair: NasaAnalog) => earthByKey.get(locationKey(pair.earth.lat, pair.earth.lon));
+const nasaPairsAt = (item: Item) => item.earth
+  ? item.earth.roles.flatMap((role) => role.kind === "nasa" ? [role.pair] : [])
+  : item.nasaPairs ?? [];
+const isNasaOnly = (item: Item) => item.kind === "nasa" || item.earth?.roles.every((role) => role.kind === "nasa");
+const nasaMatchesRef = (pair: NasaAnalog, refId: string) => nasaTargets.get(pair.id)?.ref?.id === refId;
 
 // ---------------------------------------------------------------------------------------------
 // Estado
@@ -229,6 +257,7 @@ let mode: Mode = "best";
 let refFilter: string | null = null;
 let selected: Item | null = null;
 let selectedEarthTwin: TwinRole | undefined;
+let selectedAnalog: NasaAnalog | undefined;
 let highlighted = new Set<Item>();
 
 function twinRoleOf(point: EarthPoint, ref: Reference) {
@@ -238,9 +267,11 @@ function twinRoleOf(point: EarthPoint, ref: Reference) {
 }
 
 function isVisible(item: Item) {
+  if (selectedAnalog && highlighted.has(item)) return true;
   switch (item.kind) {
     case "ref": return highlighted.has(item) || (refFilter ? item.ref!.id === refFilter : mode === "all" || isHeadlineRef(item.ref!));
-    case "patch": return mode === "all" && !refFilter;
+    case "patch":
+    case "nasa": return mode === "all" && !refFilter;
     case "heat": return mode === "all" && !refFilter;
     case "earth": {
       const point = item.earth!;
@@ -248,6 +279,7 @@ function isVisible(item: Item) {
         const ref = refById.get(refFilter)!;
         // Los gemelos de la referencia siguen visibles aunque no lleguen al puntaje de «Mejores».
         if (twinRoleOf(point, ref)) return true;
+        if (mode === "all" && nasaPairsAt(item).some((pair) => nasaMatchesRef(pair, ref.id))) return true;
         return (mode === "all" || point.best) && point.data[ref.body]?.best_ref === refFilter;
       }
       return mode === "all" || point.best;
@@ -796,7 +828,7 @@ function bestBody(point: EarthPoint): Body | null {
 
 function twinItemsOf(ref: Reference) {
   return twinsOf(ref)
-    .map((t) => earthByKey.get(earthKey(t.lat, t.lon)))
+    .map((t) => earthByKey.get(locationKey(t.lat, t.lon)))
     .filter((i): i is Item => !!i);
 }
 
@@ -871,15 +903,15 @@ function hideFrames() {
  * la que hace que el cuadrado comparado ocupe FRAME_FILL de la vista, y nunca por debajo del mínimo de ninguno
  * de los dos (la Luna no baja de ~17 km: su mosaico tiene 100 m por píxel).
  */
-function focusPair(item: Item, partner?: Item) {
+function focusPair(item: Item, partner: Item | undefined, showComparisonWindow: boolean) {
   const pair = partner ? [item, partner] : [item];
-  const side = Math.max(...pair.map(windowKm));
+  const side = showComparisonWindow ? Math.max(...pair.map(windowKm)) : WINDOW_KM;
   const floor = Math.max(...pair.map((i) => MIN_ALTITUDE[i.globe] * RADIUS_KM[i.globe]));
   const km = Math.max(side / (FRAME_FILL * 2 * VIEW_TAN), floor);
   hideFrames();
   for (const i of pair) {
     flyTo(globes[i.globe], i.vec, 1 + km / RADIUS_KM[i.globe]);
-    showFrame(i, windowKm(i));
+    if (showComparisonWindow) showFrame(i, windowKm(i));
   }
 }
 
@@ -888,12 +920,20 @@ function focusPair(item: Item, partner?: Item) {
  * pareja a la vez: el punto de la Tierra y su sitio más parecido de la Luna o Marte, o el sitio y su gemelo n.º 1.
  * Los parches HiRISE y las celdas de calor no tienen pareja: solo se acerca su globo.
  */
-function select(item: Item, reference = refFilter ? refById.get(refFilter) : undefined) {
+function select(
+  item: Item,
+  reference = refFilter ? refById.get(refFilter) : undefined,
+  analog?: NasaAnalog,
+) {
   selected = item;
   selectedEarthTwin = item.earth && reference ? twinRoleOf(item.earth, reference) : undefined;
+  selectedAnalog = analog;
+  if (isNasaOnly(item)) selectedAnalog ??= nasaPairsAt(item)[0];
   highlighted = new Set([item]);
   let partner: Item | undefined;
-  if (item.kind === "ref") {
+  if (selectedAnalog) {
+    partner = item.globe === "earth" ? nasaTargets.get(selectedAnalog.id) : nasaEarth(selectedAnalog);
+  } else if (item.kind === "ref") {
     const twins = twinItemsOf(item.ref!);
     twins.forEach((t) => highlighted.add(t));
     partner = twins[0];
@@ -901,19 +941,18 @@ function select(item: Item, reference = refFilter ? refById.get(refFilter) : und
     const body = selectedEarthTwin?.body ?? bestBody(item.earth!);
     const site = selectedEarthTwin?.site ?? (body ? item.earth!.data[body] : undefined);
     partner = site ? refItem.get(site.best_ref) : undefined;
-    if (partner) highlighted.add(partner);
   }
-  focusPair(item, partner);
+  if (partner) highlighted.add(partner);
+  focusPair(item, partner, !selectedAnalog);
   refreshPoints();
   renderDetail(item);
   detail.scrollTop = 0;
-  const goto = $<HTMLSelectElement>("#gl-goto");
-  goto.value = item.kind === "heat" ? "" : item.id;
 }
 
 function clearSelection() {
   selected = null;
   selectedEarthTwin = undefined;
+  selectedAnalog = undefined;
   highlighted = new Set();
   hideFrames();
   detail.hidden = true;
@@ -938,7 +977,7 @@ const num = (v: unknown, unit: string, d = 1) => (finite(v) ? `${fmt(v, d)}${uni
 const refName = (id: string) => esc(id === "malla_polar" ? t("lm.grp.malla_polar") : tr(refById.get(id)?.name ?? id));
 const tagLabel = (tag: string) => (tag === "nuevo" ? t("lm.pill.new") : tag === "validación" ? t("lm.pill.val") : tr(tag));
 
-function roleLabel(role: EarthRole) {
+function roleLabel(role: Exclude<EarthRole, { kind: "nasa" }>) {
   switch (role.kind) {
     case "site": return t(`gl.role.site.${role.body}`, { rank: role.rank });
     case "twin": return t("gl.role.twin", { rank: role.rank, ref: refName(role.ref) });
@@ -969,9 +1008,16 @@ function header(kicker: string, name: string, lat: number, lon: number) {
   <p class="gl-coords">${coord(lat, lon)}</p>`;
 }
 
+const analogTitle = (pair: NasaAnalog) => `${tr(pair.earth.name)} ↔ ${tr(pair.target.name)}`;
+const analogLink = (pair: NasaAnalog) => `./luna-marte.html?analog=${encodeURIComponent(pair.id)}`;
+
 function renderDetail(item: Item) {
   let html = "";
-  if (item.kind === "ref") {
+  if (selectedAnalog) {
+    html = header(bodyName(item.globe), analogTitle(selectedAnalog), item.lat, item.lon);
+    html += `<p class="gl-note">${esc(nasaText(selectedAnalog.summary))}</p>
+      <p class="gl-sub"><a href="${analogLink(selectedAnalog)}">${esc(t("gl.nasaPairLink"))}</a></p>`;
+  } else if (item.kind === "ref") {
     const ref = item.ref!;
     const twins = twinsOf(ref);
     html = header(t("gl.refKicker", { body: bodyName(ref.body) }), label(item), ref.lat, ref.lon);
@@ -988,7 +1034,7 @@ function renderDetail(item: Item) {
     }
     if (twins.length) {
       html += `<h3>${t("gl.twinsTitle")}</h3><ol class="gl-twins">${twins.map((site) => {
-        const twin = earthByKey.get(earthKey(site.lat, site.lon));
+        const twin = earthByKey.get(locationKey(site.lat, site.lon));
         if (!twin) return "";
         return `<li><button type="button" data-item="${esc(twin.id)}"><span>${esc(label(twin))}${twin.named ? `<small>${coord(site.lat, site.lon)}</small>` : ""}</span>${finite(site.score) ? `<b>${pct(site.score)}</b>` : ""}</button></li>`;
       }).join("")}</ol>`;
@@ -996,7 +1042,7 @@ function renderDetail(item: Item) {
   } else if (item.kind === "earth") {
     const point = item.earth!;
     html = header(bodyName("earth"), label(item), point.lat, point.lon);
-    html += `<ul class="gl-roles">${point.roles.map((r) => `<li>${roleLabel(r)}</li>`).join("")}</ul>`;
+    html += `<ul class="gl-roles">${point.roles.filter((r) => r.kind !== "nasa").map((r) => `<li>${roleLabel(r)}</li>`).join("")}</ul>`;
     const data = selectedEarthTwin ? { ...point.data, [selectedEarthTwin.body]: selectedEarthTwin.site } : point.data;
     const bodies = BODIES.filter((body) => data[body]).sort((a, b) => data[b]!.score - data[a]!.score);
     for (const body of bodies) {
@@ -1029,11 +1075,21 @@ function renderDetail(item: Item) {
     ].join("");
     if (rows) html += `<h3>${t("gl.terrainTitle")}</h3><dl class="gl-dl">${rows}</dl>`;
     if (patch.sourceUrl) html += `<p class="gl-sub"><a href="${esc(patch.sourceUrl)}" target="_blank" rel="noopener">${esc(patch.source || t("gl.source"))}</a></p>`;
-  } else {
-    const heat = item.heat!;
+  } else if (item.heat) {
+    const heat = item.heat;
     html = header(t(`gl.heatKicker.${heat.body}`), label(item), item.lat, item.lon);
     html += `<div class="gl-bars">${bar(t("gl.total"), heat.score, BAR_COLOR[heat.body])}</div>`;
     html += `<p class="gl-sub">${t("gl.heatNote")}</p>`;
+  }
+  if (!selectedAnalog) {
+    const pairs = nasaPairsAt(item);
+    if (pairs.length) {
+      html += `<h3>${esc(t("gl.nasaComparisons"))}</h3>`;
+      for (const pair of pairs) {
+        const counterpart = item.globe === "earth" ? pair.target : pair.earth;
+        html += `<p class="gl-sub"><a href="${analogLink(pair)}">${esc(tr(counterpart.name))}</a></p>`;
+      }
+    }
   }
   detail.innerHTML = html;
   detail.hidden = false;
@@ -1082,7 +1138,7 @@ const gotoSelect = $<HTMLSelectElement>("#gl-goto");
 function fillGoto() {
   const lang = locale();
   const groups = (["moon", "earth", "mars"] as GlobeId[]).map((globe) => {
-    const list = items.filter((i) => i.globe === globe && i.visible && i.kind !== "heat")
+    const list = items.filter((i) => i.globe === globe && i.visible && i.kind !== "heat" && !isNasaOnly(i))
       .map((i) => ({ item: i, text: label(i) }))
       .sort((a, b) => Number(b.item.named) - Number(a.item.named) || (a.item.named
         ? a.text.localeCompare(b.text, lang)
@@ -1091,16 +1147,28 @@ function fillGoto() {
     return `<optgroup label="${esc(t("gl.group", { body: bodyName(globe), n: list.length }))}">${list.map(({ item, text }) =>
       `<option value="${esc(item.id)}">${esc(text)}</option>`).join("")}</optgroup>`;
   });
-  gotoSelect.innerHTML = `<option value="">${esc(t("gl.choosePoint"))}</option>${groups.join("")}`;
-  gotoSelect.value = selected && selected.visible && selected.kind !== "heat" ? selected.id : "";
+  const analogs = nasaAnalogs.filter((pair) => !refFilter || nasaMatchesRef(pair, refFilter));
+  const analogOptions = analogs.length ? `<optgroup label="${esc(t("gl.nasaComparisons"))}">
+    ${analogs.map((pair) => `<option value="pair:${esc(pair.id)}">${esc(analogTitle(pair))}</option>`).join("")}
+    </optgroup>` : "";
+  gotoSelect.innerHTML = `<option value="">${esc(t("gl.choosePoint"))}</option>${analogOptions}${groups.join("")}`;
+  gotoSelect.value = selectedAnalog ? `pair:${selectedAnalog.id}`
+    : selected && selected.visible && selected.kind !== "heat" ? selected.id : "";
 }
 function bestScore(item: Item) {
   const data = item.earth?.data;
   return data ? Math.max(...BODIES.map((b) => data[b]?.score ?? 0)) : 0;
 }
 gotoSelect.addEventListener("change", () => {
-  const item = itemById.get(gotoSelect.value);
-  if (item) select(item);
+  const value = gotoSelect.value;
+  if (value.startsWith("pair:")) {
+    const analog = nasaAnalogs.find((pair) => value === `pair:${pair.id}`);
+    const earth = analog && nasaEarth(analog);
+    if (earth) select(earth, undefined, analog);
+  } else {
+    const item = itemById.get(value);
+    if (item) select(item);
+  }
 });
 
 // Las muestras imitan los puntos, que van encima de las imágenes de los planetas: colores fijos.

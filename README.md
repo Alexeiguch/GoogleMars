@@ -8,7 +8,7 @@ Las vistas de la app se enlazan desde la cabecera:
 
 | Vista | Página | Qué muestra |
 |---|---|---|
-| **Visor 3D de Marte** | `index.html` | 116 parches de Marte (HiRISE, 2 × 2 km a 20 m) frente a candidatos terrestres al mismo tamaño y escala, en 3D y con cámara compartida. |
+| **Visor 3D de Marte** | `index.html` | 117 parches de Marte (HiRISE, 2 × 2 km a 20 m) frente a candidatos terrestres al mismo tamaño y escala, en 3D y con cámara compartida. |
 | **Globos 3D** | `globos.html` | Luna, Tierra y Marte con sitios y análogos del mapa y del visor. |
 | **Planificador de rutas** | `globos.html#path-planner` | Dibuja una ruta en Marte o importa GeoJSON, GPX o KML. Compara las rutas propuestas en la Tierra y guarda un candidato para un ensayo. |
 | **Mapa Luna y Marte** | `luna-marte.html` | Mapa 2D global con pestañas Luna/Marte, historias destacadas, gemelos por sitio, ranking general, validación con análogos conocidos y comparación lado a lado (relieve a la misma escala e imagen real). |
@@ -104,9 +104,15 @@ Se usa el modelo **ERA5** (`ecmwf-era5`). El modelo por defecto de Meteomatics (
 7. **Validación.** Se comprueba en qué percentil global quedan análogos ya conocidos (Atacama, Haughton, Valles Secos de McMurdo, Mauna Kea, Meteor Crater…). Si quedan altos, el método detecta lo que la ciencia ya usa. Los candidatos que **no** están cerca de un análogo conocido se marcan como **nuevos**.
 8. **Comparación lado a lado.** Las imágenes de relieve miden 30 × 30 km, con píxel de 100 m y el mismo sombreado para la Tierra, la Luna y Marte. Así lo único que cambia entre imágenes es el terreno. La imagen real usa Esri World Imagery para la Tierra y el mosaico global **CTX** para Marte. Del polo sur lunar no hay un mosaico de fotos que sirva en un mapa web.
 
+### Análogos de NASA
+
+Las fichas del mapa y de los globos reúnen paralelos de geología, terreno y operaciones, con imágenes y fuentes por par. Salda–Jezero y Sunset–Ulysses incluyen medidas de ventanas de 2 × 2 km. Salda usa celdas de tierra firme para calcular pendientes y desnivel. En el visor 3D se puede abrir directamente la comparación de Sunset con el cono meridional de Ulysses Colles.
+
+El catálogo de fichas está en `src/data/nasa-analogs.json`. Para regenerar las medidas y el recorte HiRISE de Ulysses, consulta los datos de entrada y el comando en `pipeline/analogs/nasa_terrain.py`.
+
 ### Visor 3D de Marte (parches de 2 × 2 km)
 
-- **Marte.** 116 parches de 100 × 100 celdas a 20 m, del [catálogo de DTM HiRISE de USGS](https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/) y del [mosaico HiRISE de Jezero](https://www.usgs.gov/data/mars-2020-terrain-relative-navigation-hirise-dtm-mosaic). La fila 0 apunta al norte. Las categorías de terreno siguen las descripciones de las observaciones HiRISE.
+- **Marte.** 117 parches de 100 × 100 celdas a 20 m, del [catálogo de DTM HiRISE de USGS](https://stac.astrogeology.usgs.gov/docs/data/mars/hirise_dtms/), del [mosaico HiRISE de Jezero](https://www.usgs.gov/data/mars-2020-terrain-relative-navigation-hirise-dtm-mosaic) y del [modelo HiRISE de Ulysses Colles](https://www.uahirise.org/dtm/dtm.php?ID=PSP_008262_1855). La fila 0 apunta al norte. Las categorías de terreno siguen las descripciones de las observaciones HiRISE.
 - **Tierra, sitios curados.** 32 sitios de EE. UU. del [servicio de elevación USGS 3DEP](https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer), elegidos y asignados a categorías a mano. Solo compiten dentro de su categoría.
 - **Tierra, escaneo mundial** (`analogs.patches`). Elige unas 120 regiones de suelo desnudo o helado, repartidas por tipo de relieve, a partir del escaneo de 30 km. En cada una corta 49 parches de Copernicus DEM GLO-30, remuestreados de 30 a 20 m, y guarda los 3 mejores por sitio de Marte (una región por puesto).
 - **Puntuación** = 0,5·terreno + 0,25·superficie + 0,25·clima.

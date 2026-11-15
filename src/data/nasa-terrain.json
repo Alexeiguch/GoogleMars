@@ -1,0 +1,48 @@
+{
+  "lake-salda-jezero": {
+    "earth": {
+      "lat": 37.524336,
+      "lon": 29.637971,
+      "medianSlope": 2.0916,
+      "steepSlope": 10.9718,
+      "relief": 61.4342
+    },
+    "target": {
+      "lat": 18.47,
+      "lon": 77.36,
+      "medianSlope": 3.5628,
+      "steepSlope": 9.5194,
+      "relief": 67.4999
+    },
+    "windowKm": 2.0,
+    "cellSizeM": 20.0,
+    "terrainSimilarity": 0.873964,
+    "earthLandFraction": 0.9751,
+    "maximumTotalScore": 0.708982,
+    "existingBestTotalScore": 0.845356
+  },
+  "sunset-ulysses": {
+    "earth": {
+      "lat": 35.366,
+      "lon": -111.502,
+      "medianSlope": 21.3981,
+      "steepSlope": 29.9103,
+      "relief": 280.1393
+    },
+    "target": {
+      "lat": 5.563,
+      "lon": -122.968,
+      "medianSlope": 20.9428,
+      "steepSlope": 24.0447,
+      "relief": 321.804
+    },
+    "windowKm": 2.0,
+    "cellSizeM": 20.0,
+    "terrainSimilarity": 0.937106,
+    "rankedScore": 0.591653,
+    "rankedPosition": 95,
+    "existingBestTotalScore": 0.813435,
+    "earthCatalogId": "sunset",
+    "targetCatalogId": "ulysses-colles"
+  }
+}
