@@ -92,6 +92,10 @@ export function createViewer(canvas: HTMLCanvasElement, sites: ViewerSite[]) {
   }
 
   const terrain = sites.map(makeTerrain);
+  const sizeVec = new THREE.Vector2();
+  // Arrastrar manda muchos eventos por fotograma: se dibuja como mucho una vez por fotograma.
+  let drawFrame = 0;
+  const requestDraw = () => { if (!drawFrame) drawFrame = requestAnimationFrame(() => { drawFrame = 0; render(); }); };
   let mode: Mode = "slope";
 
   function render() {
@@ -99,7 +103,7 @@ export function createViewer(canvas: HTMLCanvasElement, sites: ViewerSite[]) {
     const height = canvas.clientHeight;
     if (width === 0 || height === 0) return;
 
-    const size = renderer.getSize(new THREE.Vector2());
+    const size = renderer.getSize(sizeVec);
     if (size.x !== width || size.y !== height) renderer.setSize(width, height, false);
     renderer.setScissorTest(true);
     const panelWidth = Math.floor(width / terrain.length);
@@ -168,8 +172,8 @@ export function createViewer(canvas: HTMLCanvasElement, sites: ViewerSite[]) {
 
   setView("oblique");
   setMode("slope");
-  controls.addEventListener("change", render);
-  new ResizeObserver(render).observe(canvas);
+  controls.addEventListener("change", requestDraw);
+  new ResizeObserver(requestDraw).observe(canvas);
   function setSites(pair: ViewerSite[]) {
     for (const [index, site] of pair.entries()) {
       const old = terrain[index];

@@ -13,12 +13,12 @@
         d.dataset.theme = t === "light" || t === "dark" ? t : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
       })();
     </script>
-    <title data-i18n="gl.docTitle">Análogos terrestres · Globos 3D</title>
+    <title data-i18n="gl.docTitle">TerraTwin · Globos 3D</title>
   </head>
   <body>
     <main class="gl">
       <header class="masthead">
-        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">Análogos terrestres</span></h1>
+        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">TerraTwin</span></h1>
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
           <a href="./luna-marte.html" data-i18n="nav.map">Mapa Luna y Marte</a>
           <a href="./globos.html" aria-current="page" data-i18n="nav.globes">Globos 3D</a>
@@ -28,6 +28,7 @@
 
       <div class="gl-toolbar">
         <h2 class="gl-title" data-i18n="nav.globes">Globos 3D</h2>
+        <p class="gl-intro" data-intro data-ui="intro.short">TerraTwin busca en toda la Tierra los lugares que más se parecen a sitios de la Luna y de Marte.</p>
         <div class="gl-mode">
           <div class="gl-seg" role="group" aria-label="Puntos que se muestran" data-i18n-attr="aria-label:gl.modeLabel">
             <button type="button" data-mode="best" aria-pressed="true" data-i18n="gl.best">Mejores</button>
@@ -36,7 +37,7 @@
           <span id="gl-count" class="gl-count" aria-live="polite"></span>
           <button type="button" class="gl-legend-toggle" id="gl-legend-toggle" aria-expanded="false" aria-controls="gl-legend" data-i18n="gl.legend">Leyenda</button>
         </div>
-        <a class="gl-jump" href="#gl-more"><span data-ui="jump">Comparar terreno de Marte en 3D</span> <span aria-hidden="true">↓</span></a>
+        <a class="gl-jump" href="#gl-more"><span data-ui="jump">Comparar terreno en 3D</span> <span aria-hidden="true">↓</span></a>
         <div class="gl-pickers">
           <label class="gl-field"><span data-i18n="gl.refPicker">Sitio de la Luna o de Marte</span>
             <select id="gl-ref"><option data-i18n="gl.allSites">Todos los sitios</option></select>
@@ -53,19 +54,23 @@
           <div class="gl-panel" data-globe="moon">
             <p class="gl-label"><b data-i18n="planet.moon">Luna</b> <span data-i18n="gl.radius.moon">radio 1.737 km</span></p>
             <button type="button" class="gl-reset" data-i18n="gl.reset">Restablecer vista</button>
+            <p class="gl-loading" data-ui="tiles.loading" aria-hidden="true">Cargando detalle…</p>
             <p class="gl-credit">LRO WAC: NASA/GSFC/ASU · NASA Moon Trek</p>
           </div>
           <div class="gl-panel" data-globe="earth">
             <p class="gl-label"><b data-i18n="planet.earth">Tierra</b> <span data-i18n="gl.radius.earth">radio 6.371 km</span></p>
             <button type="button" class="gl-reset" data-i18n="gl.reset">Restablecer vista</button>
+            <p class="gl-loading" data-ui="tiles.loading" aria-hidden="true">Cargando detalle…</p>
             <p class="gl-credit">Esri, Vantor, Earthstar Geographics</p>
           </div>
           <div class="gl-panel" data-globe="mars">
             <p class="gl-label"><b data-i18n="planet.mars">Marte</b> <span data-i18n="gl.radius.mars">radio 3.390 km</span></p>
             <button type="button" class="gl-reset" data-i18n="gl.reset">Restablecer vista</button>
+            <p class="gl-loading" data-ui="tiles.loading" aria-hidden="true">Cargando detalle…</p>
             <p class="gl-credit">Viking: NASA Mars Trek · CTX: NASA/JPL/MSSS/Caltech Murray Lab/Esri</p>
           </div>
           <div class="gl-tip" id="gl-tip" role="tooltip" hidden></div>
+          <p class="gl-net" id="gl-net" role="status" data-aviso="sin-red" hidden><span class="gl-net-text"></span> <button type="button" class="gl-net-retry" data-ui="net.retry">Reintentar</button></p>
           <p class="gl-error" id="gl-error" role="status" data-i18n="gl.error" hidden>Los globos 3D no están disponibles en este navegador. Usa los desplegables de arriba para consultar los puntos.</p>
           <div class="gl-legend" id="gl-legend" aria-label="Leyenda" data-i18n-attr="aria-label:gl.legend"></div>
         </section>
@@ -76,12 +81,12 @@
          Siempre visible (Jezero por defecto); también se abre al tocar un parche HiRISE en el globo de Marte. -->
     <div class="gl-more" id="gl-more">
       <section class="gl-pick" aria-labelledby="pick-title">
-        <header class="step-head"><span class="step-num" aria-hidden="true">01</span><h2 id="pick-title" data-ui="step.pick">Elige un sitio de Marte</h2></header>
+        <header class="step-head"><span class="step-num" aria-hidden="true">01</span><h2 id="pick-title" data-ui="step.pick">Elige un sitio de la Luna o de Marte</h2></header>
         <div class="panel gl-pick-panel">
-          <label class="gl-pick-field"><span data-ui="pick.label">Sitio de Marte con relieve HiRISE</span>
+          <label class="gl-pick-field"><span data-ui="pick.label">Sitio que se compara con la Tierra</span>
             <select id="hirise-site"></select>
           </label>
-          <button type="button" id="hirise-show" data-ui="pick.show">Verlo en los globos</button>
+          <button type="button" id="hirise-show" data-ui="pick.show">Buscar análogos</button>
           <p class="gl-pick-note" data-ui="pick.note"></p>
         </div>
       </section>
@@ -91,7 +96,7 @@
         <ol class="match-list" id="match-list" aria-label="Sitios de la Tierra ordenados por terreno, superficie y clima" data-i18n-attr="aria-label:v.matchListLabel"></ol>
       </section>
       <section class="comparison" aria-label="Comparación de terreno" data-i18n-attr="aria-label:v.comparisonLabel" id="comparison">
-        <header class="step-head"><span class="step-num" aria-hidden="true">03</span><h2 data-i18n="v.compareLink">Comparar terreno</h2></header>
+        <header class="step-head"><span class="step-num" aria-hidden="true">03</span><h2 data-i18n="v.compareLink">Comparar terreno</h2><span class="cmp-pair" id="cmp-pair"></span></header>
         <div class="panel comparison-panel">
           <div class="toolbar">
             <div class="modes" role="group" aria-label="Color del terreno" data-i18n-attr="aria-label:v.colorLabel">
