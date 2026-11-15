@@ -12,6 +12,7 @@ import "./prefs";
 import L from "leaflet";
 import { getLang, hasMsg, locale, onLangChange, t, tr, type Lang } from "./i18n";
 import rawResults from "./data/results.json";
+import { bindMapaTextos, m, noteOrNull } from "./mapa.textos";
 
 // ---- tipos del results.json ----------------------------------------------------
 type Body = "moon" | "mars";
@@ -47,7 +48,7 @@ type Group = { name: string; body: Body; kind?: string; n_refs?: number; n_refs_
 type LevelInfo = { window_km?: number; px_m?: number; ref_data?: string; earth_data?: string; coarsest?: string; feature_labels?: Record<string, string> };
 type ValidationRow = {
   body: Body; name: string; percentile?: number | null; before?: number | null; after?: number | null;
-  delta?: number | null; fine?: number | null; note?: string | null;
+  delta?: number | null; fine?: number | null; fine_fair?: number | null; note?: string | null;
 };
 /** [id, cuerpo, nivel, grupo, lat, lon, usable] */
 type RefPoint = [string, Body, string, string | null, number, number, boolean];
@@ -216,7 +217,79 @@ let heatLayer: L.LayerGroup | undefined;
 let heatBody: Body | undefined;
 const map = L.map("map", { worldCopyJump: true, minZoom: 2, preferCanvas: true }).setView([10, 0], 2);
 let attribution = t("lm.attribution");
-L.tileLayer(EARTH_TILES, { attribution, maxZoom: 13 }).addTo(map);
+let localAttribution = m("localAttribution");
+
+// ---- sin red: capa base local y aviso (contrato C3) ----------------------------------------
+// public/imagery/earth.webp es una imagen global equirectangular (2:1). El mapa es Web Mercator, así que cada
+// tesela se dibuja fila a fila tomando de la imagen la latitud que le toca. Va siempre debajo de los mosaicos de
+// Esri: si estos fallan o tardan, el mapa no queda negro.
+const earthImage = new Promise<HTMLImageElement | null>((resolve) => {
+  const img = new Image();
+  img.decoding = "async";
+  img.onload = () => resolve(img);
+  img.onerror = () => resolve(null);
+  img.src = `${BASE}imagery/earth.webp`;
+});
+const LocalEarth = L.GridLayer.extend({
+  createTile(this: L.GridLayer, coords: L.Coords, done: L.DoneCallback) {
+    const tile = document.createElement("canvas");
+    const size = this.getTileSize();
+    tile.width = size.x;
+    tile.height = size.y;
+    earthImage.then((img) => {
+      const n = 2 ** coords.z;
+      const ctx = tile.getContext("2d");
+      if (img && ctx && coords.y >= 0 && coords.y < n) {
+        const x = ((coords.x % n) + n) % n;
+        const sx = (x / n) * img.naturalWidth;
+        const sw = img.naturalWidth / n;
+        for (let j = 0; j < size.y; j++) {
+          const yf = (coords.y + (j + 0.5) / size.y) / n;                        // 0 = 85,05° N, 1 = 85,05° S
+          const lat = (Math.atan(Math.sinh(Math.PI * (1 - 2 * yf))) * 180) / Math.PI;
+          const sy = Math.min(img.naturalHeight - 1, Math.max(0, ((90 - lat) / 180) * img.naturalHeight - 0.5));
+          ctx.drawImage(img, sx, sy, sw, 1, 0, j, size.x, 1);
+        }
+      }
+      done(undefined, tile);
+    });
+    return tile;
+  },
+}) as unknown as new (options?: L.GridLayerOptions) => L.GridLayer;
+new LocalEarth({ maxNativeZoom: 4, maxZoom: 13, attribution: localAttribution, className: "lm-local-tiles" }).addTo(map);
+const esriLayer = L.tileLayer(EARTH_TILES, { attribution, maxZoom: 13 }).addTo(map);
+
+/**
+ * Vigila una capa de teselas externas y avisa cuando no llegan: fallan (sin red) o tardan demasiado.
+ * `onState(true)` = no hay imágenes externas; `onState(false)` = han vuelto a cargar.
+ */
+function watchTiles(layer: L.TileLayer, onState: (down: boolean) => void, slowMs = 7000) {
+  let ok = 0;
+  let err = 0;
+  let down = false;
+  let timer: number | undefined;
+  const set = (v: boolean) => { if (v !== down) { down = v; onState(v); } };
+  const arm = () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => { if (!ok) set(true); }, slowMs);
+  };
+  layer.on("loading", () => { ok = 0; err = 0; arm(); });
+  layer.on("tileload", () => { ok++; window.clearTimeout(timer); set(false); });
+  layer.on("tileerror", () => { err++; if (!ok && err >= 2) set(true); });
+  layer.on("load", () => { window.clearTimeout(timer); if (!ok && err) set(true); });
+  const offline = () => set(true);
+  const online = () => layer.redraw();
+  window.addEventListener("offline", offline);
+  window.addEventListener("online", online);
+  layer.on("remove", () => { window.clearTimeout(timer); window.removeEventListener("offline", offline); window.removeEventListener("online", online); });
+  if (navigator.onLine === false) set(true);
+  arm();
+}
+let mapDown = false;
+function renderAviso() {
+  const box = document.getElementById("map-aviso");
+  if (box) box.textContent = mapDown ? m("offline") : "";
+}
+watchTiles(esriLayer, (down) => { mapDown = down; renderAviso(); });
 const legend = new L.Control({ position: "bottomright" });
 const legendBox = L.DomUtil.create("div", "lm-legend");
 legend.onAdd = () => legendBox;
@@ -228,7 +301,27 @@ function renderMapText() {
     map.attributionControl.removeAttribution(attribution).addAttribution(next);
     attribution = next;
   }
+  const nextLocal = m("localAttribution");
+  if (nextLocal !== localAttribution) {
+    map.attributionControl.removeAttribution(localAttribution).addAttribution(nextLocal);
+    localAttribution = nextLocal;
+  }
+  renderAviso();
 }
+
+// ---- disposición: tres columnas (sitios · ficha · mapa) o apilado en pantallas estrechas ------
+const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const stacked = () => matchMedia("(max-width: 1099px)").matches;
+/** El bloque principal ocupa lo que queda de pantalla bajo la cabecera y la frase de entrada, midan lo que midan. */
+function fitLayout() {
+  const layout = $(".lm-layout");
+  document.documentElement.style.setProperty("--lm-top", `${layout.offsetTop}px`);
+  requestAnimationFrame(() => map.invalidateSize());
+}
+window.addEventListener("resize", fitLayout);
+void document.fonts?.ready.then(fitLayout);
+/** La historia de un sitio destacado va plegada salvo que se haya elegido una historia a propósito. */
+let storyOpen = false;
 
 // ---- elementos abribles (sitios de la Tierra) -------------------------------------------
 let selectedEl: HTMLElement | null = null;
@@ -262,8 +355,8 @@ function listItem(s: EarthSite, badge: string, subtitle: string, extra = "") {
   const button = document.createElement("button");
   button.type = "button";
   button.setAttribute("aria-pressed", "false");
-  button.innerHTML = `${badge}
-    <span class="lm-name">${coord(s.lat, s.lon)}<small>${esc(subtitle)}</small>${extra}</span>
+  // El texto del botón se lee "1 · 29,50° S · 69,51° O": el separador no se ve (el número ya va en su círculo).
+  button.innerHTML = `${badge}<span class="lm-vh"> · </span><span class="lm-name">${coord(s.lat, s.lon)}<small>${esc(subtitle)}</small>${extra}</span>
     <span class="lm-score"><b>${pct(s.score)}</b>${pill(s)}</span>`;
   li.append(button);
   return { li, button };
@@ -317,6 +410,7 @@ function renderRanking() {
     if (b.dataset.rank === "new") b.hidden = !nw.length;
   }
   $("#rank-note").hidden = mode !== "new";
+  $("#rank-note").textContent = m("newNote");
 
   if (rankLayer) map.removeLayer(rankLayer);
   rankLayer = L.layerGroup().addTo(map);
@@ -335,6 +429,27 @@ function renderRanking() {
 
 // ---- gemelos por grupo ---------------------------------------------------------------------
 const openGroups = new Set<string>();
+/** Sitios a la vista sin desplegar la lista entera (el resto, con "Ver los N sitios"). */
+const GROUPS_SHOWN = 8;
+let showAllGroups = false;
+const twinsMore = $<HTMLButtonElement>("#twins-more");
+twinsMore.addEventListener("click", () => {
+  showAllGroups = !showAllGroups;
+  applyGroupLimit();
+  if (!showAllGroups) $("#panel").scrollTo?.({ top: 0 });
+});
+function applyGroupLimit() {
+  const groups = [...document.querySelectorAll<HTMLDetailsElement>("#twins > details")];
+  groups.forEach((det, i) => { det.hidden = !showAllGroups && i >= GROUPS_SHOWN && !det.open; });
+  twinsMore.hidden = groups.length <= GROUPS_SHOWN;
+  twinsMore.textContent = showAllGroups ? m("showFewer") : m("showAll", { n: groups.length });
+  twinsMore.setAttribute("aria-expanded", String(showAllGroups));
+}
+/** Abre un apartado plegado del panel (historias, ranking, referencias, validación). */
+function openFold(id: string) {
+  const fold = document.getElementById(id) as HTMLDetailsElement | null;
+  if (fold) fold.open = true;
+}
 
 function twinList(list: EarthSite[], keyPrefix: string, label: string, outline: boolean, makeTitle: (k: number) => string) {
   // Dentro del panel el contorno usa --body (contrasta en los dos temas); el relleno, el color fijo del mapa.
@@ -392,11 +507,14 @@ function renderTwins() {
     show.textContent = t("lm.showRef");
     show.addEventListener("click", () => {
       selectRef(`g:${key}`);
-      $("#refs").scrollIntoView({ behavior: "smooth", block: "start" });
+      openFold("fold-refs");
+      $("#fold-refs").scrollIntoView({ behavior: reducedMotion() ? "instant" : "smooth", block: "start" });
     });
     det.append(show);
     box.append(det);
   }
+  applyGroupLimit();
+  $("#pick-hint-text").textContent = m(`pick.${body}`);
 }
 
 // ---- referencias: recuento, minimapa y ficha ---------------------------------------------
@@ -626,7 +744,8 @@ function qualityText(r: Reference) {
     const v = { r: fmt(q.R400, 2), m: fmt(q.eq1m, 2) };
     out.push(q.clase === "hrsc" ? t("lm.q.hrsc", v) : q.clase === "solo_mola" ? t("lm.q.mola", v) : q.clase);
   }
-  if (r.usable_note) out.push(tr(r.usable_note));
+  const usableNote = noteOrNull(r.usable_note, tr(r.usable_note));
+  if (usableNote) out.push(usableNote);
   return out.length ? out.join(" ") : t("lm.q.none");
 }
 
@@ -677,8 +796,9 @@ function renderRefDetail() {
     let host = "";
     try { host = url ? new URL(url).host : ""; } catch { /* URL rara: se muestra tal cual */ }
     // v2: nota de la fuente (larga, en español) plegada; v1: la nota corta del sitio, traducida.
-    const noteHtml = show.source_note
-      ? `<details class="lm-srcnote"><summary>${t("lm.sourceNote")}</summary><p>${esc(tr(show.source_note))}</p></details>`
+    const srcNote = noteOrNull(show.source_note, tr(show.source_note));
+    const noteHtml = srcNote
+      ? `<details class="lm-srcnote"><summary>${esc(m("sourceNote"))}</summary><p>${esc(srcNote)}</p></details>`
       : "";
     const generated = show.coord_quality === "malla_generada" || show.group === "malla_polar";
     const link = url
@@ -688,7 +808,8 @@ function renderRefDetail() {
   }
   if (dl.length) parts.push(`<dl class="lm-dl">${dl.join("")}</dl>`);
   // v1: nota corta del sitio (sin fuente).
-  if (show && !show.source_note && show.note) parts.push(`<p class="lm-note lm-refnote">${esc(tr(show.note))}</p>`);
+  const shortNote = show && !show.source_note ? noteOrNull(show.note, tr(show.note)) : null;
+  if (shortNote) parts.push(`<p class="lm-note lm-refnote">${esc(shortNote)}</p>`);
   parts.push(`<h4 class="lm-minihead">${t("lm.refTwins")}</h4><div id="ref-twins"></div>`);
   box.innerHTML = parts.join("");
 
@@ -740,15 +861,15 @@ function renderFeatured() {
     btn.innerHTML = `${f.tag === "nuevo" ? `<span class="lm-pill new">${t("lm.pill.new")}</span>` : `<span class="lm-pill val">${t("lm.pill.val")}</span>`}
       <b>${esc(tr(f.title))}</b><span class="lm-note">${t("lm.cardNote", { s: pct(s.score), t: pct(s.scores?.terrain) })}</span>`;
     const key = `feat-${f.ref}`;
+    btn.addEventListener("click", () => { storyOpen = true; });   // antes que el de register: la historia se abre desplegada
     const go = register(key, btn, (fly) => select(s, tr(f.title), tr(f.story), fly));
     const icon = L.divIcon({ className: "", iconSize: [30, 30],
       html: `<span class="lm-rank lm-star" style="box-shadow:0 0 0 3px ${color}">★</span>` });
-    L.marker([s.lat, s.lon], { icon, zIndexOffset: 1000, title: tr(f.title) }).addTo(baseLayer!).on("click", () => go());
+    L.marker([s.lat, s.lon], { icon, zIndexOffset: 1000, title: tr(f.title) }).addTo(baseLayer!).on("click", () => { storyOpen = true; go(); });
     featured.append(btn);
     firstKey ??= key;
   }
-  $("#featured-h").hidden = !firstKey;
-  featured.hidden = !firstKey;
+  $("#fold-featured").hidden = !firstKey;
   return firstKey;
 }
 
@@ -756,7 +877,7 @@ function renderFeatured() {
 function renderValidation() {
   const v = (DATA.validation ?? []).filter((x) => x.body === body);
   const nw = (DATA.validation_no_window ?? []).filter((x) => x.body === body);
-  const v2 = v.some((x) => x.after != null || x.before != null || "fine" in x);
+  const v2 = v.some((x) => x.after != null || x.before != null || "fine_fair" in x || "fine" in x);
   const table = $("#validation");
   table.classList.toggle("lm-valid3", v2);
   if (!v2) {
@@ -766,14 +887,16 @@ function renderValidation() {
     $("#validation-note").textContent = t("lm.validationNote");
     return;
   }
+  // A 10 km se muestra fine_fair (INFORME_v2 §4: "L1 justo"); validation[].fine, comparado con ventanas sueltas, salía inflado.
+  const k1 = fmt(windowKm(body, "L1"), 0);
   const delta = (d: number | null | undefined) =>
     d == null || !Number.isFinite(d) || Math.abs(d) < 0.05 ? "" : ` <small class="${d > 0 ? "up" : "down"}">${d > 0 ? "+" : "−"}${fmt(Math.abs(d), 1)}</small>`;
   table.innerHTML = `<thead><tr><th scope="col">${t("lm.knownAnalog")}</th><th scope="col">${t("lm.before")}</th>` +
-    `<th scope="col">${t("lm.after")}</th><th scope="col">${t("lm.fine")}</th></tr></thead><tbody>` +
-    v.map((x) => `<tr><th scope="row">${esc(tr(x.name))}</th><td>${fmt(x.before, 0)}</td><td>${fmt(x.after ?? x.percentile, 0)}${delta(x.delta)}</td><td>${fmt(x.fine, 0)}</td></tr>`).join("") +
+    `<th scope="col">${t("lm.after")}</th><th scope="col">${esc(m("fineFair", { k1 }))}</th></tr></thead><tbody>` +
+    v.map((x) => `<tr><th scope="row">${esc(tr(x.name))}</th><td>${fmt(x.before, 0)}</td><td>${fmt(x.after ?? x.percentile, 0)}${delta(x.delta)}</td><td>${fmt(x.fine_fair, 0)}</td></tr>`).join("") +
     nw.map((x) => `<tr><th scope="row">${esc(tr(x.name))}</th><td colspan="3" class="lm-nowin">${esc(x.note ? tr(x.note) : t("lm.noWindow"))}</td></tr>`).join("") +
     "</tbody>";
-  $("#validation-note").textContent = t("lm.validationNoteV2");
+  $("#validation-note").textContent = m("validationNote", { k0: fmt(windowKm(body, "L0"), 0), k1 });
 }
 
 // ---- pintado de la pestaña -----------------------------------------------------------------------
@@ -805,6 +928,8 @@ function render() {
   const firstFeatured = renderFeatured();
   renderValidation();
   $("#lm-results").hidden = false;
+  $("#lm-loading").hidden = true;
+  fitLayout();
   // Reabre lo que estaba abierto (cambio de idioma) o, si no, la primera historia destacada / el n.º 1.
   reopen(firstFeatured);
 }
@@ -884,6 +1009,21 @@ function robustHtml(s: EarthSite) {
   return `<p class="lm-note">${esc(t("lm.robust", { p: pct(r.top10_frac), n, a: r.best, b: r.worst }))}</p>`;
 }
 
+/** Nombre del lugar de la Tierra cuando los datos lo dan (revisión de bibliografía) o, si no, el análogo conocido cercano. */
+function placeOf(s: EarthSite): { title: string; full: string | null } | null {
+  const raw = s.literature?.name ? tr(s.literature.name).trim() : "";
+  if (raw) {
+    let short = raw.split(/ \(|\. |; /)[0].trim();
+    const parts = short.split(", ");
+    if (short.length > 64 && parts.length > 3) short = parts.slice(0, 3).join(", ");
+    return { title: short, full: short === raw ? null : raw };
+  }
+  if (s.known_analog) return { title: m("near", { name: tr(s.known_analog).split(" (")[0] }), full: null };
+  return null;
+}
+const joinList = (xs: string[]) =>
+  xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} ${getLang() === "es" ? "y" : "and"} ${xs[xs.length - 1]}`;
+
 function select(s: EarthSite, title: string, story: string | null = null, fly = true) {
   const lv = siteLevel(s);
   const wins = siteWindows(s);
@@ -892,9 +1032,11 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
   const mainRef = REFS.get(s.best_ref) ?? (wins.L0?.best_ref ? REFS.get(wins.L0.best_ref) : undefined);
   const name = likeName(s) || (mainRef ? tr(mainRef.name) : "—");
   if (fly) {
-    const animate = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const animate = !reducedMotion();
     map.flyTo([s.lat, s.lon], 8, { animate, duration: 1.2 });
-    $("#detail").scrollIntoView({ block: "start", behavior: animate ? "smooth" : "instant" });
+    // En columnas la ficha vuelve arriba sin mover la página; apilado, se va al mapa (la ficha queda justo debajo).
+    if (stacked()) $(".lm-map-wrap").scrollIntoView({ block: "start", behavior: animate ? "smooth" : "instant" });
+    else $("#ficha").scrollTo({ top: 0, behavior: animate ? "smooth" : "instant" });
   }
 
   // Tabla de rasgos: los del nivel del sitio, con sus etiquetas (la rugosidad cambia de escala).
@@ -905,42 +1047,78 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
   const rows = Object.keys(labels).filter((k) => here[k] != null || there?.[k] != null).map((k) =>
     `<tr><th scope="row">${esc(tr(labels[k]))}</th><td>${featText(k, here[k])}</td><td>${featText(k, there?.[k])}</td></tr>`).join("");
 
+  // En qué se parece y en qué no, por eje (terreno, superficie, clima): veredicto, barra y los datos que lo explican.
   const c = s.climate;
   const cp = s.climate_parts;
   const cov = s.cover;
-  const ok: string[] = [];
-  const no: string[] = [];
-  const terrain = s.scores?.terrain ?? 0;
-  if (terrain >= 0.5) ok.push(t("lm.ok.terrain", { name: esc(name), v: pct(terrain) }));
-  else no.push(t("lm.no.terrain", { name: esc(name), v: pct(terrain) }));
-  if (cov) (cov.bare + cov.snow_ice >= 0.8 ? ok : no).push(t("lm.cover", { bare: pct(cov.bare), ice: pct(cov.snow_ice) }));
-  else if (s.surface_assumed) no.push(t("lm.noCover"));
-  if (c && cp) {
-    (cp.cold >= 0.5 ? ok : no).push(t("lm.temp", { m: fmt(c.t_mean), min: fmt(c.t_min) }));
-    (cp.dry >= 0.5 ? ok : no).push(t("lm.rain", { v: fmt(c.precip_year, 0) }));
-    (cp.swing >= 0.5 ? ok : no).push(t("lm.swing", { v: fmt(c.diurnal_range) }));
-  }
-
   const sc = s.scores ?? ({} as Scores);
-  const hasLevels = sc.terrain_L0 !== undefined || sc.terrain_L1 !== undefined || sc.terrain_L2 !== undefined;
-  const levelBars = hasLevels ? `<p class="lm-minihead">${t("lm.terrainLevels")}</p>
-    <div class="lm-bars lm-bars-lv">${LEVELS.map((l) => bar(t("lm.levelBar", { km: fmt(windowKm(body, l), 0), lv: l }), sc[`terrain_${l}` as const], "var(--info)")).join("")}</div>` : "";
+  const li = (ok: boolean | null, html: string) => `<li class="${ok == null ? "fact" : ok ? "ok" : "no"}">${html}</li>`;
+  const terrain = sc.terrain ?? 0;
+  const tItems = [li(terrain >= 0.5, t(terrain >= 0.5 ? "lm.ok.terrain" : "lm.no.terrain", { name: esc(name), v: pct(terrain) }))];
+  const num = (v: number | null | undefined): v is number => v != null && Number.isFinite(v);
+  const kmHere = fmt(windowKm(body, lv), 0);
+  const slopeThere = there?.slope_p50;
+  const reliefThere = there?.relief;
+  if (num(here.slope_p50) && num(slopeThere)) {
+    tItems.push(li(null, esc(m("slope", { km: kmHere, a: fmt(here.slope_p50), b: fmt(slopeThere), body: m(`on.${body}`) }))));
+  }
+  if (num(here.relief) && num(reliefThere)) {
+    tItems.push(li(null, esc(m("relief", { km: kmHere, a: fmt(here.relief, 0), b: fmt(reliefThere, 0), body: m(`on.${body}`) }))));
+  }
+  const sItems: string[] = [];
+  let surfaceOk = (sc.surface ?? 0) >= 0.5;
+  if (cov) {
+    surfaceOk = cov.bare + cov.snow_ice >= 0.8;
+    sItems.push(li(surfaceOk, t("lm.cover", { bare: pct(cov.bare), ice: pct(cov.snow_ice) })));
+  } else if (s.surface_assumed) sItems.push(li(null, t("lm.noCover")));
+  const cItems: string[] = [];
+  if (c && cp) {
+    cItems.push(li(cp.cold >= 0.5, t("lm.temp", { m: fmt(c.t_mean), min: fmt(c.t_min) })));
+    cItems.push(li(cp.dry >= 0.5, t("lm.rain", { v: fmt(c.precip_year, 0) })));
+    cItems.push(li(cp.swing >= 0.5, t("lm.swing", { v: fmt(c.diurnal_range) })));
+  }
+  const axes = [
+    { key: "terrain", label: t("lm.bar.terrain"), v: sc.terrain, color: "var(--info)", ok: terrain >= 0.5, items: tItems },
+    { key: "surface", label: t("lm.bar.surface"), v: sc.surface, color: "var(--warn)", ok: surfaceOk, items: sItems },
+    { key: "climate", label: t("lm.bar.climate"), v: sc.climate, color: "var(--ok)", ok: (sc.climate ?? 0) >= 0.5, items: cItems },
+  ];
+  const alike = axes.filter((a) => a.ok).map((a) => m(`axis.${a.key}`));
+  const unlike = axes.filter((a) => !a.ok).map((a) => m(`axis.${a.key}`));
+  const verdict = `<p class="lm-verdict">${alike.length ? `<span class="ok">${esc(m("alike", { list: joinList(alike) }))}</span>` : ""}${
+    unlike.length ? `<span class="no">${esc(m("notAlike", { list: joinList(unlike) }))}</span>` : ""}</p>`;
+  const axisHtml = axes.map((a) => `<section class="lm-axis ${a.ok ? "ok" : "no"}">
+      ${bar(`<em class="lm-mark" aria-hidden="true">${a.ok ? "✓" : "✗"}</em>${a.label}<span class="lm-vh">: ${esc(m(a.ok ? "verdictOk" : "verdictNo"))}</span>`, a.v, a.color)}
+      ${a.items.length ? `<ul class="lm-why">${a.items.join("")}</ul>` : ""}
+    </section>`).join("");
+
+  // Terreno por escala: solo las escalas medidas (una barra sola repetiría la de terreno).
+  const measured = LEVELS.filter((l) => num(sc[`terrain_${l}` as const]));
+  const levelBars = measured.length > 1 ? `<p class="lm-minihead">${t("lm.terrainLevels")}</p>
+    <div class="lm-bars lm-bars-lv">${measured.map((l) => bar(t("lm.levelBar", { km: fmt(windowKm(body, l), 0), lv: l }), sc[`terrain_${l}` as const], "var(--info)")).join("")}</div>` : "";
   const levelBtns = avail.length > 1 ? `<div class="lm-seg lm-cmp-levels" role="group" aria-label="${t("lm.cmpLevel")}">${avail.map((l) =>
     `<button type="button" data-lv="${l}" aria-pressed="${l === cmpLevel}">${fmt(windowKm(body, l), 0)} km</button>`).join("")}</div>` : "";
 
+  // Título: el lugar de la Tierra cuando los datos lo nombran; el contexto ("Gemelo n.º 1 de…") queda de antetítulo.
+  const place = placeOf(s);
+  const heading = story ? title : place?.title ?? coord(s.lat, s.lon);
+  const eyebrow = story ? m("story") : title;
+  const placeLine = story ? place?.full ?? place?.title : place?.full;
+  // Enlace a los globos 3D con el sitio de referencia y el gemelo en la URL (globos.ts puede leerlos para abrirlo ya elegido).
+  const refId = s.twin_key ?? wins.L0?.best_ref ?? s.best_ref;
+  const url3d = `./globos.html?sitio=${encodeURIComponent(`ref:${refId}`)}&lat=${s.lat.toFixed(4)}&lon=${s.lon.toFixed(4)}`;
+  const refNote = refHere?.note ? noteOrNull(refHere.note, tr(refHere.note)) : null;
+
   $("#detail").innerHTML = `
-    <h2>${esc(title)}</h2>
-    <p class="lm-note">${coord(s.lat, s.lon, 3)}${s.elev_mean != null ? ` · ${t("lm.altitude", { v: fmt(s.elev_mean, 0) })}` : ""} ·
+    <p class="lm-eyebrow">${esc(eyebrow)}</p>
+    <h2>${esc(heading)}</h2>
+    <p class="lm-note lm-meta">${coord(s.lat, s.lon, 3)}${s.elev_mean != null ? ` · ${t("lm.altitude", { v: fmt(s.elev_mean, 0) })}` : ""} ·
       ${s.known_analog ? t("lm.nearKnown", { name: esc(tr(s.known_analog)) }) : isReviewedNew(s) ? t("lm.notStudied") : t("lm.notReviewed")}</p>
-    ${story ? `<p class="lm-story">${esc(story)}</p>` : ""}
-    <div class="lm-bars">
+    ${placeLine ? `<p class="lm-note lm-meta">${esc(m("place", { name: placeLine }))}</p>` : ""}
+    ${verdict}
+    <div class="lm-bars lm-total">
       ${bar(t("lm.bar.total"), s.score, "var(--body)")}
-      ${bar(t("lm.bar.terrain"), sc.terrain, "var(--info)")}
-      ${bar(t("lm.bar.surface"), sc.surface, "var(--warn)")}
-      ${bar(t("lm.bar.climate"), sc.climate, "var(--ok)")}
     </div>
-    ${levelBars}
-    ${robustHtml(s)}
+    <div class="lm-axes">${axisHtml}</div>
     <div class="lm-compare">
       <div class="lm-cmp-modes" role="group" aria-label="${t("lm.cmpLabel")}">
         <button type="button" data-cmp="relief" aria-pressed="${cmpMode === "relief"}">${t("lm.cmpRelief")}</button>
@@ -951,16 +1129,23 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
       <div class="lm-scale" id="cmp-scale"><i></i><span></span></div>
       <p class="lm-cmp-info" id="cmp-info"></p>
     </div>
-    <ul class="lm-why">${ok.map((x) => `<li class="ok">${x}</li>`).join("")}${no.map((x) => `<li class="no">${x}</li>`).join("")}</ul>
+    <p class="lm-cta-row"><a class="lm-cta" href="${esc(url3d)}">${esc(m("open3d"))} <span aria-hidden="true">→</span></a>
+      <span class="lm-note">${esc(m("open3dNote"))}</span></p>
+    ${story ? `<details class="lm-storyfold" id="story-fold"${storyOpen ? " open" : ""}><summary>${esc(m("storyFold"))}</summary><p class="lm-story">${esc(story)}</p></details>` : ""}
+    ${levelBars}
+    ${robustHtml(s)}
     <table class="lm-table">
-      <thead><tr><th scope="col">${t("lm.terrainWindowKm", { km: fmt(windowKm(body, lv), 0) })}</th><th scope="col">${t("lm.here")}</th><th scope="col">${bodyName(body)}</th></tr></thead>
+      <thead><tr><th scope="col">${t("lm.terrainWindowKm", { km: kmHere })}</th><th scope="col">${t("lm.here")}</th><th scope="col">${bodyName(body)}</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     ${!there && rows ? `<p class="lm-note">${t("lm.noRefFeatures")}</p>` : ""}
-    ${refHere?.note ? `<p class="lm-note"><b>${esc(tr(refHere.name))}</b>: ${esc(tr(refHere.note))}</p>` : ""}
+    ${refHere && refNote ? `<p class="lm-note"><b>${esc(tr(refHere.name))}</b>: ${esc(refNote)}</p>` : ""}
     ${literatureHtml(s)}
     <h3 class="lm-subtitle">${t("lm.breaks")}</h3>
     <ul class="lm-why">${LIMITS[getLang()][body].map((x) => `<li class="no">${x}</li>`).join("")}</ul>`;
+
+  const fold = document.getElementById("story-fold") as HTMLDetailsElement | null;
+  fold?.addEventListener("toggle", () => { storyOpen = fold.open; });
 
   const modes = document.querySelectorAll<HTMLButtonElement>("[data-cmp]");
   for (const b of modes) {
@@ -1006,28 +1191,33 @@ function refUrls(w: Win, lv: Level) {
   if (lv === "L0") out.push(rel(`ref_${id}.png`));
   return out;
 }
-/** <img> que prueba las URL en orden y, si ninguna existe, muestra el aviso de imagen no generada. */
+/** Caja de imagen que prueba las URL en orden: "cargando" mientras llega y, si ninguna existe, un aviso claro. */
 function fallbackImg(urls: string[], alt: string, onFallback?: (i: number) => void) {
-  if (!urls.length) {
-    const d = document.createElement("div");
-    d.className = "lm-mini lm-empty";
-    d.textContent = t("lm.noImage");
-    return d;
-  }
+  const box = document.createElement("div");
+  box.className = "lm-mini lm-imgbox";
+  const empty = () => {
+    box.classList.remove("is-loading");
+    box.classList.add("lm-empty");
+    box.textContent = m("noImage");
+  };
+  if (!urls.length) { empty(); return box; }
+  box.classList.add("is-loading");
+  const wait = document.createElement("span");
+  wait.className = "lm-imgwait";
+  wait.textContent = m("imgLoading");
   const img = document.createElement("img");
   img.alt = alt;
   img.decoding = "async";
   let i = 0;
+  img.addEventListener("load", () => { box.classList.remove("is-loading"); wait.remove(); });
   img.addEventListener("error", () => {
     i++;
     if (i < urls.length) { img.src = urls[i]; onFallback?.(i); return; }
-    const d = document.createElement("div");
-    d.className = "lm-mini lm-empty";
-    d.textContent = t("lm.noImage");
-    img.replaceWith(d);
+    empty();
   });
   img.src = urls[0];
-  return img;
+  box.append(wait, img);
+  return box;
 }
 
 function boxBounds(lat: number, lon: number, radiusKm: number, halfKm: number): L.LatLngBoundsExpression {
@@ -1046,7 +1236,7 @@ function showCompare(s: EarthSite, wins: Partial<Record<Level, Win>>, lv: Level,
   const w = wins[lv];
   grid.replaceChildren();
   if (!w) {
-    grid.innerHTML = `<div class="lm-mini lm-empty">${t("lm.noImage")}</div>`;
+    grid.innerHTML = `<div class="lm-mini lm-empty">${esc(m("noImage"))}</div>`;
     scale.hidden = true;
     info.textContent = "";
     return;
@@ -1103,20 +1293,30 @@ function showCompare(s: EarthSite, wins: Partial<Record<Level, Win>>, lv: Level,
   figR.append(mR, capR);
   grid.append(figE, figR);
   const opts: L.MapOptions = { zoomControl: false, attributionControl: false, zoomSnap: 0 };
+  // Sin red, las imágenes reales no llegan: se dice en la propia caja (la vista de relieve es local y sigue funcionando).
+  const offNote = (box: HTMLElement) => (down: boolean) => {
+    box.querySelector(".lm-mini-off")?.remove();
+    if (!down) return;
+    const note = document.createElement("p");
+    note.className = "lm-mini-off";
+    note.setAttribute("role", "status");
+    note.textContent = m("miniOffline");
+    box.append(note);
+  };
   const earth = L.map(mE, opts);
-  L.tileLayer(EARTH_TILES, { maxZoom: 17 }).addTo(earth);
+  watchTiles(L.tileLayer(EARTH_TILES, { maxZoom: 17 }).addTo(earth), offNote(mE));
   earth.fitBounds(boxBounds(w.lat, w.lon, EARTH_RADIUS_KM, W / 2));
   miniMaps.push(earth);
   const rid = lv === "L2" && w.hirise ? `hirise_${w.hirise}` : w.best_ref;
   const r = rid ? REFS.get(rid) ?? POINT_BY_ID.get(rid) ?? (w.best_ref ? REFS.get(w.best_ref) ?? POINT_BY_ID.get(w.best_ref) : undefined) : undefined;
   if (body === "mars" && r?.lat != null && r.lon != null) {
     const mars = L.map(mR, { ...opts, crs: L.CRS.EPSG4326 });
-    L.tileLayer(MARS_TILES, { tileSize: 512, zoomOffset: -1, minZoom: 1, maxZoom: 18, maxNativeZoom: 18 }).addTo(mars);
+    watchTiles(L.tileLayer(MARS_TILES, { tileSize: 512, zoomOffset: -1, minZoom: 1, maxZoom: 18, maxNativeZoom: 18 }).addTo(mars), offNote(mR));
     mars.fitBounds(boxBounds(r.lat, r.lon, MARS_RADIUS_KM, W / 2));
     miniMaps.push(mars);
   } else {
     mR.classList.add("lm-empty");
-    mR.textContent = body === "moon" ? t("lm.noMoonMosaic") : t("lm.noImage");
+    mR.textContent = body === "moon" ? t("lm.noMoonMosaic") : m("noReal");
   }
 }
 
@@ -1127,12 +1327,15 @@ function setBody(next: Body) {
   currentKey = null;
   refSel = null;
   openGroups.clear();
+  showAllGroups = false;
   for (const tab of tabs) tab.setAttribute("aria-selected", String(tab.dataset.body === body));
   document.documentElement.dataset.body = body;
   render();
 }
 for (const tab of tabs) tab.addEventListener("click", () => setBody(tab.dataset.body as Body));
+bindMapaTextos();
 renderMapText();
+fitLayout();
 setBody(new URLSearchParams(location.search).get("cuerpo") === "marte" ? "mars" : "moon");
 
 // Cambio de idioma: se repinta todo lo generado y se reabre el mismo sitio sin mover el mapa.
