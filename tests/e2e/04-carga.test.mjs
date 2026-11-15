@@ -1,9 +1,9 @@
 // (e) Cada página, en los dos idiomas y a 1920x1080 y 375x812: carga sin errores de consola, sin excepciones y
-// sin peticiones locales fallidas; sin desborde horizontal; y con la frase de entrada [data-intro] (C5) visible
+// sin peticiones locales fallidas; con icono de pestaña que carga; sin desborde horizontal; y con la frase de entrada [data-intro] (C5) visible
 // sin desplazarse.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { abrirNavegador, nuevoContexto, abrir, esperarArranque, PAGINAS, IDIOMAS, VISTAS, PASO } from './apoyo.mjs';
+import { abrirNavegador, nuevoContexto, abrir, esperarArranque, comprobarFavicon, PAGINAS, IDIOMAS, VISTAS, PASO } from './apoyo.mjs';
 import { espanolEnIngles, inglesEnEspanol } from './idioma.mjs';
 
 let navegador;
@@ -39,6 +39,10 @@ for (const lang of IDIOMAS) {
           await t.test('sin errores de consola', () => assert.deepEqual(vig.consola, []));
           await t.test('sin excepciones no capturadas', () => assert.deepEqual(vig.excepciones, []));
           await t.test('sin peticiones locales fallidas (404…)', () => assert.deepEqual(vig.localesFallidas, []));
+          // Comprobación explícita: no depende de que Chrome tenga ya cacheado el fallo del favicon.
+          const favicon = await comprobarFavicon(page);
+          await t.test('el icono de la pestaña (favicon) carga', () =>
+            assert.deepEqual(favicon, [], `Icono de la pestaña roto${vig.favicon.length ? ` (en consola: ${vig.favicon[0]})` : ''}`));
           await t.test('sin desborde horizontal', () =>
             assert.ok(m.scrollWidth <= m.innerWidth, `scrollWidth ${m.scrollWidth} > innerWidth ${m.innerWidth}. Elementos que se salen: ${m.fuera.join(' ; ')}`));
           await t.test('la frase de entrada [data-intro] se ve sin desplazarse', () => {

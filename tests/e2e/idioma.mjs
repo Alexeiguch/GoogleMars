@@ -73,6 +73,11 @@ export function espanolEnIngles(texto) {
   const otraSenal = fuertes.length > 0 || funcionales.length >= 2;
   const raras = [...new Set(ps.filter((p) => LETRAS_ES.test(p) && !TILDES_ACEPTADAS.has(p) && (otraSenal || !propio(p, s))))];
   if (/[¿¡]/.test(s)) motivos.push(`signo «${s.match(/[¿¡]/)[0]}»`);
+  // Coordenadas con formato español: coma decimal en grados («29,50°») u «O» de oeste («69,51° O»).
+  // (Un millar inglés con grados, «1,200 °C», no cuenta: lleva C o F detrás.)
+  const coma = s.match(/\d+,\d+\s*°(?!\s*[CF]\b)/);
+  if (coma) motivos.push(`coma decimal en grados «${coma[0]}»`);
+  if (/°\s*O\b/.test(s)) motivos.push('«O» de oeste en una coordenada');
   if (raras.length) motivos.push(`eñe en «${raras.slice(0, 3).join('», «')}»`);
   const conTilde = [...new Set(ps.filter((p) => TILDE_ES.test(p) && !TILDES_ACEPTADAS.has(p) && (otraSenal || !propio(p, s))))];
   if (conTilde.length) motivos.push(`tilde en «${conTilde.slice(0, 3).join('», «')}»`);
@@ -90,7 +95,9 @@ export function espanolEnIngles(texto) {
 
 const FUNCIONALES_EN = new Set(['the', 'and', 'of', 'with', 'from', 'for', 'to', 'is', 'are', 'this', 'that', 'these', 'those', 'in', 'on', 'at', 'by', 'or', 'not', 'only', 'it', 'its', 'which', 'where', 'when', 'than', 'into', 'near', 'inside', 'below', 'above', 'between', 'has', 'have', 'was', 'were', 'be', 'been', 'an']);
 /** Palabras de interfaz o de nombres de sitio inequívocamente inglesas: basta una. */
-const INTERFAZ_EN = new Set(['show', 'select', 'choose', 'twin', 'twins', 'analog', 'analogs', 'score', 'best', 'known', 'reviewed', 'terrain', 'relief', 'slope', 'view', 'reset', 'legend', 'compare', 'find', 'loading', 'close', 'open', 'search', 'sources', 'source', 'switch', 'theme', 'dark', 'light', 'globes', 'globe', 'map', 'imagery', 'window', 'windows', 'study', 'studies', 'found', 'similar', 'climate', 'surface', 'scale', 'new', 'all', 'candidate', 'scan', 'crater', 'craters', 'plains', 'gullies', 'fresh', 'impact', 'layered', 'deposits', 'dunes', 'valley', 'fans', 'ridge', 'unnamed', 'landing', 'site', 'sites', 'hills', 'island', 'peak', 'rim', 'plain', 'massif', 'plateau', 'basin', 'highlands']);
+const INTERFAZ_EN = new Set(['show', 'select', 'choose', 'twin', 'twins', 'analog', 'analogs', 'score', 'best', 'known', 'reviewed', 'terrain', 'relief', 'slope', 'view', 'reset', 'legend', 'compare', 'find', 'loading', 'close', 'open', 'search', 'sources', 'source', 'switch', 'theme', 'dark', 'light', 'globes', 'globe', 'map', 'imagery', 'window', 'windows', 'study', 'studies', 'found', 'similar', 'climate', 'surface', 'scale', 'new', 'all', 'candidate', 'scan', 'crater', 'craters', 'plains', 'gullies', 'fresh', 'impact', 'layered', 'deposits', 'dunes', 'valley', 'fans', 'ridge', 'unnamed', 'landing', 'site', 'sites', 'hills', 'island', 'peak', 'rim', 'plain', 'massif', 'plateau', 'basin', 'highlands',
+  // Topónimos genéricos que en español se traducen («Mar Rojo», «condado», «distrito», «desierto», «lago»…).
+  'sea', 'county', 'district', 'desert', 'lake', 'river', 'mountains', 'province']);
 /**
  * Nombres oficiales en inglés que se dejan tal cual en español: regiones candidatas de Artemis III (NASA) y lugares
  * conocidos internacionalmente por ese nombre. Se quitan del texto antes de analizarlo.
@@ -113,5 +120,8 @@ export function inglesEnEspanol(texto) {
   const funcionales = ps.filter((p) => FUNCIONALES_EN.has(p));
   if (interfaz.length && funcES === 0 && !TILDE_ES.test(s)) motivos.push(`palabra inglesa «${interfaz.slice(0, 3).join('», «')}»`);
   if (funcionales.length >= 2 && funcionales.length > funcES) motivos.push(`palabras funcionales inglesas «${[...new Set(funcionales)].slice(0, 4).join('», «')}»`);
+  // Coordenada con «W» de oeste (en español es «O»), salvo en una frase española que cita la convención de una
+  // fuente («La fuente usa longitud oeste (166° W)…»).
+  if (/\d\s*°\s*W\b/.test(s) && funcES === 0 && !TILDE_ES.test(s)) motivos.push('«W» de oeste en una coordenada');
   return motivos;
 }

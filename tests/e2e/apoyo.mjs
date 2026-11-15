@@ -74,11 +74,14 @@ export async function nuevoContexto(browser, { lang = 'en', vista = '1920x1080',
 
 /** Anota errores de consola, excepciones y peticiones locales fallidas de una página. */
 export function vigilar(page) {
-  const v = { consola: [], avisos: [], excepciones: [], localesFallidas: [], externasFallidas: [] };
+  const v = { consola: [], avisos: [], excepciones: [], localesFallidas: [], externasFallidas: [], favicon: [] };
   page.on('console', (m) => {
     const url = m.location()?.url || '';
     const texto = m.text();
     if (m.type() === 'error') {
+      // El favicon tiene su propia prueba en 04 (Chrome cachea el fallo y solo lo pide en la primera página de cada
+      // navegador: contarlo aquí haría que el fallo cambiara de prueba según el orden).
+      if (esFavicon(url)) { v.favicon.push(texto.slice(0, 160)); return; }
       // Un mosaico externo que no carga depende de la red de la sala, no de la app: se anota aparte y no hace fallar.
       const externa = (url && !esLocal(url)) || [...texto.matchAll(/https?:\/\/[^\s'")]+/g)].some((x) => !esLocal(x[0]));
       if (externa && /Failed to load resource|net::ERR|CORS/i.test(texto)) { v.externasFallidas.push(url || texto.slice(0, 160)); return; }
@@ -86,12 +89,38 @@ export function vigilar(page) {
     } else if (m.type() === 'warning') v.avisos.push(texto.slice(0, 200));
   });
   page.on('pageerror', (e) => v.excepciones.push(String(e?.stack || e).slice(0, 400)));
-  page.on('response', (r) => { if (r.status() >= 400 && esLocal(r.url())) v.localesFallidas.push(`${r.status()} ${r.url()}`); });
+  page.on('response', (r) => {
+    if (r.status() >= 400 && esLocal(r.url())) (esFavicon(r.url()) ? v.favicon : v.localesFallidas).push(`${r.status()} ${r.url()}`);
+  });
   page.on('requestfailed', (r) => {
     const motivo = r.failure()?.errorText || '';
-    if (esLocal(r.url()) && !/ERR_ABORTED/.test(motivo)) v.localesFallidas.push(`${motivo} ${r.url()}`);
+    if (esLocal(r.url()) && !/ERR_ABORTED/.test(motivo)) (esFavicon(r.url()) ? v.favicon : v.localesFallidas).push(`${motivo} ${r.url()}`);
   });
   return v;
+}
+
+/** La petición automática de Chrome al icono por defecto. */
+const esFavicon = (url) => { try { return new URL(url).pathname === '/favicon.ico'; } catch { return false; } };
+
+/**
+ * Comprueba el icono de la pestaña sin depender de la caché de Chrome: si la página declara iconos
+ * (link[rel~=icon]), cada uno debe responder 200 con una imagen; si no declara ninguno, Chrome pide /favicon.ico
+ * y ese debe responder 200 con una imagen. Devuelve la lista de problemas (vacía si todo va bien).
+ */
+export async function comprobarFavicon(page) {
+  const declarados = await page.evaluate(() => [...document.querySelectorAll('link[rel~="icon" i]')].map((l) => l.href).filter(Boolean));
+  const urls = declarados.length ? declarados : [new URL('/favicon.ico', page.url()).href];
+  const problemas = [];
+  for (const u of urls) {
+    if (u.startsWith('data:')) continue;
+    const r = await page.request.get(u, { timeout: PASO }).catch((e) => ({ error: String(e).slice(0, 120) }));
+    if (r.error) { problemas.push(`${u}: ${r.error}`); continue; }
+    const tipo = r.headers()['content-type'] || '';
+    if (r.status() !== 200 || !/^image\//i.test(tipo)) {
+      problemas.push(`${u} → ${r.status()} ${tipo}${declarados.length ? '' : ' (la página no declara link[rel~=icon] y Chrome pide /favicon.ico)'}`);
+    }
+  }
+  return problemas;
 }
 
 /** Abre una ruta y devuelve la página con su vigilancia. No espera a la red: cada prueba espera su condición. */
@@ -109,13 +138,34 @@ export async function abrir(ctx, ruta) {
  */
 export async function ir(page, url, recargar = false) {
   const nav = () => (recargar ? page.reload({ waitUntil: 'commit' }) : page.goto(url, { waitUntil: 'commit' }));
-  await nav().catch(async (e) => { if (!/Timeout/i.test(String(e))) throw e; await nav(); });
-  await page.waitForLoadState('domcontentloaded', { timeout: 2 * PASO });
+  await nav().catch(async (e) => { if (!esTimeout(e)) throw e; await nav(); });
+  await esperarCarga(page, 'domcontentloaded');
+}
+
+const esTimeout = (e) => e?.name === 'TimeoutError' || /Timeout \d+ms exceeded/i.test(String(e));
+
+/**
+ * Espera un estado de carga con margen (2×PASO). Si vence, recarga la página UNA vez y vuelve a esperar. Si vuelve a
+ * vencer, lanza un error que empieza por «CARGA LENTA»: es la máquina o el servidor, no un fallo de contrato.
+ */
+export async function esperarCarga(page, estado) {
+  try {
+    await page.waitForLoadState(estado, { timeout: 2 * PASO });
+  } catch (e) {
+    if (!esTimeout(e)) throw e;
+    try {
+      await page.reload({ waitUntil: estado, timeout: 2 * PASO });
+    } catch (e2) {
+      if (!esTimeout(e2)) throw e2;
+      throw new Error(`CARGA LENTA (no es un fallo de contrato): ${page.url()} no llegó a «${estado}» en dos intentos de ${2 * PASO / 1000} s. ` +
+        'La máquina o el servidor van cargados: repite con `npm run test:e2e:serie` o sube E2E_PASO_MS.');
+    }
+  }
 }
 
 /** Espera a que la página termine de arrancar: evento load, red en calma (con tope) y DOM quieto. */
 export async function esperarArranque(page, lang) {
-  await page.waitForLoadState('load', { timeout: 2 * PASO });
+  await esperarCarga(page, 'load');
   // <html lang> sigue al idioma elegido; si una rama dejara de ponerlo, no se bloquea la prueba (se sigue tras CORTA).
   if (lang) await page.waitForFunction((l) => document.documentElement.lang === l, lang, { timeout: CORTA }).catch(() => {});
   await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => {});

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test:e2e": "node --test --test-concurrency=2 --test-reporter=spec tests/e2e/*.test.mjs"
+    "test:e2e": "node --test --test-concurrency=2 --test-reporter=spec tests/e2e/*.test.mjs",
+    "test:e2e:serie": "node --test --test-concurrency=1 --test-reporter=spec tests/e2e/*.test.mjs"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.1.0",

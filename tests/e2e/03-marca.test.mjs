@@ -27,9 +27,11 @@ for (const lang of IDIOMAS) {
           for (const el of document.querySelectorAll('img, svg image, input[type="image"], source, object, embed, link[rel~="icon"]')) {
             const src = el.currentSrc || el.getAttribute('src') || el.getAttribute('href') || el.getAttribute('xlink:href') || el.getAttribute('data') || el.getAttribute('srcset') || '';
             const alt = el.getAttribute('alt') || el.getAttribute('aria-label') || '';
-            // «nasa» en la ruta del archivo o en el texto alternativo. El dominio no cuenta: los mosaicos de
-            // trek.nasa.gov son datos de imagen, no el logo.
-            if (/nasa/i.test(ruta(src)) || /nasa/i.test(alt)) imagenes.push(`<${el.tagName.toLowerCase()}> src=${String(src).slice(0, 120)} alt=${alt}`);
+            // «nasa» en la ruta del archivo, o un texto alternativo que nombra el logo («NASA», «NASA logo»,
+            // «Logo de la NASA», «NASA meatball»…). El dominio no cuenta: los mosaicos de trek.nasa.gov son datos de
+            // imagen. Un crédito como «LRO image, NASA/GSFC» tampoco: es atribución, no el logo.
+            const altLogo = /^\s*(?:(?:the\s+)?nasa(?:\s+(?:logo(?:type)?|insignia|meatball|emblem|worm))?|(?:logo(?:tipo)?|insignia|emblema)\s+(?:de\s+(?:la\s+)?)?nasa)\s*$/i;
+            if (/nasa/i.test(ruta(src)) || altLogo.test(alt)) imagenes.push(`<${el.tagName.toLowerCase()}> src=${String(src).slice(0, 120)} alt=${alt}`);
           }
           for (const el of cab ? cab.querySelectorAll('*') : []) {
             const fondo = getComputedStyle(el).backgroundImage;
@@ -41,7 +43,7 @@ for (const lang of IDIOMAS) {
           assert.ok(d.cabecera.includes(MARCA), `C1: la cabecera no contiene «${MARCA}». Texto de la cabecera: «${d.cabecera.slice(0, 200)}»`));
         await t.test(`el título del documento contiene «${MARCA}»`, () =>
           assert.ok(d.titulo.includes(MARCA), `C1: el título del documento es «${d.titulo}»`));
-        await t.test('ninguna imagen de la NASA (ruta o texto alternativo con «nasa»)', () =>
+        await t.test('ninguna imagen del logo de la NASA (ruta con «nasa» o texto alternativo que nombra el logo)', () =>
           assert.deepEqual(d.imagenes, [], 'C1: las reglas de Space Apps prohíben el logo de la NASA'));
         await t.test('no aparecen los nombres antiguos del sitio', () => {
           const vistos = d.cadenas.filter(([, s]) => NOMBRES_ANTIGUOS.some((n) => s.includes(n))).map(([tipo, s]) => `${tipo}: ${s.slice(0, 120)}`);
