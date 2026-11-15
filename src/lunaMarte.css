@@ -105,6 +105,56 @@
 .lm-card[aria-pressed="true"] b { text-decoration: underline; text-decoration-color: var(--body); text-underline-offset: .26em; }
 .lm-card:focus-visible { position: relative; z-index: 1; outline-offset: -3px; }
 
+.lm-nasa-list button:hover, .lm-nasa-list button[aria-pressed="true"] { background: var(--hover); }
+.lm-nasa-list, .lm-nasa-sources { margin: 0; padding: 0; list-style: none; }
+.lm-nasa-list { padding: 0 20px 8px; }
+.lm-nasa-list li + li { border-top: 1px solid var(--border); }
+.lm-nasa-list button {
+  display: grid;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.lm-nasa-list button small { color: var(--muted); font-size: 13px; }
+.lm-nasa-list button:focus-visible { outline-offset: -2px; }
+.lm-nasa-marker { display: grid; place-items: center; }
+.lm-nasa-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-inline: 2px;
+  transform: rotate(45deg);
+  background: var(--body);
+  outline: 2px solid var(--sunken);
+}
+.lm-nasa-images { margin: 12px 0; }
+.lm-nasa-photo {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  background: var(--sunken);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+.lm-nasa-photo img { aspect-ratio: 4 / 3; object-fit: contain; background: transparent; }
+.lm-nasa-credit { display: block; overflow-wrap: anywhere; }
+.lm-nasa-sources { display: grid; gap: 4px; font-size: 14px; }
+.lm-nasa-sources a, .lm-nasa-viewer { text-decoration: underline; text-underline-offset: 0.18em; }
+.lm-nasa-metrics { width: 100%; margin: 12px 0 6px; }
+.lm-nasa-metrics caption { color: var(--muted); font-size: 13px; text-align: left; }
+.lm-nasa-metrics thead th { font-family: inherit; letter-spacing: normal; text-transform: none; }
+.lm-nasa-metrics :is(th, td):first-child { padding-left: 0; text-align: left; }
+.lm-nasa-metrics :is(th, td):not(:first-child) { text-align: right; }
+.lm-nasa-score { margin: 0 0 10px; color: var(--text); font-size: 14px; }
+.lm-nasa-score span { color: var(--muted); }
+.lm-nasa-viewer { display: inline-block; margin-bottom: 12px; font-size: 14px; }
+
 .lm-list { margin: 0; padding: 0 10px 6px; list-style: none; }
 .lm-list button {
   display: grid;
@@ -434,7 +484,7 @@
   .lm-pick select { min-height: 44px; }
 }
 @media (max-width: 640px) {
-  .lm-detail, .lm-section, .lm-refname, .lm-valid, .lm-refs, .lm-pickhint, .lm-fold > summary, .lm-fold-note, .lm-loading { padding-inline: 12px; }
+  .lm-detail, .lm-section, .lm-refname, .lm-valid, .lm-refs, .lm-pickhint, .lm-fold > summary, .lm-fold-note, .lm-loading, .lm-nasa-list { padding-inline: 12px; }
   .lm-groups, .lm-rank-modes, .lm-more { margin-inline: 12px; }
   .lm-tabs { padding-inline: 4px; }
   .lm-cards { margin-inline: 12px; }

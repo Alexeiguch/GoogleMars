@@ -1,0 +1,622 @@
+[
+  {
+    "id": "lake-salda-jezero",
+    "body": "mars",
+    "earth": {
+      "name": "Lake Salda, Türkiye",
+      "lat": 37.55,
+      "lon": 29.68,
+      "approximate": true,
+      "image": {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/147000/147041/lakesalda_oli_2020159_lrg.jpg?fit=clip&w=800",
+        "alt": {
+          "en": "Landsat view of Lake Salda and its pale shoreline",
+          "es": "Vista Landsat del lago Salda y su orilla clara"
+        },
+        "credit": "NASA Earth Observatory/Lauren Dauphin, using USGS Landsat data"
+      }
+    },
+    "target": {
+      "name": "Jezero Crater",
+      "lat": 18.445,
+      "lon": 77.451,
+      "approximate": true,
+      "image": {
+        "url": "https://d2pn8kiwq2w21t.cloudfront.net/original_images/jpegPIA23380.jpg",
+        "alt": {
+          "en": "Orbital mineral map of Jezero Crater",
+          "es": "Mapa mineral orbital del cráter Jezero"
+        },
+        "credit": "NASA/JPL-Caltech/MSSS/JHU-APL/Purdue/USGS"
+      }
+    },
+    "summary": {
+      "en": "Salda’s carbonate-rich shoreline sediments and alluvial fans help explain deposits around the ancient Jezero lake. Salda still holds water.",
+      "es": "Los sedimentos costeros ricos en carbonatos y los abanicos aluviales de Salda ayudan a interpretar los depósitos del antiguo lago de Jezero. El lago Salda aún contiene agua."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "NASA satellite and field imagery",
+          "es": "Imágenes satelitales y de campo de la NASA"
+        },
+        "url": "https://science.nasa.gov/earth/earth-observatory/jez-like-mars-147041/"
+      },
+      {
+        "label": {
+          "en": "Jezero mineral map",
+          "es": "Mapa mineral de Jezero"
+        },
+        "url": "https://www.jpl.nasa.gov/images/pia23380-jezero-crater-minerals/"
+      },
+      {
+        "label": {
+          "en": "Lake Salda field study",
+          "es": "Estudio de campo del lago Salda"
+        },
+        "url": "https://astrobiology.nasa.gov/uploads/filer_public/29/d1/29d15953-db5c-4e96-aff3-e190686acfa3/report_lc_garczynski_project.pdf"
+      }
+    ]
+  },
+  {
+    "id": "holuhraun-elysium",
+    "body": "mars",
+    "earth": {
+      "name": "Holuhraun, Iceland",
+      "lat": 64.8531,
+      "lon": -16.827,
+      "approximate": true,
+      "image": {
+        "url": "https://d2pn8kiwq2w21t.cloudfront.net/original_images/jpegPIA18796.jpg",
+        "alt": {
+          "en": "EO-1 infrared image of lava erupting from the Holuhraun fissure",
+          "es": "Imagen infrarroja de EO-1 de la lava que brota de la fisura de Holuhraun"
+        },
+        "credit": "NASA/JPL/EO-1 Mission/GSFC/Ashley Davies"
+      }
+    },
+    "target": {
+      "name": "Central Elysium Planitia lava vent",
+      "lat": -1.05,
+      "lon": 159.7,
+      "approximate": true,
+      "image": {
+        "url": "https://hirise-pds.lpl.arizona.edu/PDS/EXTRAS/RDR/ESP/ORB_028500_028599/ESP_028532_1790/ESP_028532_1790_RED.abrowse.jpg",
+        "alt": {
+          "en": "HiRISE image of a lava vent within an impact crater in Elysium Planitia",
+          "es": "Imagen HiRISE de una boca eruptiva en un cráter de impacto en Elysium Planitia"
+        },
+        "credit": "NASA/JPL-Caltech/University of Arizona"
+      }
+    },
+    "summary": {
+      "en": "Basalt flowed from fissures at both sites. The Martian stereo terrain model has a grid spacing of 1.01 m. The map uses the instrument team’s east longitude.",
+      "es": "En ambos sitios, la lava basáltica salió por fisuras. La cuadrícula del modelo estereoscópico marciano tiene una separación de 1,01 m. El mapa usa la longitud este del equipo del instrumento."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "Landsat and Mars orbital imagery",
+          "es": "Imágenes orbitales Landsat y de Marte"
+        },
+        "url": "https://science.nasa.gov/earth/earth-observatory/flood-basalts-on-mars-and-iceland-92858/"
+      },
+      {
+        "label": {
+          "en": "HiRISE terrain and orthophotos",
+          "es": "Relieve y ortofotos de HiRISE"
+        },
+        "url": "https://www.uahirise.org/dtm/dtm.php?ID=ESP_028532_1790"
+      }
+    ]
+  },
+  {
+    "id": "sunset-ulysses",
+    "body": "mars",
+    "earth": {
+      "name": "Sunset Crater, Arizona",
+      "lat": 35.366,
+      "lon": -111.502,
+      "image": {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/90000/90413/sunsetcrater_oli_2016194_lrg.jpg?fit=clip&w=800",
+        "alt": {
+          "en": "Landsat image of Sunset Crater and nearby lava flows",
+          "es": "Imagen Landsat de Sunset Crater y las coladas de lava cercanas"
+        },
+        "credit": "NASA Earth Observatory/Jesse Allen, using USGS Landsat data"
+      }
+    },
+    "target": {
+      "name": "Ulysses Colles",
+      "lat": 5.563,
+      "lon": -122.968,
+      "image": {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/scoria-cones-on-earth-and-mars/scoriaconesmars_ctx_2014_lrg.jpg?fit=clip&w=800",
+        "alt": {
+          "en": "Orbital mosaic of scoria cones and lava flows in Ulysses Colles",
+          "es": "Mosaico orbital de conos de escoria y coladas de lava en Ulysses Colles"
+        },
+        "credit": "NASA Earth Observatory/Lauren Dauphin, using NASA/JPL-Caltech/MSSS CTX data"
+      }
+    },
+    "summary": {
+      "en": "Scoria cones and surrounding lava flows occur in both volcanic fields. The Martian cones are broader and gentler. The 2.02 m HiRISE terrain model covers the southern cone used in the measurements.",
+      "es": "Ambos campos volcánicos tienen conos de escoria rodeados de coladas de lava. Los conos marcianos son más anchos y sus pendientes más suaves. El modelo HiRISE de 2,02 m cubre el cono meridional que se usó para las mediciones."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "NASA comparison images",
+          "es": "Imágenes comparativas de la NASA"
+        },
+        "url": "https://science.nasa.gov/earth/earth-observatory/scoria-cones-on-earth-and-mars/"
+      },
+      {
+        "label": {
+          "en": "HiRISE terrain and orthophotos",
+          "es": "Relieve y ortofotos de HiRISE"
+        },
+        "url": "https://www.uahirise.org/dtm/dtm.php?ID=PSP_008262_1855"
+      }
+    ]
+  },
+  {
+    "id": "spitsbergen-phoenix",
+    "body": "mars",
+    "earth": {
+      "name": "Northeastern Spitsbergen, Svalbard",
+      "lat": 79.40962,
+      "lon": 17.559662,
+      "approximate": true
+    },
+    "target": {
+      "name": "Phoenix landing site",
+      "lat": 68.22,
+      "lon": -125.75,
+      "image": {
+        "url": "https://d2pn8kiwq2w21t.cloudfront.net/original_images/jpegPIA10684.jpg",
+        "alt": {
+          "en": "Polygonal cracks photographed by the Phoenix Mars lander",
+          "es": "Grietas poligonales fotografiadas por la sonda Phoenix en Marte"
+        },
+        "credit": "NASA/JPL-Caltech/University of Arizona"
+      }
+    },
+    "summary": {
+      "en": "Contraction cracks divide frozen ground into polygons in both places. The Earth pin marks the region described by NASA.",
+      "es": "En ambos lugares, las grietas por contracción dividen el suelo helado en polígonos. El punto terrestre señala la región descrita por la NASA."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "NASA paired ground photos",
+          "es": "Fotografías comparativas de la NASA"
+        },
+        "url": "https://science.nasa.gov/earth/earth-observatory/permafrost-on-mars-and-earth-8786/"
+      },
+      {
+        "label": {
+          "en": "Phoenix stereo-image archive",
+          "es": "Archivo de imágenes estereoscópicas de Phoenix"
+        },
+        "url": "https://pds.nasa.gov/ds-view/pds/viewDataset.jsp?dsid=PHX-M-SSI-4-LINEARIZED-OPS-V1.0"
+      }
+    ]
+  },
+  {
+    "id": "el-tatio-home-plate",
+    "body": "mars",
+    "earth": {
+      "name": "El Tatio, Chile",
+      "lat": -22.34,
+      "lon": -68.01,
+      "approximate": true
+    },
+    "target": {
+      "name": "Home Plate, Gusev Crater",
+      "lat": -14.6,
+      "lon": 175.5,
+      "approximate": true,
+      "image": {
+        "url": "https://d2pn8kiwq2w21t.cloudfront.net/original_images/jpegPIA12205.jpg",
+        "alt": {
+          "en": "HiRISE view of the pale Home Plate outcrop near Spirit",
+          "es": "Vista HiRISE del afloramiento claro de Home Plate cerca de Spirit"
+        },
+        "credit": "NASA/JPL-Caltech/University of Arizona"
+      }
+    },
+    "summary": {
+      "en": "Fingerlike silica deposits near Spirit’s Home Plate outcrop resemble deposits at El Tatio’s hot springs. How the Martian structures formed remains uncertain.",
+      "es": "Los depósitos de sílice con forma de dedos cerca del afloramiento Home Plate, estudiado por Spirit, se parecen a los de las fuentes termales de El Tatio. Aún se desconoce cómo se formaron las estructuras marcianas."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "Earth and rover close-ups",
+          "es": "Primeros planos en la Tierra y en Marte"
+        },
+        "url": "https://astrobiology.nasa.gov/news/looking-for-life-on-mars-in-chile/"
+      },
+      {
+        "label": {
+          "en": "Home Plate orbital image and location",
+          "es": "Imagen orbital y ubicación de Home Plate"
+        },
+        "url": "https://www.jpl.nasa.gov/images/pia12205-orbital-view-of-spirit-at-troy/"
+      },
+      {
+        "label": {
+          "en": "Spirit X-ray spectra",
+          "es": "Espectros de rayos X de Spirit"
+        },
+        "url": "https://pds.nasa.gov/ds-view/pds/viewBundle.jsp?identifier=urn%3Anasa%3Apds%3Amer2_apxs_raw&version=1.0"
+      }
+    ]
+  },
+  {
+    "id": "haughton-shackleton",
+    "body": "moon",
+    "earth": {
+      "name": "Haughton Crater, Devon Island",
+      "lat": 75.38,
+      "lon": -89.68,
+      "approximate": true,
+      "image": {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia06/pia06012/PIA06012.jpg?fit=clip&w=800",
+        "alt": {
+          "en": "Impact ejecta hills and research tents near Haughton Crater",
+          "es": "Colinas de material eyectado por el impacto y tiendas de investigación cerca del cráter Haughton"
+        },
+        "credit": "NASA/JPL/ASU"
+      }
+    },
+    "target": {
+      "name": "Shackleton Crater",
+      "lat": -89.67,
+      "lon": 129.78,
+      "approximate": true,
+      "image": {
+        "url": "https://svs.gsfc.nasa.gov/vis/a000000/a003600/a003634/LROC_v03.1000.jpg",
+        "alt": {
+          "en": "Lunar Reconnaissance Orbiter visualization of the rim of Shackleton Crater",
+          "es": "Visualización del borde del cráter Shackleton a partir de imágenes de la sonda Lunar Reconnaissance Orbiter"
+        },
+        "credit": "NASA Goddard Space Flight Center Scientific Visualization Studio"
+      }
+    },
+    "summary": {
+      "en": "Both impact craters are roughly 20 km across. On Devon Island, NASA rehearsed traversing flats, rolling terrain and crater rims along a simulated Shackleton-to-Malapert route.",
+      "es": "Ambos cráteres de impacto miden alrededor de 20 km de diámetro. En la isla Devon, la NASA ensayó una ruta simulada de Shackleton a Malapert por llanuras, terreno ondulado y bordes de cráteres."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "NASA traverse report and waypoints",
+          "es": "Informe de travesía y puntos de ruta de la NASA"
+        },
+        "url": "https://ntrs.nasa.gov/api/citations/20110011887/downloads/20110011887.pdf"
+      },
+      {
+        "label": {
+          "en": "Shackleton imagery",
+          "es": "Imágenes de Shackleton"
+        },
+        "url": "https://www.nasa.gov/missions/lro/nasa-moon-camera-mosaic-sheds-light-on-lunar-south-pole/"
+      },
+      {
+        "label": {
+          "en": "5 m lunar south pole terrain",
+          "es": "Relieve del polo sur lunar a 5 m"
+        },
+        "url": "https://pgda.gsfc.nasa.gov/products/78"
+      }
+    ]
+  },
+  {
+    "id": "chicxulub-schrodinger",
+    "body": "moon",
+    "earth": {
+      "name": "Chicxulub, Mexico",
+      "lat": 21.3,
+      "lon": -89.5,
+      "approximate": true,
+      "image": {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia01/pia01723/PIA01723.jpg?fit=clip&w=800",
+        "alt": {
+          "en": "Space Shuttle radar of the southwest part of the buried Chicxulub impact structure",
+          "es": "Radar del transbordador espacial de la parte suroeste del cráter Chicxulub sepultado"
+        },
+        "credit": "NASA/JPL-Caltech"
+      }
+    },
+    "target": {
+      "name": "Schrödinger Basin",
+      "lat": -75,
+      "lon": 132.4,
+      "approximate": true,
+      "image": {
+        "url": "https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005029/sp_illum.0002_print.jpg",
+        "alt": {
+          "en": "Schrödinger Basin visualization showing the outer rim and inner peak ring",
+          "es": "Visualización de la cuenca Schrödinger con el borde exterior y el anillo interior de picos"
+        },
+        "credit": "NASA Scientific Visualization Studio"
+      }
+    },
+    "summary": {
+      "en": "Both impacts produced an inner peak ring. Schrödinger’s ring stands above the basin floor. Chicxulub’s is buried and was sampled by drilling.",
+      "es": "Ambos impactos formaron un anillo interior de picos. El de Schrödinger se eleva sobre el fondo de la cuenca. El de Chicxulub está sepultado y se tomaron muestras mediante perforación."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "NASA peak-ring comparison, figure 4",
+          "es": "Comparación de anillos de picos de la NASA, figura 4"
+        },
+        "url": "https://ntrs.nasa.gov/api/citations/20180000941/downloads/20180000941.pdf"
+      },
+      {
+        "label": {
+          "en": "Chicxulub radar image",
+          "es": "Imagen de radar de Chicxulub"
+        },
+        "url": "https://science.nasa.gov/photojournal/space-radar-image-of-the-yucatan-impact-crater-site/"
+      },
+      {
+        "label": {
+          "en": "Schrödinger imagery and elevation",
+          "es": "Imágenes y elevación de Schrödinger"
+        },
+        "url": "https://svs.gsfc.nasa.gov/5029/"
+      }
+    ]
+  },
+  {
+    "id": "indian-tunnel-tranquillitatis",
+    "body": "moon",
+    "earth": {
+      "name": "Indian Tunnel, Idaho",
+      "lat": 43.44,
+      "lon": -113.53,
+      "approximate": true,
+      "image": {
+        "url": "https://ti.arc.nasa.gov/dataset/caves/images/image010.jpg",
+        "alt": {
+          "en": "View inside the Indian Tunnel lava tube",
+          "es": "Vista del interior del tubo de lava Indian Tunnel"
+        },
+        "credit": "NASA Ames Research Center"
+      }
+    },
+    "target": {
+      "name": "Mare Tranquillitatis Pit",
+      "lat": 8.3355,
+      "lon": 33.222,
+      "image": {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia13/pia13518/PIA13518.jpg?fit=clip&w=800",
+        "alt": {
+          "en": "Lunar Reconnaissance Orbiter views of the Mare Tranquillitatis pit floor",
+          "es": "Vistas del fondo de la sima de Mare Tranquillitatis desde la sonda Lunar Reconnaissance Orbiter"
+        },
+        "credit": "NASA/GSFC/Arizona State University"
+      }
+    },
+    "summary": {
+      "en": "Idaho’s lava tube has multiple openings where the roof collapsed. Lunar radar indicates a passage extending more than 60 m from the base of the pit. Its full extent is unknown.",
+      "es": "El tubo de lava de Idaho tiene varias aberturas donde se hundió el techo. El radar lunar indica que un pasaje se extiende más de 60 m desde la base de la sima. Se desconoce su longitud total."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "Indian Tunnel photos and LiDAR",
+          "es": "Fotografías y LiDAR de Indian Tunnel"
+        },
+        "url": "https://ti.arc.nasa.gov/dataset/caves/"
+      },
+      {
+        "label": {
+          "en": "Lunar pit photos",
+          "es": "Fotografías de la sima lunar"
+        },
+        "url": "https://science.nasa.gov/photojournal/new-views-of-lunar-pits/"
+      },
+      {
+        "label": {
+          "en": "Lunar radar evidence",
+          "es": "Evidencia del radar lunar"
+        },
+        "url": "https://science.nasa.gov/solar-system/moon/new-evidence-adds-to-findings-hinting-at-network-of-caves-on-moon/"
+      }
+    ]
+  },
+  {
+    "id": "stillwater-descartes",
+    "body": "moon",
+    "earth": {
+      "name": "Stillwater Complex, Montana",
+      "lat": 45.4167,
+      "lon": -110,
+      "approximate": true,
+      "image": {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/146000/146650/stillwater_oli-srtm_2018222_lrg.jpg?fit=clip&w=800",
+        "alt": {
+          "en": "Landsat and SRTM view of the Stillwater Complex in the Beartooth Range",
+          "es": "Vista Landsat y SRTM del complejo Stillwater en la cordillera Beartooth"
+        },
+        "credit": "NASA Earth Observatory/Joshua Stevens, using USGS Landsat and SRTM data"
+      }
+    },
+    "target": {
+      "name": "Descartes Highlands, Apollo 16",
+      "lat": -8.9734,
+      "lon": 15.501,
+      "image": {
+        "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004900/a004989/apollo16.1800_print.jpg",
+        "alt": {
+          "en": "Lunar Reconnaissance Orbiter visualization of the Apollo 16 area",
+          "es": "Visualización de la zona del Apolo 16 a partir de datos de la sonda Lunar Reconnaissance Orbiter"
+        },
+        "credit": "NASA Scientific Visualization Studio"
+      }
+    },
+    "summary": {
+      "en": "Calcium-rich anorthosite from the Stillwater Complex resembles a major rock type in the lunar highlands. It contributed to a simulant based on Apollo 16 soil chemistry.",
+      "es": "La anortosita rica en calcio del complejo Stillwater se parece a uno de los tipos de roca principales de las tierras altas lunares. Se utilizó para elaborar un simulante basado en la composición del suelo recogido por el Apolo 16."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "NASA Landsat imagery of Stillwater",
+          "es": "Imágenes Landsat de Stillwater de la NASA"
+        },
+        "url": "https://science.nasa.gov/earth/earth-observatory/montanas-moon-like-rocks-146650/"
+      },
+      {
+        "label": {
+          "en": "Apollo 16 orbital imagery",
+          "es": "Imágenes orbitales del sitio del Apolo 16"
+        },
+        "url": "https://svs.gsfc.nasa.gov/4989/"
+      },
+      {
+        "label": {
+          "en": "Simulant and Apollo 16 composition tables",
+          "es": "Tablas de composición del simulante y del Apolo 16"
+        },
+        "url": "https://ares.jsc.nasa.gov/projects/simulants/nu-lht.html"
+      }
+    ]
+  },
+  {
+    "id": "askja-cabeus",
+    "body": "moon",
+    "earth": {
+      "name": "Askja, Iceland",
+      "lat": 65.03,
+      "lon": -16.75,
+      "approximate": true,
+      "image": {
+        "url": "https://science.nasa.gov/wp-content/uploads/2023/11/2605-icelandcherieachilles.jpeg?w=768",
+        "alt": {
+          "en": "NASA team surveying volcanic terrain at Askja",
+          "es": "Equipo de la NASA explorando el terreno volcánico de Askja"
+        },
+        "credit": "NASA/Cherie Achilles"
+      }
+    },
+    "target": {
+      "name": "Cabeus, LCROSS impact site",
+      "lat": -84.6796,
+      "lon": -48.7093,
+      "image": {
+        "url": "https://science.nasa.gov/wp-content/uploads/2024/01/20110615lcross.jpg",
+        "alt": {
+          "en": "LOLA elevation visualization of Cabeus and the LCROSS impact site",
+          "es": "Visualización de elevación LOLA de Cabeus y el lugar de impacto de LCROSS"
+        },
+        "credit": "NASA/Lunar Reconnaissance Orbiter/LOLA"
+      }
+    },
+    "summary": {
+      "en": "At Askja, radar mapped up to 4.5 m of ice buried beneath volcanic deposits. LCROSS detected water in ejecta from Cabeus, a permanently shadowed lunar crater.",
+      "es": "En Askja, el radar cartografió hasta 4,5 m de hielo enterrado bajo depósitos volcánicos. LCROSS detectó agua en el material eyectado en Cabeus, un cráter lunar en sombra permanente."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "Askja radar study",
+          "es": "Estudio de radar de Askja"
+        },
+        "url": "https://ntrs.nasa.gov/citations/20240009232"
+      },
+      {
+        "label": {
+          "en": "Field radar and ice thickness data",
+          "es": "Datos de radar y espesor del hielo"
+        },
+        "url": "https://doi.org/10.5066/P9QATARQ"
+      },
+      {
+        "label": {
+          "en": "Cabeus impact-site image",
+          "es": "Imagen del lugar de impacto en Cabeus"
+        },
+        "url": "https://science.nasa.gov/image-detail/20110615lcross/"
+      },
+      {
+        "label": {
+          "en": "LCROSS spectra",
+          "es": "Espectros de LCROSS"
+        },
+        "url": "https://pds.nasa.gov/ds-view/pds/viewDataset.jsp?dsid=LCROSS-E%2FL-NSP1-3-CAL-V1.0"
+      }
+    ]
+  },
+  {
+    "id": "askja-amazonis",
+    "body": "mars",
+    "earth": {
+      "name": "Askja, Iceland",
+      "lat": 65.03,
+      "lon": -16.75,
+      "approximate": true,
+      "image": {
+        "url": "https://science.nasa.gov/wp-content/uploads/2023/11/2605-icelandcherieachilles.jpeg?w=768",
+        "alt": {
+          "en": "NASA team surveying volcanic terrain at Askja",
+          "es": "Equipo de la NASA explorando el terreno volcánico de Askja"
+        },
+        "credit": "NASA/Cherie Achilles"
+      }
+    },
+    "target": {
+      "name": "Amazonis Planitia ice crater",
+      "lat": 35.1,
+      "lon": -170.18,
+      "approximate": true,
+      "image": {
+        "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/mars/downloadable_items/4/7/47697_1-PIA25583.png?fit=clip&w=800",
+        "alt": {
+          "en": "HiRISE view of the 2021 Amazonis impact crater and exposed water ice",
+          "es": "Vista HiRISE del cráter de impacto de 2021 en Amazonis y el hielo de agua expuesto"
+        },
+        "credit": "NASA/JPL-Caltech/University of Arizona"
+      }
+    },
+    "summary": {
+      "en": "At Askja, researchers mapped buried ice using radar. A 2021 impact in Amazonis Planitia exposed blocks of buried Martian ice around a 150 m crater.",
+      "es": "En Askja, los investigadores cartografiaron hielo enterrado con radar. Un impacto de 2021 en Amazonis Planitia dejó al descubierto bloques de hielo marciano alrededor de un cráter de 150 m."
+    },
+    "sources": [
+      {
+        "label": {
+          "en": "Askja radar study",
+          "es": "Estudio de radar de Askja"
+        },
+        "url": "https://ntrs.nasa.gov/citations/20240009232"
+      },
+      {
+        "label": {
+          "en": "Field radar and ice thickness data",
+          "es": "Datos de radar y espesor del hielo"
+        },
+        "url": "https://doi.org/10.5066/P9QATARQ"
+      },
+      {
+        "label": {
+          "en": "NASA image of the exposed ice",
+          "es": "Imagen de la NASA del hielo expuesto"
+        },
+        "url": "https://science.nasa.gov/resource/hirise-views-a-mars-impact-crater-surrounded-by-water-ice/"
+      },
+      {
+        "label": {
+          "en": "1 m HiRISE terrain and orthophotos",
+          "es": "Relieve a 1 m y ortofotos de HiRISE"
+        },
+        "url": "https://www.uahirise.org/dtm/ESP_073578_2155"
+      }
+    ]
+  }
+]

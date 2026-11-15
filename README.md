@@ -21,7 +21,7 @@ Todas salen de `src/data/results.json` y `src/data/catalog.json`.
 | Grupos con gemelos terrestres | 57 (32 de la Luna y 25 de Marte), con 3 gemelos cada uno |
 | Finalistas del ranking multiescala | 20 por cuerpo; lista «Solo nuevos»: 13 en la Luna y 20 en Marte |
 | Historias destacadas | 10 (4 de la Luna y 6 de Marte) |
-| Parches de 2 × 2 km para comparar en 3D | 374: 116 de Marte (HiRISE) y 258 de la Tierra |
+| Parches de 2 × 2 km para comparar en 3D | 375: 117 de Marte (HiRISE) y 258 de la Tierra |
 | Validación con 11 análogos conocidos | 8 de 11 en el percentil 90 o más, en la Luna y en Marte |
 
 ## Cómo se ejecuta la app
@@ -71,6 +71,7 @@ Mapa 2D de toda la Tierra con una pestaña para la Luna y otra para Marte:
 - **Referencias** de la Luna y de Marte, con su fuente.
 - **Gemelos terrestres por grupo:** los 3 mejores lugares de la Tierra para cada región o sitio.
 - **Validación** con análogos conocidos.
+- **Análogos de NASA:** 11 parejas Tierra–Luna o Tierra–Marte estudiadas por NASA, con imágenes y fuentes (ver más abajo).
 - **Comparación lado a lado:** relieve sombreado a la misma escala e imagen real.
 
 ## Método
@@ -140,6 +141,12 @@ Antes de ver resultados se fijaron 12 análogos ya usados por la ciencia. Se mid
 | Pilbara | 85,1 | 76,0 | 76,5 | 70,7 |
 
 Río Tinto es el más bajo en Marte a las dos escalas y en la Luna a 10 km; en la Luna a 30 km el más bajo es Meteor Crater (77,7). Río Tinto es un análogo mineralógico (aguas ácidas), no topográfico, y este método no mide minerales.
+
+### Análogos de NASA
+
+Las fichas del mapa y de los globos reúnen paralelos de geología, terreno y operaciones, con imágenes y fuentes por par. Salda–Jezero y Sunset–Ulysses incluyen medidas de ventanas de 2 × 2 km. Salda usa celdas de tierra firme para calcular pendientes y desnivel. El enlace «Comparar en el visor 3D» de Sunset abre en los globos la comparación 3D con el cono meridional de Ulysses Colles (`globos.html?site=ulysses-colles&earth=sunset`).
+
+El catálogo de fichas está en `src/data/nasa-analogs.json` y las medidas en `src/data/nasa-terrain.json`. Para regenerar las medidas y el recorte HiRISE de Ulysses, consulta los datos de entrada y el comando en `pipeline/analogs/nasa_terrain.py`.
 
 ## Resultados destacados
 
@@ -271,7 +278,8 @@ scripts/                          alta manual de terreno (no se usa en la versi�
 | Regiones de Artemis | Mosaicos LROC NAC (Arizona State University) |
 | Relieve del polo sur en los globos y en el minimapa | DEM LRO LOLA de 118 m. USGS Astrogeology |
 | Relieve de Marte a 30 y 10 km | Blend HRSC + MOLA v2, 200 m. ESA Mars Express, NASA MGS, USGS Astrogeology |
-| Relieve de Marte a 2 km | Modelos de terreno HiRISE. NASA / JPL / USGS |
+| Relieve de Marte a 2 km | Modelos de terreno HiRISE. NASA / JPL / USGS; [Ulysses Colles](https://www.uahirise.org/dtm/dtm.php?ID=PSP_008262_1855), NASA / JPL / University of Arizona |
+| Análogos de NASA | Fichas, imágenes y créditos de NASA Earth Observatory, JPL, Astrobiology, NTRS, PDS y SVS (cada par lleva sus fuentes en `src/data/nasa-analogs.json`) |
 | Relieve de la Tierra | Copernicus DEM GLO-90 y GLO-30 (ESA), vía Microsoft Planetary Computer |
 | Relieve de 32 sitios de EE. UU. | 3DEP, USGS |
 | Superficie de la Tierra | ESA WorldCover 2021 |
