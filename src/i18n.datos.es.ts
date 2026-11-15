@@ -1,6 +1,6 @@
 // GENERADO con noche/tools/marca-generar-datos-es.mjs: textos de src/data/catalog.json y results.json que llegan
 // en inglés (títulos de imágenes HiRISE, lugares de la Tierra) y cómo se muestran con la app en español.
-// Los nombres propios que se usan igual en español (Meteor Crater, Craters of the Moon…) no están aquí.
+// Los nombres propios que se usan igual en español (Meteor Crater…) no están aquí.
 export const DATOS_ES: Record<string, string> = {
   "2km crater on south polar layered deposits": "Cráter de 2 km sobre los depósitos estratificados del polo sur",
   "Al Wusta Governorate, Oman": "Gobernación de Al Wusta, Omán",
@@ -131,7 +131,8 @@ export const DATOS_ES: Record<string, string> = {
   "Northeast Melas Chasma dune fields and wall rock": "Campos de dunas y roca de la pared en el noreste de Melas Chasma",
   "Northern Hellas Planitia layered bedrock": "Roca estratificada en el norte de Hellas Planitia",
   "Northern plains ridge": "Cresta de las llanuras del norte",
-  "Painted Desert": "Desierto Pintado (Painted Desert)",
+  "Painted Desert": "Desierto Pintado",
+  "Craters of the Moon": "Cráteres de la Luna (Idaho)",
   "Panjgur District, Pakistan": "Distrito de Panjgur, Pakistán",
   "Pasted-on material on crater ejecta": "Material adherido sobre la eyecta de un cráter",
   "Pisgah lava field": "Campo de lava de Pisgah",

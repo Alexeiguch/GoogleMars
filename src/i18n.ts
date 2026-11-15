@@ -1054,7 +1054,7 @@ const dataEn: Record<string, string> = {
   "Primer punto (sol 3, site 2, drive 0) del GeoJSON oficial de recorrido de NASA/JPL: lon 137.441633, lat -4.589467. Ya está en longitud este -180..180. Concuerda con ODE ('MSL Gale (Curiosity): 4.59° S, 137.44° E'). El archivo no indica el datum de latitud, pero la cartografía de MSL es planetocéntrica.":
     "First point (sol 3, site 2, drive 0) of the official NASA/JPL traverse GeoJSON: lon 137.441633, lat -4.589467. Already in east longitude -180..180. It agrees with ODE ('MSL Gale (Curiosity): 4.59° S, 137.44° E'). The file does not state the latitude datum, but MSL cartography is planetocentric.",
   "Primer punto del GeoJSON oficial de recorrido de NASA/JPL (sol 13, site 3, drive 0, dist_total_m 0, 'Site increment, no motion'): lon 77.45088572, lat 18.44462715. Es la posición antes del primer movimiento, que figura en sol 14. Ya está en longitud este. No encontré un documento de NASA que dé '18.4447N 77.4508E' de forma explícita; esa cifra solo aparece en Wikipedia.":
-    "First point of the official NASA/JPL traverse GeoJSON (sol 13, site 3, drive 0, dist_total_m 0, 'Site increment, no motion'): lon 77.45088572, lat 18.44462715. It is the position before the first drive, which appears at sol 14. Already in east longitude. We did not find a NASA document that gives '18.4447N 77.4508E' explicitly; that figure only appears on Wikipedia.",
+    "First point of the official NASA/JPL traverse GeoJSON (sol 13, site 3, drive 0, total distance 0 m, 'Site increment, no motion'): lon 77.45088572, lat 18.44462715. It is the position before the first drive, which appears at sol 14. Already in east longitude. We did not find a NASA document that gives '18.4447N 77.4508E' explicitly; that figure only appears on Wikipedia.",
   "Página HiRISE 'A Closer Look at Holden Crater' (PSP_003077_1530): Latitude (centered) -26.960°, Longitude (East) 325.457° → -34.543. El texto dice que los depósitos afloran mejor en el sector suroeste, bajo abanicos aluviales. Centro del Gazetteer (-26.04, 325.981E, 153 km) no usado.":
     "HiRISE page 'A Closer Look at Holden Crater' (PSP_003077_1530): Latitude (centered) -26.960°, Longitude (East) 325.457° → -34.543. The text says the deposits are best exposed in the southwest sector, beneath alluvial fans. Gazetteer center (-26.04, 325.981E, 153 km) not used.",
   "Página HiRISE 'Candidate Cavern Entrance Northeast of Arsia Mons' (PSP_003647_1745): Latitude (centered) -5.532°, Longitude (East) 241.396° → -118.604. Texto: punto muy oscuro en una llanura de lava polvorienta al noreste de Arsia Mons, sin borde elevado ni eyecta. Nota: la interpretación como caverna es discutida (otras fuentes lo consideran un pozo cilíndrico). El centro del Gazetteer de Arsia Mons (-8.257, 239.908E) caería en la caldera.":
@@ -1198,10 +1198,14 @@ const dataEnPatterns: [RegExp, string][] = [
   [/^Malla polar (\d+) km \((.+)\)$/, "Polar grid $1 km ($2)"],
 ];
 
+/** «71.9°N 31.1°W» → «71,9° N 31,1° O»: coordenadas de los datos con el formato español de la app. */
+const coordEs = (text: string) =>
+  text.replace(/(\d)\.(\d)/g, "$1,$2").replace(/°\s*([NSEW])/g, (_, h: string) => `° ${h === "W" ? "O" : h}`);
+
 /** Textos de los datos en inglés con parte variable que se muestran en español. */
 const dataEsPatterns: [RegExp, string | ((match: string, ...groups: string[]) => string)][] = [
-  [/^Antarctica · (.+)$/, "Antártida · $1"],
-  [/^Greenland · (.+)$/, "Groenlandia · $1"],
+  [/^Antarctica · (.+)$/, (_, rest) => `Antártida · ${coordEs(rest)}`],
+  [/^Greenland · (.+)$/, (_, rest) => `Groenlandia · ${coordEs(rest)}`],
   // Teselas de las referencias HiRISE de results.json («Western Jezero · tesela 3»).
   [/^(.+)( · tesela \d+(?: de \d+ km)?)$/, (_, name, rest) => `${tr(name)}${rest}`],
 ];
