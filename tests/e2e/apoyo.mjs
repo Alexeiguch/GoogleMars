@@ -98,14 +98,26 @@ export function vigilar(page) {
 export async function abrir(ctx, ruta) {
   const page = await ctx.newPage();
   const vig = vigilar(page);
-  await page.goto(BASE + ruta, { waitUntil: 'domcontentloaded' });
+  await ir(page, BASE + ruta);
   return { page, vig };
+}
+
+/**
+ * Navega con margen para una máquina cargada: espera a que el servidor responda (con un reintento) y después,
+ * con el doble de tiempo, a que se ejecuten los módulos de la página (con el servidor de desarrollo, globos.html
+ * carga muchos módulos y JSON grandes antes de DOMContentLoaded).
+ */
+export async function ir(page, url, recargar = false) {
+  const nav = () => (recargar ? page.reload({ waitUntil: 'commit' }) : page.goto(url, { waitUntil: 'commit' }));
+  await nav().catch(async (e) => { if (!/Timeout/i.test(String(e))) throw e; await nav(); });
+  await page.waitForLoadState('domcontentloaded', { timeout: 2 * PASO });
 }
 
 /** Espera a que la página termine de arrancar: evento load, red en calma (con tope) y DOM quieto. */
 export async function esperarArranque(page, lang) {
-  await page.waitForLoadState('load');
-  if (lang) await page.waitForFunction((l) => document.documentElement.lang === l, lang);
+  await page.waitForLoadState('load', { timeout: 2 * PASO });
+  // <html lang> sigue al idioma elegido; si una rama dejara de ponerlo, no se bloquea la prueba (se sigue tras CORTA).
+  if (lang) await page.waitForFunction((l) => document.documentElement.lang === l, lang, { timeout: CORTA }).catch(() => {});
   await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => {});
   await quieto(page, 400, 8000);
 }

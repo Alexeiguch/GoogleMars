@@ -3,7 +3,7 @@
 // aviso visible con role="status" y data-aviso="sin-red".
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { abrirNavegador, nuevoContexto, abrir, esLocal, GUION, PASO, esperarPulsable, reTexto, esperarDibujo, conDibujo, sondear } from './apoyo.mjs';
+import { abrirNavegador, nuevoContexto, abrir, ir, esLocal, GUION, PASO, esperarPulsable, reTexto, esperarDibujo, conDibujo, sondear } from './apoyo.mjs';
 import { espanolEnIngles } from './idioma.mjs';
 
 const lang = 'en';
@@ -20,7 +20,7 @@ async function abrirSinRed(ruta) {
   const red = { imagery: [], externasPedidas: 0 };
   page.on('request', (r) => { if (!esLocal(r.url())) red.externasPedidas++; });
   page.on('response', (r) => { if (esLocal(r.url()) && /\/imagery\//.test(new URL(r.url()).pathname) && r.status() < 400) red.imagery.push(new URL(r.url()).pathname); });
-  await page.reload({ waitUntil: 'domcontentloaded' }); // con los contadores ya puestos
+  await ir(page, null, true); // recarga con los contadores ya puestos
   return { ctx, page, vig, red };
 }
 
