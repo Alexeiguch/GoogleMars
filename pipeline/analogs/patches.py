@@ -127,12 +127,18 @@ def read_cover(la, lo):
 
 # ---------------------------------------------------------------- medidas (igual que el visor)
 
-def patch_metrics(z: np.ndarray) -> dict[str, float]:
-    """Mismas medidas que scripts/export-catalog.py."""
-    y, x = np.gradient(z.astype("float64"), CELL)
+def patch_metrics(z: np.ndarray, land: np.ndarray | None = None) -> dict[str, float]:
+    """Medidas del visor, opcionalmente limitadas a celdas terrestres."""
+    elevation = z.astype("float64")
+    y, x = np.gradient(elevation, CELL)
     slope = np.rad2deg(np.arctan(np.hypot(x, y)))[1:-1, 1:-1]
+    if land is not None:
+        # Una pendiente necesita el centro y los cuatro vecinos del gradiente.
+        stencil = land[1:-1, 1:-1] & land[:-2, 1:-1] & land[2:, 1:-1] & land[1:-1, :-2] & land[1:-1, 2:]
+        slope = slope[stencil]
+        elevation = elevation[land]
     median_slope, steep_slope = np.percentile(slope, [50, 90])
-    low, median_elevation, high = np.percentile(z.astype("float64"), [5, 50, 95])
+    low, median_elevation, high = np.percentile(elevation, [5, 50, 95])
     return dict(medianSlope=float(median_slope), steepSlope=float(steep_slope),
                 medianElevation=float(median_elevation), relief=float(high - low))
 
