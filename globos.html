@@ -23,6 +23,7 @@
           <a href="./" data-i18n="nav.viewer">Visor 3D de Marte</a>
           <a href="./luna-marte.html" data-i18n="nav.map">Mapa Luna y Marte</a>
           <a href="./globos.html" id="gl-browse-link" aria-current="page" data-i18n="nav.globes">Globos 3D</a>
+          <a href="#solar-illumination" id="solar-link" data-i18n="solar.nav">Iluminación solar</a>
           <a href="#path-planner" id="path-link" data-i18n="path.title">Planificador de rutas</a>
           <a href="#sources" id="gl-sources-link"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
         </nav>
@@ -47,6 +48,18 @@
           </label>
         </div>
       </div>
+
+      <section class="solar-head" id="solar-controls" aria-labelledby="solar-title" hidden>
+        <h2 id="solar-title" data-i18n="solar.title">Iluminación solar</h2>
+        <p class="visually-hidden" id="solar-keyboard" data-i18n="solar.keyboard"></p>
+        <fieldset class="solar-clock">
+          <legend data-i18n="solar.utc">Fecha y hora UTC</legend>
+          <input type="date" id="solar-date" required aria-label="Fecha UTC" data-i18n-attr="aria-label:solar.date" aria-describedby="solar-date-status">
+          <input type="time" id="solar-time" required step="60" aria-label="Hora UTC" data-i18n-attr="aria-label:solar.time" aria-describedby="solar-date-status">
+          <button type="button" id="solar-now" data-i18n="solar.now">Ahora</button>
+          <p id="solar-date-status" role="status"></p>
+        </fieldset>
+      </section>
 
       <section class="path-toolbar" id="path-tools" aria-labelledby="path-title" hidden>
         <div class="path-toolbar-head">
@@ -80,8 +93,10 @@
         <section class="gl-stage" id="gl-stage" aria-label="Globos de la Luna, la Tierra y Marte" data-i18n-attr="aria-label:gl.stageLabel">
           <canvas id="gl-canvas" aria-hidden="true"></canvas>
           <div class="gl-panel" data-globe="moon">
-            <p class="gl-label"><b data-i18n="planet.moon">Luna</b> <span data-i18n="gl.radius.moon">radio 1.737 km</span></p>
-            <button type="button" class="gl-reset" data-i18n="gl.reset">Restablecer vista</button>
+            <canvas class="solar-fallback" id="solar-map-moon" role="img" aria-label="Mapa de iluminación de la Luna" data-i18n-attr="aria-label:solar.map.moon" hidden></canvas>
+            <p class="gl-label"><b id="gl-name-moon" data-i18n="planet.moon">Luna</b> <span data-i18n="gl.radius.moon">radio 1.737 km</span></p>
+            <button type="button" class="gl-reset"><span data-i18n="gl.reset">Restablecer vista</span></button>
+            <div class="solar-readout" hidden><span data-i18n="solar.subsolar">Sol en el cenit</span> <output id="solar-moon" aria-live="off"></output></div>
             <p class="gl-credit">LRO WAC: NASA/GSFC/ASU · NASA Moon Trek</p>
           </div>
           <div class="gl-panel" data-globe="earth">
@@ -90,8 +105,10 @@
             <p class="gl-credit">Esri, Vantor, Earthstar Geographics</p>
           </div>
           <div class="gl-panel" data-globe="mars">
-            <p class="gl-label"><b data-i18n="planet.mars">Marte</b> <span data-i18n="gl.radius.mars">radio 3.390 km</span></p>
-            <button type="button" class="gl-reset" data-i18n="gl.reset">Restablecer vista</button>
+            <canvas class="solar-fallback" id="solar-map-mars" role="img" aria-label="Mapa de iluminación de Marte" data-i18n-attr="aria-label:solar.map.mars" hidden></canvas>
+            <p class="gl-label"><b id="gl-name-mars" data-i18n="planet.mars">Marte</b> <span data-i18n="gl.radius.mars">radio 3.390 km</span></p>
+            <button type="button" class="gl-reset"><span data-i18n="gl.reset">Restablecer vista</span></button>
+            <div class="solar-readout" hidden><span data-i18n="solar.subsolar">Sol en el cenit</span> <output id="solar-mars" aria-live="off"></output></div>
             <div class="path-zoom" id="path-zoom" hidden>
               <button type="button" id="path-zoom-in" aria-label="Acercar Marte" data-i18n-attr="aria-label:path.zoomIn">+</button>
               <button type="button" id="path-zoom-out" aria-label="Alejar Marte" data-i18n-attr="aria-label:path.zoomOut">−</button>
@@ -105,6 +122,26 @@
         </section>
         <aside class="gl-detail" id="gl-detail" aria-live="polite" aria-label="Detalle del punto" data-i18n-attr="aria-label:gl.detailLabel" hidden></aside>
       </div>
+      <section class="solar-deck" id="solar-deck" aria-label="Línea de tiempo" data-i18n-attr="aria-label:solar.timeline" hidden>
+        <div class="solar-transport">
+          <button type="button" id="solar-play" class="solar-play">
+            <span class="solar-play-icon" aria-hidden="true"></span>
+            <span id="solar-play-label" data-i18n="solar.play">Reproducir</span>
+          </button>
+          <div class="solar-range-picker" role="group" aria-label="Duración de la línea de tiempo" data-i18n-attr="aria-label:solar.range">
+            <button type="button" data-solar-days="1" aria-pressed="true" data-i18n="solar.day">24 h</button>
+            <button type="button" data-solar-days="30" aria-pressed="false" data-i18n="solar.month">30 días</button>
+          </div>
+        </div>
+        <div class="solar-track">
+          <input type="range" id="solar-timeline" min="0" step="1" aria-label="Línea de tiempo UTC" data-i18n-attr="aria-label:solar.timeline">
+          <div id="solar-ticks" class="solar-ticks" aria-hidden="true"></div>
+        </div>
+        <div class="solar-key" role="group" aria-label="Leyenda de iluminación" data-i18n-attr="aria-label:solar.key">
+          <span><i aria-hidden="true"></i><span data-i18n="solar.daylight">Iluminado</span></span>
+          <span><i aria-hidden="true"></i><span data-i18n="solar.night">En sombra</span></span>
+        </div>
+      </section>
       <section id="path-comparison" class="path-comparison-host" aria-label="Comparación de rutas" data-i18n-attr="aria-label:path.comparison" hidden></section>
     </main>
     <footer id="sources" class="gl-footer">
@@ -119,6 +156,7 @@
       <h2 data-i18n="sources.title">Fuentes de datos</h2>
       <ul id="source-list"></ul>
       <p class="gl-howto" data-i18n="gl.howto">Arrastra un globo para girarlo; usa la rueda o pellizca con dos dedos para acercar. Los globos se dibujan del mismo tamaño: el radio real va en la etiqueta de cada uno.</p>
+      <p class="gl-howto" id="solar-method" data-i18n="solar.method" hidden></p>
     </footer>
     <script type="module" src="/src/globos.ts"></script>
   </body>

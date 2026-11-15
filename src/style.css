@@ -417,7 +417,7 @@ footer a:hover { color: var(--text); }
   .masthead .prefs { order: 2; padding-bottom: 10px; }
   .brand-event__logo { height: 32px; }
   .brand-event__name { max-width: 17ch; }
-  /* Tres pestañas a partes iguales; el texto baja a dos líneas si no cabe. */
+  /* Pestañas del mismo ancho; el texto baja a dos líneas si no cabe. */
   .views a { flex: 1 1 0; justify-content: center; padding: 6px 8px; font-size: 15px; line-height: 1.1; text-align: center; }
   .views a[href="#sources"] { display: none; }
   .intro { padding: 26px 0 22px; gap: 18px; }
@@ -441,6 +441,13 @@ footer a:hover { color: var(--text); }
   .lang-switch button, .theme-toggle, .toolbar button { min-height: 44px; }
   .theme-toggle { width: 44px; }
   .toolbar { gap: 8px; }
+}
+
+@media (max-width: 440px) {
+  .views { flex-wrap: wrap; }
+  .views a { flex-basis: calc(100% / 3); min-width: 0; padding-inline: 5px; }
+  .views a:nth-child(-n + 3) { border-bottom: 1px solid var(--border); }
+  .views a:nth-child(4) { border-inline-start: 1px solid var(--border); }
 }
 
 /* ---- 01 · Globos de Marte y la Tierra ---- */

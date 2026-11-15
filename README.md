@@ -10,8 +10,11 @@ Las vistas de la app se enlazan desde la cabecera:
 |---|---|---|
 | **Visor 3D de Marte** | `index.html` | 116 parches de Marte (HiRISE, 2 × 2 km a 20 m) frente a candidatos terrestres al mismo tamaño y escala, en 3D y con cámara compartida. |
 | **Globos 3D** | `globos.html` | Luna, Tierra y Marte con sitios y análogos del mapa y del visor. |
+| **Iluminación solar** | `globos.html#solar-illumination` | Compara el día y la noche en la Luna y Marte para la misma fecha y hora UTC, con reproducción a lo largo de 24 horas o 30 días. |
 | **Planificador de rutas** | `globos.html#path-planner` | Dibuja una ruta en Marte o importa GeoJSON, GPX o KML. Compara las rutas propuestas en la Tierra y guarda un candidato para un ensayo. |
 | **Mapa Luna y Marte** | `luna-marte.html` | Mapa 2D global con pestañas Luna/Marte, historias destacadas, gemelos por sitio, ranking general, validación con análogos conocidos y comparación lado a lado (relieve a la misma escala e imagen real). |
+
+La iluminación solar se calcula localmente para fechas del 1 de enero de 1800 al 31 de diciembre de 2050. El modelo usa [órbitas de JPL](https://ssd.jpl.nasa.gov/planets/approx_pos.html) y [orientaciones planetarias publicadas por NAIF](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00011.tpc). Muestra el terminador global de una superficie esférica. Las sombras del relieve y los eclipses quedan fuera del modelo. Cuando WebGL no está disponible, la vista muestra mapas 2D con los mismos cálculos.
 
 ## Cómo se ejecuta
 

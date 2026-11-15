@@ -34,6 +34,7 @@ export type TileLayerOptions = {
   /** geographic: lat/lon lineales, raíz de 2 × 1 mosaicos. mercator: Web Mercator, raíz de 1 mosaico (±85,05°). */
   scheme: "geographic" | "mercator";
   sources: TileSource[];
+  prepareMaterial?: (material: THREE.MeshStandardMaterial) => void;
   onLoad: () => void;
 };
 
@@ -188,6 +189,7 @@ export class TileLayer {
         map: texture, roughness: 1, depthTest: false, depthWrite: false,
         transparent: !!source.transparent, side: THREE.FrontSide,
       });
+      this.options.prepareMaterial?.(material);
       // El tinte se mide sobre valores de píxel (sRGB); se convierte al espacio lineal del shader.
       if (source.tint) material.color.setRGB(...source.tint, THREE.SRGBColorSpace);
       const mesh = new THREE.Mesh(this.geometry(node), material);

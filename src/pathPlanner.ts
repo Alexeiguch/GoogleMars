@@ -7,8 +7,6 @@ import {
   MAX_PLANNER_DISTANCE_KM, MIN_PLANNER_DISTANCE_KM, PathTerrainError, plannerDistanceRange, searchPathTerrain, type PathTerrainResult,
 } from "./pathTerrain";
 
-// No element has this id: opening the link must not scroll the page past the header.
-const HASH = "#path-planner";
 const STORAGE_KEY = "analogs-path-rehearsal-v1";
 const MIN_WAYPOINT_GAP_KM = .001;
 const EXAMPLE: RoutePoint[] = [
@@ -43,10 +41,6 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 
 export function mountPathPlanner(globe: PathGlobe) {
   const planner = $("path-tools");
-  const plannerLink = $<HTMLAnchorElement>("path-link");
-  const browseLink = $<HTMLAnchorElement>("gl-browse-link");
-  const sourcesLink = $<HTMLAnchorElement>("gl-sources-link");
-  const sourcesHeading = $("sources").querySelector<HTMLElement>("h2")!;
   const comparison = $("path-comparison");
   const search = $<HTMLButtonElement>("path-search");
   const draw = $<HTMLButtonElement>("path-draw");
@@ -228,23 +222,16 @@ export function mountPathPlanner(globe: PathGlobe) {
     }
   }
 
-  function syncMode() {
-    const next = location.hash === HASH;
+  function setActive(next: boolean) {
     if (next === active) return;
     active = next;
     planner.hidden = !active;
-    if (active) {
-      plannerLink.setAttribute("aria-current", "page");
-      browseLink.removeAttribute("aria-current");
-    } else {
-      browseLink.setAttribute("aria-current", "page");
-      plannerLink.removeAttribute("aria-current");
+    if (!active) {
       importVersion++;
       importing = false;
       cancelSearch();
       setDrawing(false);
     }
-    document.title = t(active ? "path.docTitle" : "gl.docTitle");
     globe.setActive(active);
     if (active && draft.points.length) {
       globe.preview(draft.points, earthPoints());
@@ -258,30 +245,6 @@ export function mountPathPlanner(globe: PathGlobe) {
     }
   }
 
-  plannerLink.addEventListener("click", (event) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
-    event.preventDefault();
-    if (!active) {
-      history.pushState(null, "", HASH);
-      syncMode();
-    }
-    window.scrollTo(0, 0);
-  });
-  browseLink.addEventListener("click", (event) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0 || !active) return;
-    event.preventDefault();
-    history.pushState(null, "", browseLink.href);
-    syncMode();
-    window.scrollTo(0, 0);
-  });
-  sourcesLink.addEventListener("click", (event) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0 || !active) return;
-    event.preventDefault();
-    sourcesHeading.tabIndex = -1;
-    sourcesHeading.focus({ preventScroll: true });
-    sourcesHeading.scrollIntoView({ block: "start" });
-  });
-  window.addEventListener("hashchange", syncMode);
   draw.addEventListener("click", () => { error = null; setDrawing(!drawing); });
   upload.addEventListener("click", () => file.click());
   file.addEventListener("change", async () => {
@@ -321,15 +284,14 @@ export function mountPathPlanner(globe: PathGlobe) {
   search.addEventListener("click", () => void findMatches(true));
   onLangChange(() => {
     if (!active) return;
-    document.title = t("path.docTitle");
     paintToolbar();
     paintComparison();
   });
-  syncMode();
 
   return {
     get active() { return active; },
     get drawing() { return active && drawing && globe.isAvailable(); },
+    setActive,
     previewPoint(point: RoutePoint | null) {
       const end = draft.points.at(-1);
       const segment = drawing && !importing && draft.points.length < MAX_ROUTE_POINTS && end && point

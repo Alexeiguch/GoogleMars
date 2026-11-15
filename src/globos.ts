@@ -9,6 +9,7 @@ import { bindUiText, type UiText } from "./prefs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadGlobeTexture } from "./globeTexture";
+import { createGlobeLighting } from "./globeLighting";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
@@ -22,6 +23,8 @@ import {
 import { TileLayer, direction, type TileLayerOptions } from "./tiles";
 import { mountPathPlanner } from "./pathPlanner";
 import { EARTH_RADIUS_KM, interpolateRoutePoint, MARS_RADIUS_KM, type RoutePoint } from "./pathRoute";
+import { mountSolarView } from "./solarView";
+import { createSolarFallback } from "./solarFallback";
 
 // ---------------------------------------------------------------------------------------------
 // Franja de introducción: textos propios de esta página (no están en i18n.ts) y cifras de los datos ya cargados.
@@ -100,6 +103,7 @@ const POLE_FADE_DEG = 2;    // fundido con la imagen global entre 78°S y 80°S
 const POLE_TINT = [1.028, 0.994, 0.966] as const;
 const MAX_DISTANCE = 8;
 const PICK_RADIUS = 14; // px de pantalla
+const ANNOTATION_LAYER = 1;
 // Pegado a la superficie: de cerca, un punto más alto se desplaza al mirar en oblicuo (1.003 eran 19 km en la Tierra).
 const MARKER_RADIUS = 1.0002;
 
@@ -230,6 +234,7 @@ let refFilter: string | null = null;
 let selected: Item | null = null;
 let selectedEarthTwin: TwinRole | undefined;
 let highlighted = new Set<Item>();
+let solarActive = false;
 
 function twinRoleOf(point: EarthPoint, ref: Reference) {
   if (ref.usable === false) return undefined;
@@ -351,6 +356,7 @@ function makeLayer(list: Item[]): Layer {
   });
   const points = new THREE.Points(geometry, material);
   points.frustumCulled = false;
+  points.layers.set(ANNOTATION_LAYER);
   const layer: Layer = { points, items: list, size: sizeAttr, hl: hlAttr };
   list.forEach((item, i) => { item.layer = layer; item.index = i; });
   return layer;
@@ -409,6 +415,29 @@ const TILE_SOURCES: Record<GlobeId, Omit<TileLayerOptions, "onLoad">> = {
 
 const lightOffset = new THREE.Vector3(-2, 2, 1);
 const globes = {} as Record<GlobeId, Globe>;
+const globeLighting = { moon: createGlobeLighting(), mars: createGlobeLighting() };
+
+type SolarPoint = { latitude: number; longitude: number };
+
+function setGlobeIllumination(points: Record<Body, SolarPoint> | null) {
+  for (const body of BODIES) {
+    const point = points?.[body];
+    globeLighting[body].setSun(point ? direction(point.latitude, point.longitude) : null);
+    const { camera } = globes[body];
+    if (point) camera.layers.disable(ANNOTATION_LAYER);
+    else camera.layers.enable(ANNOTATION_LAYER);
+  }
+  requestRender();
+}
+
+function frameGlobeTerminator(body: Body, point: SolarPoint) {
+  const globe = globes[body];
+  cancelAnimationFrame(globe.animation);
+  // Offset the camera east of the Sun so both halves of the globe are visible, with daylight on the left.
+  globe.camera.position.copy(direction(point.latitude / 2, point.longitude + 78)).multiplyScalar(HOME_DISTANCE);
+  globe.controls.update();
+  requestRender();
+}
 
 /**
  * Casquete del polo sur lunar con el relieve LOLA, algo por encima de la esfera.
@@ -455,6 +484,7 @@ function southPoleCap(onLoad: () => void) {
   const material = new THREE.MeshStandardMaterial({
     roughness: 1, vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide,
   });
+  globeLighting.moon.applyTo(material);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.visible = false;                // hasta que llegue la imagen
   loadGlobeTexture(`${import.meta.env.BASE_URL}imagery/${POLE_TEXTURE}`, (map) => {
@@ -481,7 +511,10 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
   const panel = stage.querySelector<HTMLElement>(`.gl-panel[data-globe="${id}"]`)!;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(36, 1, 0.01, 20);
+  camera.layers.enable(ANNOTATION_LAYER);
+  const lighting = id === "earth" ? undefined : globeLighting[id];
   const material = new THREE.MeshStandardMaterial({ color: BASE_COLOR[id], roughness: 1 });
+  lighting?.applyTo(material);
   const sphere = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), material);
   sphere.renderOrder = -1000;          // debajo de los mosaicos (que se dibujan sin prueba de profundidad)
   scene.add(sphere);
@@ -498,7 +531,7 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
       requestRender();
     });
   }
-  const tiles = new TileLayer({ ...TILE_SOURCES[id], onLoad: () => requestRender() });
+  const tiles = new TileLayer({ ...TILE_SOURCES[id], prepareMaterial: lighting?.applyTo, onLoad: () => requestRender() });
   if (renderer) tiles.setAnisotropy(Math.min(8, renderer.capabilities.getMaxAnisotropy()));
   scene.add(tiles.group);
   if (id === "moon" && renderer) scene.add(southPoleCap(() => requestRender()));
@@ -548,6 +581,7 @@ function zoomBy(globe: Globe, factor: number) {
 for (const globe of Object.values(globes)) {
   const { panel } = globe;
   panel.addEventListener("wheel", (event) => {
+    if (!renderer || contextLost) return;
     event.preventDefault();
     const step = event.deltaMode === 1 ? event.deltaY * 33 : event.deltaMode === 2 ? event.deltaY * 400 : event.deltaY;
     zoomBy(globe, Math.exp(THREE.MathUtils.clamp(step, -200, 200) * 0.0016));
@@ -556,12 +590,12 @@ for (const globe of Object.values(globes)) {
   let spread = 0;
   const gap = () => { const [a, b] = [...touches.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
   panel.addEventListener("pointerdown", (event) => {
-    if (event.pointerType !== "touch") return;
+    if (!globe.controls.enabled || event.pointerType !== "touch") return;
     touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (touches.size === 2) spread = gap();
   });
   panel.addEventListener("pointermove", (event) => {
-    if (!touches.has(event.pointerId)) return;
+    if (!globe.controls.enabled || !touches.has(event.pointerId)) return;
     touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (touches.size !== 2) return;
     const next = gap();
@@ -703,7 +737,10 @@ for (const globe of Object.values(globes)) {
   const reset = globe.panel.querySelector<HTMLButtonElement>(".gl-reset")!;
   // Sin esto, OrbitControls captura el puntero en el panel y el clic nunca llega al botón.
   reset.addEventListener("pointerdown", (event) => event.stopPropagation());
-  reset.addEventListener("click", () => flyTo(globe, globe.home, HOME_DISTANCE));
+  reset.addEventListener("click", () => {
+    if (solarActive && globe.id !== "earth" && solarView.points) frameGlobeTerminator(globe.id, solarView.points[globe.id]);
+    else flyTo(globe, globe.home, HOME_DISTANCE);
+  });
   // Cualquier gesto del usuario cancela un vuelo en curso.
   globe.controls.addEventListener("start", () => cancelAnimationFrame(globe.animation));
 }
@@ -746,7 +783,7 @@ for (const globe of Object.values(globes)) {
   const pointers = new Map<number, { x: number; y: number; t: number }>();
   let multi = false;
   panel.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0 || (event.target as HTMLElement).closest("button")) return;
+    if (solarActive || event.button !== 0 || (event.target as HTMLElement).closest("button")) return;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, t: performance.now() });
     if (pointers.size > 1) multi = true;
   });
@@ -755,7 +792,7 @@ for (const globe of Object.values(globes)) {
     pointers.delete(event.pointerId);
     const wasMulti = multi;
     if (pointers.size === 0) multi = false;
-    if (!start || wasMulti || event.type !== "pointerup") return;
+    if (solarActive || !start || wasMulti || event.type !== "pointerup") return;
     const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y);
     if (moved > 6 || performance.now() - start.t > 700) return;
     const { x, y } = localPoint(globe, event);
@@ -769,7 +806,7 @@ for (const globe of Object.values(globes)) {
   panel.addEventListener("pointerup", end);
   panel.addEventListener("pointercancel", end);
   panel.addEventListener("pointermove", (event) => {
-    if (pathPlanner.active || event.pointerType !== "mouse" || event.buttons) return;
+    if (solarActive || pathPlanner.active || event.pointerType !== "mouse" || event.buttons) return;
     if ((event.target as HTMLElement).closest("button")) { hideTip(); return; }
     const { x, y } = localPoint(globe, event);
     const item = pick(globe, x, y);
@@ -821,6 +858,7 @@ const frameLines = (["moon", "earth", "mars"] as GlobeId[]).reduce((acc, id) => 
     const line = new Line2(new LineGeometry(), material);
     line.renderOrder = order;          // encima de mosaicos y capa polar, debajo de los puntos (1, 2, 3)
     line.frustumCulled = false;
+    line.layers.set(ANNOTATION_LAYER);
     return line;
   };
   const group = new THREE.Group();
@@ -1147,8 +1185,14 @@ sources.push(
   ["gl.src.moonTiles", "https://trek.nasa.gov/moon/"],
   ["gl.src.marsTiles", "https://murray-lab.caltech.edu/CTX/"],
 );
+const solarSources = [
+  ["solar.source", "https://ssd.jpl.nasa.gov/planets/approx_pos.html"],
+  ["solar.orientation", "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00011.tpc"],
+  ...sources.filter(([key]) => /\.(moon|mars)(Image|Pole|Tiles)$/.test(key)),
+];
 function fillSources() {
-  $("#source-list").innerHTML = sources.map(([key, url]) => `<li><a href="${url}">${esc(t(key))}</a></li>`).join("");
+  const links = solarActive ? solarSources : sources;
+  $("#source-list").innerHTML = links.map(([key, url]) => `<li><a href="${url}">${esc(t(key))}</a></li>`).join("");
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1422,7 +1466,12 @@ marsPanel.addEventListener("keydown", (event) => {
     event.preventDefault();
     const { width, height } = marsPanel.getBoundingClientRect();
     addPathPoint(width / 2, height / 2);
-  } else if (["+", "=", "-"].includes(event.key)) {
+  } else globeKeys(globe, event);
+});
+
+function globeKeys(globe: Globe, event: KeyboardEvent) {
+  const { camera } = globe;
+  if (["+", "=", "-"].includes(event.key)) {
     event.preventDefault();
     zoomBy(globe, event.key === "-" ? 1.59 : .63);
   } else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
@@ -1438,7 +1487,162 @@ marsPanel.addEventListener("keydown", (event) => {
     globe.controls.update();
     requestRender();
   }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Views sharing the globe stage
+
+const solarHead = $("#solar-controls");
+const solarDeck = $("#solar-deck");
+const solarMethod = $("#solar-method");
+const solarMaps = {
+  moon: createSolarFallback($("#solar-map-moon"), "moon"),
+  mars: createSolarFallback($("#solar-map-mars"), "mars"),
+};
+const has3D = () => !!renderer && !contextLost;
+const solarView = mountSolarView((points) => {
+  if (has3D()) setGlobeIllumination(points);
+  else for (const body of BODIES) solarMaps[body].setPoint(points[body]);
 });
+
+for (const body of BODIES) {
+  const globe = globes[body];
+  globe.panel.addEventListener("keydown", (event) => {
+    if (solarActive && has3D() && event.target === globe.panel) globeKeys(globe, event);
+  });
+}
+
+function localizeSolar() {
+  for (const body of BODIES) {
+    const button = globes[body].panel.querySelector<HTMLButtonElement>(".gl-reset")!;
+    button.firstElementChild!.textContent = t(solarActive ? "solar.frame" : "gl.reset");
+    if (solarActive) {
+      const label = t(`solar.frameLabel.${body}`);
+      button.setAttribute("aria-label", label);
+      button.title = label;
+    } else {
+      button.removeAttribute("aria-label");
+      button.removeAttribute("title");
+    }
+  }
+  solarView.localize();
+}
+
+function syncSolarRenderer() {
+  const interactive = solarActive && has3D();
+  const showMaps = solarActive && !interactive;
+  pathMain.classList.toggle("is-solar-fallback", showMaps);
+  for (const body of BODIES) {
+    const { controls, panel } = globes[body];
+    controls.enabled = !showMaps;
+    panel.style.touchAction = showMaps ? "auto" : "none";
+    panel.querySelector<HTMLElement>(".gl-reset")!.hidden = showMaps;
+    if (interactive) {
+      panel.tabIndex = 0;
+      panel.setAttribute("role", "region");
+      panel.setAttribute("aria-labelledby", `gl-name-${body}`);
+      panel.setAttribute("aria-describedby", "solar-keyboard");
+    } else {
+      panel.removeAttribute("tabindex");
+      panel.removeAttribute("role");
+      panel.removeAttribute("aria-labelledby");
+      panel.removeAttribute("aria-describedby");
+    }
+    solarMaps[body].setPoint(showMaps ? solarView.points?.[body] ?? null : null);
+  }
+  if (interactive && solarView.points) setGlobeIllumination(solarView.points);
+}
+
+function setSolarActive(active: boolean) {
+  solarActive = active;
+  pathMain.classList.toggle("is-solar", active);
+  solarHead.hidden = solarDeck.hidden = solarMethod.hidden = !active;
+  browseToolbar.hidden = browseTitle.hidden = earthPanel.hidden = legend.hidden = browseInstructions.hidden = active;
+  detail.hidden = active || !selected;
+  hideTip();
+  for (const body of BODIES) {
+    const globe = globes[body];
+    const { panel, camera, controls } = globe;
+    cancelAnimationFrame(globe.animation);
+    panel.classList.remove("is-over-point");
+    panel.querySelector<HTMLElement>(".solar-readout")!.hidden = !active;
+    if (active) {
+      browsePositions.set(globe.id, camera.position.clone());
+    } else {
+      const position = browsePositions.get(globe.id);
+      if (position) camera.position.copy(position);
+      controls.update();
+    }
+  }
+  if (active) {
+    solarView.enter();
+    for (const body of BODIES) frameGlobeTerminator(body, solarView.points![body]);
+  } else {
+    solarView.stop();
+    setGlobeIllumination(null);
+    localizeSolar();
+  }
+  syncSolarRenderer();
+}
+
+// The view hashes deliberately have no matching element, so deep links keep the header in view.
+const viewLinks = {
+  browse: $<HTMLAnchorElement>("#gl-browse-link"),
+  solar: $<HTMLAnchorElement>("#solar-link"),
+  path: $<HTMLAnchorElement>("#path-link"),
+};
+type View = keyof typeof viewLinks;
+const viewLabels: Record<View, { title: string; stage: string }> = {
+  browse: { title: "gl.docTitle", stage: "gl.stageLabel" },
+  solar: { title: "solar.docTitle", stage: "solar.stage" },
+  path: { title: "path.docTitle", stage: "path.stage" },
+};
+let view: View = "browse";
+
+function localizeView() {
+  document.title = t(viewLabels[view].title);
+  stage.dataset.i18nAttr = `aria-label:${viewLabels[view].stage}`;
+  stage.setAttribute("aria-label", t(viewLabels[view].stage));
+  if (solarActive) localizeSolar();
+}
+
+function syncView() {
+  view = location.hash === viewLinks.path.hash ? "path" : location.hash === viewLinks.solar.hash ? "solar" : "browse";
+  if (solarActive && view !== "solar") setSolarActive(false);
+  pathPlanner.setActive(view === "path");
+  if (!solarActive && view === "solar") setSolarActive(true);
+  for (const key of Object.keys(viewLinks) as View[]) {
+    if (key === view) viewLinks[key].setAttribute("aria-current", "page");
+    else viewLinks[key].removeAttribute("aria-current");
+  }
+  localizeView();
+  fillSources();
+  requestRender();
+}
+
+function plainClick(event: MouseEvent) {
+  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+}
+
+for (const link of Object.values(viewLinks)) {
+  link.addEventListener("click", (event) => {
+    if (!plainClick(event)) return;
+    event.preventDefault();
+    if (location.href !== link.href) history.pushState(null, "", link.href);
+    syncView();
+    window.scrollTo(0, 0);
+  });
+}
+
+$("#gl-sources-link").addEventListener("click", (event) => {
+  if (view === "browse" || !plainClick(event as MouseEvent)) return;
+  event.preventDefault();
+  const heading = $("#sources h2");
+  heading.tabIndex = -1;
+  heading.focus({ preventScroll: true });
+  heading.scrollIntoView({ block: "start" });
+});
+window.addEventListener("hashchange", syncView);
 
 // ---------------------------------------------------------------------------------------------
 // Arranque
@@ -1450,6 +1654,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   pathMain.classList.add("is-map-unavailable");
   hideTip();
   pathPlanner.updateAvailability();
+  if (solarActive) syncSolarRenderer();
 });
 canvas.addEventListener("webglcontextrestored", () => {
   contextLost = false;
@@ -1457,22 +1662,25 @@ canvas.addEventListener("webglcontextrestored", () => {
   pathMain.classList.remove("is-map-unavailable");
   requestRender();
   pathPlanner.updateAvailability();
+  if (solarActive) syncSolarRenderer();
 });
 
 function paintTexts() {
   fillRefs();
   fillLegend();
-  fillSources();
   refreshPoints();
 }
 // Al cambiar de idioma se vuelve a pintar todo lo generado por código sin perder la selección ni el filtro.
 onLangChange(() => {
   hideTip();
   paintTexts();
+  localizeView();
+  fillSources();
   if (selected && !detail.hidden) {
     const scroll = detail.scrollTop;
     renderDetail(selected);
     detail.scrollTop = scroll;
   }
 });
+syncView();
 paintTexts();
