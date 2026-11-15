@@ -304,11 +304,12 @@ lectura, la carpeta local `pipeline/data/`. El resto del informe no se ha tocado
 | Sección | Dice | Debe decir | Cómo se comprobó |
 |---|---|---|---|
 | 4, tras la tabla | «Mayor bajada: Río Tinto en la Luna (−4,8)» | La mayor bajada es Meteor Crater en Marte (−5,5: de 91,8 a 86,3). Río Tinto (−4,8) es la mayor de la Luna. Sigue siendo cierto que ninguno baja más de 10 | `results.json → validation[].delta`, mínimo por cuerpo |
+| 4, tras la tabla | «Río Tinto es el más bajo en las tres medidas» | Solo en Marte (63,6, 66,5 y 59,0). En la Luna, antes el más bajo es Pilbara (78,8) y después Meteor Crater (77,7); a 10 km sí es Río Tinto (72,5) | `results.json → validation[].before/after/fine_fair`, mínimo por cuerpo y columna |
 | 5, tabla de tiempos | L1: 1.856 tiles y 154.363 ventanas | Eran las cifras antes de añadir la Luna fuera del polo. Con sus 24 tiles hay 1.880 tiles y 156.898 ventanas | `results.json → n_fine.L1`; `data/fine_tiles.json → n_tiles` y 1.880 archivos en `data/fine/l1/` |
 | 5, Meteomatics | «La caché pasa de 247 a 556 puntos» | La caché tiene hoy 568 puntos; la copia anterior a la v2 tiene 247. El número de consultas (32) no se puede comprobar: la caché no las registra | Número de claves de `data/climate_ecmwf-era5.json` y de `data/backup_v1/climate_ecmwf-era5_antes_v2.json` |
 | 3 ter y 6 | «En total, 38 lugares revisados»; «Quedan como "no verificado" 5 lugares» | El archivo tiene 38 entradas: 23 no encontrados, 3 ya estudiados y 12 no verificados. De esos 12, 5 se revisaron el 14/11 (Mouydir y los gemelos de Apollo 11, Chang'e 6 y los fosos de Marius Hills y Mare Ingenii) y 7 no tienen fecha de revisión ni búsquedas anotadas. Con revisión anotada hay 31 lugares, no 38 | Recuento de `status`, `reviewed` y `searches` en `literature_v2.json` |
 | 3 bis, tabla | Estado «sin revisar» en 12 de los 13 gemelos | Hoy 6 constan como no encontrados (Apollo 12, 14 y 16; Chang'e 3, 4 y 5) y 4 como no verificados (Apollo 11, Chang'e 6 y los fosos de Marius Hills y Mare Ingenii). Siguen sin revisar los de Apollo 15 y el foso de Mare Tranquillitatis. El de Apollo 17 es conocido (Qaidam) | `results.json → bodies.moon.twins[sitio][0].literature.status` |
-| 5, tabla de tiempos | «Imágenes de relieve (698)» | Hoy hay 939 imágenes | Número de PNG en `public/relieve/` |
+| 5, tabla de tiempos | «Imágenes de relieve (698)» | Era el número de esa ejecución; después se generaron más y hoy hay 939 | Número de PNG en `public/relieve/` |
 
 Comprobado y **sin cambio**: las referencias lunares L0 del polo sur son 140 ventanas, de las que puntúan 139
 (sección 2). En `results.json → references` aparecen 141 entradas del polo porque `rank` añade una entrada de

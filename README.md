@@ -20,9 +20,9 @@ Todas salen de `src/data/results.json` y `src/data/catalog.json`.
 | Sitios de Marte | 43 (25 puntúan; en 18 solo hay relieve MOLA de 463 m) |
 | Grupos con gemelos terrestres | 57 (32 de la Luna y 25 de Marte), con 3 gemelos cada uno |
 | Finalistas del ranking multiescala | 20 por cuerpo; lista «Solo nuevos»: 13 en la Luna y 20 en Marte |
-| Historias destacadas | 10 (5 de la Luna y 5 de Marte) |
+| Historias destacadas | 10 (4 de la Luna y 6 de Marte) |
 | Parches de 2 × 2 km para comparar en 3D | 374: 116 de Marte (HiRISE) y 258 de la Tierra |
-| Validación con 11 análogos conocidos | 8 de 11 por encima del percentil 90, en la Luna y en Marte |
+| Validación con 11 análogos conocidos | 8 de 11 en el percentil 90 o más, en la Luna y en Marte |
 
 ## Cómo se ejecuta la app
 
@@ -45,10 +45,10 @@ La cabecera dice **TerraTwin** y enlaza las dos páginas. `index.html` solo redi
 ### Globos 3D (`globos.html`)
 
 - La Luna, la Tierra y Marte dibujados del mismo tamaño, con los sitios de referencia de la Luna y de Marte y los puntos de la Tierra que más se les parecen. Se puede ver solo los mejores o todos, filtrar por sitio e ir a un punto.
-- Cada punto tiene una ficha con sus puntuaciones y sus gemelos.
+- Al elegir un punto se abre su ficha, con sus gemelos.
 - Al acercarse, los globos cargan mosaicos según el zoom (`src/tiles.ts`). El polo sur de la Luna se dibuja con un relieve sombreado propio, de 78°S al polo.
-- **Comparación de terreno en 3D** (antes era una página aparte, el «Visor 3D de Marte»). Se elige un sitio, se pulsa **«Buscar análogos»** (*Find analogs*) y se compara con cada análogo terrestre, con la misma ventana, la misma escala y la cámara compartida. El terreno se colorea por relieve o por pendiente, y una tabla da las medidas de los dos.
-  - Sitios de referencia de la Luna y de Marte: ventanas de 30 km con cuadrículas de altura de 100 × 100 celdas a 300 m (`public/terrain/l0/`).
+- **Comparación de terreno en 3D** (antes era una página aparte, el «Visor 3D de Marte»). Se elige un sitio de la Luna o de Marte, se pulsa **«Buscar análogos»** (*Find analogs*) y se elige uno de sus análogos terrestres para compararlo en 3D, con la misma ventana, la misma escala y la cámara compartida. El terreno se colorea por relieve o por pendiente, y una tabla da las medidas de los dos.
+  - Sitios de referencia de la Luna y de Marte: ventanas de 30 km con cuadrículas de altura de 100 × 100 celdas a 300 m (`public/terrain/l0/`). Si un sitio no tiene cuadrícula exportada, se muestra su relieve sombreado en 2D.
   - Sitios de Marte con relieve HiRISE: parches de 2 × 2 km de 100 × 100 celdas a 20 m (`public/terrain/*.f32`).
 
 ### Mapa Luna y Marte (`luna-marte.html`)
@@ -85,7 +85,7 @@ Regla: en cada comparación, la Tierra y la Luna o Marte usan **la misma ventana
 
 ### Referencias
 
-- **Luna, polo sur (140 ventanas de 30 km):** las 16 regiones de Artemis, 8 teselas más dentro de Mons Mouton Plateau, 3 sitios (IM-2 Athena, el borde sur de Shackleton y el centro de Shackleton) y una malla regular de 113 ventanas entre 84°S y 90°S. Las coordenadas de las regiones son el centro de los mosaicos LROC de cada una. Nobile Rim 1 comparte mosaico con Mons Mouton y no puntúa aparte, por eso puntúan 139.
+- **Luna, polo sur (140 ventanas de 30 km):** las 16 regiones de Artemis, 8 teselas de 30 km más en Mons Mouton Plateau, 3 sitios (IM-2 Athena, el borde sur de Shackleton y el centro de Shackleton) y una malla regular de 113 ventanas entre 84°S y 90°S. Las coordenadas de las regiones son el centro de los mosaicos LROC de cada una. Nobile Rim 1 comparte mosaico con Mons Mouton y no puntúa aparte, por eso puntúan 139.
 - **Luna, fuera del polo (13 sitios):** Apollo 11, 12, 14, 15, 16 y 17, Chang'e 3, 4, 5 y 6, y los fosos de Marius Hills, Mare Tranquillitatis y Mare Ingenii. Solo tienen gemelos: no entran en el ranking ni en la validación.
 - **Marte (43 sitios):** 10 aterrizajes, 10 zonas de exploración humana del taller de 2015 y 23 sitios por tipo de terreno. Puntúan 25.
 - **Escalas finas:** 1.232 ventanas de 10 km y 113 teselas de 5 km en el polo sur lunar; 201 ventanas de 10 km en Marte.
@@ -128,7 +128,7 @@ Antes de ver resultados se fijaron 12 análogos ya usados por la ciencia. Se mid
 | Río Tinto | 78,7 | 72,5 | 66,5 | 59,0 |
 | Pilbara | 85,1 | 76,0 | 76,5 | 70,7 |
 
-Río Tinto es el más bajo porque es un análogo mineralógico (aguas ácidas), no topográfico: este método no mide minerales.
+Río Tinto es el más bajo en Marte a las dos escalas y en la Luna a 10 km; en la Luna a 30 km el más bajo es Meteor Crater (77,7). Río Tinto es un análogo mineralógico (aguas ácidas), no topográfico, y este método no mide minerales.
 
 ## Resultados destacados
 
@@ -144,7 +144,7 @@ Las 10 historias de `results.json → featured`. Las tres cifras de terreno son 
 | Cuenca alta del Loa, Chile (21,86°S 68,94°O, ~3.490 m) | Laderas de Mons Mouton Plateau | nuevo | 96 / 94 / 88 | Similitud climática de solo 28/100 |
 | Llanura de la Tamesna, Argelia (20,14°N 6,16°E, ~490 m) | Cráter con hielo de Arcadia Planitia | nuevo | 95 / 94 / 96 | Media de 29,5 °C y nada de hielo |
 | Colinas del Mar Rojo, Egipto (23,50°N 35,06°E, ~456 m) | Nili Fossae; a 2 km, capas de roca de Terra Sirenum | nuevo | 95 / 97 / 98 | Media de 26,9 °C |
-| Borde norte del Changtang, Qiemo, Xinjiang (35,77°N 85,72°E, ~5.370 m) | Kasei Valles | nuevo | 94,6 / 99,5 / 97,5 | Caen 368 mm al año |
+| Borde norte del Changtang, Qiemo, Xinjiang (35,77°N 85,72°E, ~5.370 m) | Kasei Valles; a 2 km, un delta invertido | nuevo | 94,6 / 99,5 / 97,5 | Caen 368 mm al año |
 | Llanura de Tim Mersoï, Níger (19,68°N 7,55°E, ~490 m) | Meridiani Planum (Opportunity) | nuevo | 98 / 94 / 96 | Media de 29,9 °C |
 
 **«Nuevo» significa que no encontramos estudios que usen el lugar como análogo en una búsqueda limitada.** No garantiza que no existan. La bibliografía está en `pipeline/analogs/literature_v2.json`: 38 lugares, de los que 23 constan como no encontrados, 3 como ya estudiados y 12 como no verificados.
@@ -212,7 +212,7 @@ python -m analogs.patches --no-climate --regions 2   # -> data/prueba/catalog.js
 python -m unittest discover -s tests -v              # pruebas unitarias, sin red
 ```
 
-Con `--no-climate`, `rank` también escribe las selecciones `fine_tiles.json` y `fine_l2_blocks.json` en `data/`. Usa `--sel-dir` para mandarlas a otra carpeta.
+Cada ejecución de `rank`, con o sin clima, reescribe las selecciones `fine_tiles.json` y `fine_l2_blocks.json` en `data/` (o en la carpeta de `--fine-dir`, si se da). Usa `--sel-dir` para mandarlas a otra carpeta.
 
 ### Consultas a Meteomatics
 
@@ -250,7 +250,7 @@ scripts/                          alta manual de terreno (no se usa en la versi�
 |---|---|
 | Relieve del polo sur lunar | LOLA `LDEM_80S_40MPP_ADJ`, 40 m. NASA GSFC / PGDA (Barker et al. 2023) |
 | Relieve lunar fuera del polo | SLDEM2015, 59 m. LOLA + Kaguya TC, USGS Astrogeology |
-| Regiones de Artemis | Mosaicos LROC NAC. NASA / GSFC / Arizona State University |
+| Regiones de Artemis | Mosaicos LROC NAC (Arizona State University) |
 | Relieve del polo sur en los globos y en el minimapa | DEM LRO LOLA de 118 m. USGS Astrogeology |
 | Relieve de Marte a 30 y 10 km | Blend HRSC + MOLA v2, 200 m. ESA Mars Express, NASA MGS, USGS Astrogeology |
 | Relieve de Marte a 2 km | Modelos de terreno HiRISE. NASA / JPL / USGS |
@@ -266,7 +266,7 @@ Los enlaces a cada fuente están en el pie de las dos páginas de la app.
 
 ## Uso de IA
 
-- **Código y documentación.** El pipeline, la app y esta documentación se escribieron con ayuda de un asistente de IA (Claude, de Anthropic). Los commits en los que participó llevan la línea `Co-Authored-By` en el historial de git.
+- **Código y documentación.** El pipeline, la app y esta documentación se escribieron con ayuda de asistentes de IA. Los commits en los que participó Claude (Anthropic) llevan la línea `Co-Authored-By` en el historial de git.
 - **Revisión bibliográfica.** La hicieron agentes de IA: uno por candidato, con búsquedas en inglés y en el idioma local, y un verificador independiente que abrió cada enlace de los lugares «ya estudiados».
 - **Historias destacadas.** Un agente redactó cada una solo con los datos de `results.json` y fuentes web citadas. Otro agente comprobó cada cifra y después se revisaron a mano.
 - **Lo que no hace la IA.** Las puntuaciones las calcula código determinista (`pipeline/analogs/`), no un modelo de IA.
