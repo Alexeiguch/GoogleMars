@@ -109,6 +109,9 @@ export function bindMapaTextos() {
 export function noteOrNull(original: string | null | undefined, translated: string | null | undefined): string | null {
   if (!original || !translated) return null;
   if (getLang() === "es" || translated !== original) return translated;
-  const spanish = /[áéíóúñ¿¡]|\b(el|la|los|las|del|que|con|para|por|una|según|sin|cerca|misma|mismo|centro|tesela|teselas|región|dentro)\b/i;
-  return spanish.test(original) ? null : translated;
+  // Una nota sin traducir se oculta en inglés solo si es claramente española: tildes/ñ/¿¡, o al menos dos
+  // palabras españolas distintas (una sola, como "La" en "La Paz" o "sin", no basta).
+  if (/[áéíóúñ¿¡]/i.test(original)) return null;
+  const words = original.toLowerCase().match(/\b(el|la|los|las|del|que|con|para|por|una|sin|cerca|misma|mismo|centro|tesela|teselas|dentro)\b/g) ?? [];
+  return new Set(words).size >= 2 ? null : translated;
 }

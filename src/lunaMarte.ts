@@ -1005,13 +1005,23 @@ function scopeText(scope: string | null | undefined) {
   return scope;
 }
 
+/** Nombre de lugar traducido, sin el nombre de la herramienta de geocodificación (Nominatim), que no informa al lector. */
+function litPlace(name: string): string {
+  return tr(name)
+    .replace(/,?\s*(?:according to|según)\s+Nominatim(?:\s*\([^)]*\))?/gi, "")
+    .replace(/\s*\(Nominatim\)/gi, "")
+    .replace(/Nominatim\s*[:;,]\s*/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 function literatureHtml(s: EarthSite) {
   if (!("literature" in s)) return "";
   const lit = s.literature;
   const st = lit?.status ?? "no_verificado";
   const url = safeUrl(lit?.url);
   const note = lit?.note ? `<span class="lm-note">${esc(tr(lit.note))}</span>` : "";
-  const name = lit?.name ? ` · ${esc(tr(lit.name))}` : "";
+  const name = lit?.name ? ` · ${esc(litPlace(lit.name))}` : "";
   const dist = lit?.km != null ? ` <small>(${esc(t("lm.lit.km", { km: fmt(lit.km, 0) }))})</small>` : "";
   let head: string;
   let cls: string;
@@ -1032,7 +1042,7 @@ function robustHtml(s: EarthSite) {
 
 /** Nombre del lugar de la Tierra cuando los datos lo dan (revisión de bibliografía) o, si no, el análogo conocido cercano. */
 function placeOf(s: EarthSite): { title: string; full: string | null } | null {
-  const raw = s.literature?.name ? tr(s.literature.name).trim() : "";
+  const raw = s.literature?.name ? litPlace(s.literature.name) : "";
   if (raw) {
     let short = raw.split(/ \(|\. |; /)[0].trim();
     const parts = short.split(", ");
