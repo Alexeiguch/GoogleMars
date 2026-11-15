@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "node --test --test-concurrency=2 --test-reporter=spec tests/e2e/*.test.mjs"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.1.0",

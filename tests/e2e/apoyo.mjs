@@ -290,7 +290,11 @@ function enPagina() {
     recoger() {
       const out = [];
       const add = (tipo, s) => { const v = norm(s); if (v.length < 2) return; const k = tipo + '\u0001' + v; if (vistos.has(k)) return; vistos.add(k); out.push([tipo, v]); };
-      for (const l of document.body.innerText.split('\n')) add('texto', l);
+      // Las referencias bibliográficas (pie de fuentes y <cite>) se marcan aparte: títulos de artículos y de
+      // conjuntos de datos que se citan en su idioma original.
+      const citas = new Set();
+      for (const e of document.querySelectorAll('footer, cite')) for (const l of e.innerText.split('\n')) citas.add(norm(l));
+      for (const l of document.body.innerText.split('\n')) add(citas.has(norm(l)) ? 'fuente citada' : 'texto', l);
       for (const o of document.querySelectorAll('option')) add('opción', o.textContent);
       for (const e of document.querySelectorAll('[aria-label],[title],[alt],[placeholder]')) {
         for (const a of ['aria-label', 'title', 'alt', 'placeholder']) if (e.hasAttribute(a)) add(a, e.getAttribute(a));
