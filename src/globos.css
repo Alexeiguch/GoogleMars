@@ -36,7 +36,7 @@ main.gl {
   order: 10;
   flex: 1 1 100%;
   margin: 0;
-  max-width: 120ch;
+  max-width: 150ch;
   color: var(--story);
   font-size: 15px;
   line-height: 1.4;
@@ -417,6 +417,8 @@ main.gl {
 .gl-more .details thead th.is-moon { color: var(--moon); }
 /* Respaldo 2D (relieve sombreado) cuando un sitio aún no tiene alturas exportadas. */
 .gl-flat { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Sin esto display:grid gana a [hidden]: la capa vacía tapaba el canvas y no se podía girar el terreno 3D con el ratón. */
+.gl-flat[hidden] { display: none; }
 .gl-flat figure { margin: 0; display: grid; place-items: center; padding: 16px; min-height: 0; }
 .gl-flat figure + figure { border-left: 1px solid var(--border); }
 .gl-flat img { max-width: 100%; max-height: 100%; aspect-ratio: 1; object-fit: contain; image-rendering: auto; }
