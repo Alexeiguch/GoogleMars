@@ -7,7 +7,6 @@ import "./style.css";
 import "./globos.css";
 import { bindUiText, type UiText } from "./prefs";
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadGlobeTexture } from "./globeTexture";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
@@ -414,7 +413,6 @@ type Globe = {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   light: THREE.DirectionalLight;
-  controls: OrbitControls;
   layers: Layer[];
   items: Item[];
   home: THREE.Vector3;
@@ -587,24 +585,9 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
 
   const home = homeDirection(id).multiplyScalar(HOME_DISTANCE);
   camera.position.copy(home);
-  const controls = new OrbitControls(camera, panel);
-  controls.enablePan = false;
-  // El zoom de OrbitControls avanza en proporción a la distancia al centro: cerca del suelo se pasaría de largo.
-  // Lo sustituye zoomBy (más abajo), que avanza en proporción a la altura.
-  controls.enableZoom = false;
-  controls.minDistance = 1 + MIN_ALTITUDE[id];
-  controls.maxDistance = MAX_DISTANCE;
-  controls.rotateSpeed = 0.55;
-  controls.update();
-  controls.addEventListener("change", () => {
-    // El giro es proporcional a la altura: arrastrar el panel entero mueve más o menos lo que se ve.
-    const altitude = camera.position.length() - 1;
-    controls.rotateSpeed = 0.55 * THREE.MathUtils.clamp(altitude / (HOME_DISTANCE - 1), 1e-5, 1.6);
-    hideTip();
-    requestRender(globes[id]);
-  });
+  camera.lookAt(0, 0, 0);
   globes[id] = {
-    id, panel, scene, camera, light, controls, layers, items: own, home, animation: 0, flying: false, loading: false,
+    id, panel, scene, camera, light, layers, items: own, home, animation: 0, flying: false, loading: false,
     rect: { x: 0, y: 0, w: 0, h: 0 }, tiles,
   };
 }
@@ -614,10 +597,10 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
 
 function zoomBy(globe: Globe, factor: number) {
   stopFlight(globe);
-  const { camera, controls } = globe;
+  const { camera } = globe;
   const altitude = THREE.MathUtils.clamp((camera.position.length() - 1) * factor, MIN_ALTITUDE[globe.id], MAX_DISTANCE - 1);
   camera.position.setLength(1 + altitude);
-  controls.update();
+  hideTip();
   requestRender(globe);
 }
 
@@ -628,25 +611,6 @@ for (const globe of Object.values(globes)) {
     const step = event.deltaMode === 1 ? event.deltaY * 33 : event.deltaMode === 2 ? event.deltaY * 400 : event.deltaY;
     zoomBy(globe, Math.exp(THREE.MathUtils.clamp(step, -200, 200) * 0.0016));
   }, { passive: false });
-  const touches = new Map<number, { x: number; y: number }>();
-  let spread = 0;
-  const gap = () => { const [a, b] = [...touches.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
-  panel.addEventListener("pointerdown", (event) => {
-    if (event.pointerType !== "touch") return;
-    touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (touches.size === 2) spread = gap();
-  });
-  panel.addEventListener("pointermove", (event) => {
-    if (!touches.has(event.pointerId)) return;
-    touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (touches.size !== 2) return;
-    const next = gap();
-    if (spread > 0 && next > 0) zoomBy(globe, spread / next);
-    spread = next;
-  });
-  const lift = (event: PointerEvent) => { touches.delete(event.pointerId); spread = touches.size === 2 ? gap() : 0; };
-  panel.addEventListener("pointerup", lift);
-  panel.addEventListener("pointercancel", lift);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -812,14 +776,38 @@ function stopFlight(globe: Globe) {
   requestRender(globe);   // al parar, se piden los mosaicos de donde se ha quedado la cámara
 }
 
+const orbitAxis = new THREE.Vector3();
+const orbitRotation = new THREE.Quaternion();
+
+/** Gira la posición y la orientación juntas alrededor del centro, incluso al cruzar un polo. */
+function rotateGlobe(globe: Globe, horizontal: number, vertical: number) {
+  const angle = Math.hypot(horizontal, vertical);
+  if (!angle) return;
+  stopFlight(globe);
+  const { camera } = globe;
+  orbitAxis.set(-vertical, -horizontal, 0).normalize().applyQuaternion(camera.quaternion);
+  orbitRotation.setFromAxisAngle(orbitAxis, angle);
+  camera.position.applyQuaternion(orbitRotation);
+  camera.quaternion.premultiply(orbitRotation).normalize();
+  hideTip();
+  requestRender(globe);
+}
+
 function flyTo(globe: Globe, target: THREE.Vector3, distance?: number) {
   stopFlight(globe);
-  const { camera, controls } = globe;
+  const { camera } = globe;
   const from = camera.position.clone().normalize();
+  const fromOrientation = camera.quaternion.clone();
   const to = target.clone().normalize();
   const fromDistance = camera.position.length();
   const toDistance = distance ?? fromDistance;
   const rotation = new THREE.Quaternion().setFromUnitVectors(from, to);
+  // Enderezar la vista progresivamente, sin un salto de orientación al pasar por un polo.
+  const carriedUp = new THREE.Vector3(0, 1, 0).applyQuaternion(fromOrientation).applyQuaternion(rotation);
+  const north = new THREE.Vector3(0, 1, 0).addScaledVector(to, -to.y);
+  const roll = north.lengthSq() > 1e-12
+    ? Math.atan2(to.dot(new THREE.Vector3().crossVectors(carriedUp, north)), carriedUp.dot(north))
+    : 0;
   const step = new THREE.Quaternion();
   const dir = new THREE.Vector3();
   // Salto largo cerca del suelo: el vuelo sube a media ruta y vuelve a bajar, para no perder el contexto.
@@ -834,8 +822,8 @@ function flyTo(globe: Globe, target: THREE.Vector3, distance?: number) {
     dir.copy(from).applyQuaternion(step);
     const distance = THREE.MathUtils.lerp(fromDistance, toDistance, e) + lift * Math.sin(Math.PI * e);
     camera.position.copy(dir).multiplyScalar(distance);
-    camera.lookAt(0, 0, 0);
-    controls.update();
+    camera.quaternion.copy(fromOrientation).premultiply(step);
+    camera.rotateZ(roll * e);
     requestRender(globe);
   };
   if (duration === 0) { apply(1); return; }
@@ -851,11 +839,7 @@ function flyTo(globe: Globe, target: THREE.Vector3, distance?: number) {
 
 for (const globe of Object.values(globes)) {
   const reset = globe.panel.querySelector<HTMLButtonElement>(".gl-reset")!;
-  // Sin esto, OrbitControls captura el puntero en el panel y el clic nunca llega al botón.
-  reset.addEventListener("pointerdown", (event) => event.stopPropagation());
   reset.addEventListener("click", () => flyTo(globe, globe.home, HOME_DISTANCE));
-  // Cualquier gesto del usuario cancela un vuelo en curso.
-  globe.controls.addEventListener("start", () => stopFlight(globe));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -865,6 +849,7 @@ const projected = new THREE.Vector3();
 function pick(globe: Globe, x: number, y: number): Item | null {
   const { camera } = globe;
   const { w, h } = globe.rect;
+  camera.updateMatrixWorld();
   let best: Item | null = null;
   let bestScore = Infinity;
   for (const item of globe.items) {
@@ -894,18 +879,47 @@ function hideTip() { tip.hidden = true; }
 for (const globe of Object.values(globes)) {
   const { panel } = globe;
   const pointers = new Map<number, { x: number; y: number; t: number }>();
-  let multi = false;
+  let multiplePointers = false;
+  let dragged = false;
   panel.addEventListener("pointerdown", (event) => {
     if (event.button !== 0 || (event.target as HTMLElement).closest("button")) return;
+    stopFlight(globe);
+    panel.setPointerCapture(event.pointerId);
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, t: performance.now() });
-    if (pointers.size > 1) multi = true;
+    if (pointers.size > 1) multiplePointers = true;
+  });
+  panel.addEventListener("pointermove", (event) => {
+    const pointer = pointers.get(event.pointerId);
+    if (!pointer) return;
+    const dx = event.clientX - pointer.x;
+    const dy = event.clientY - pointer.y;
+    if (pointers.size === 1) {
+      if (!dragged && !multiplePointers && Math.hypot(dx, dy) <= 6) return;
+      dragged = true;
+      // Cerca del suelo, un mismo arrastre recorre menos superficie.
+      const altitude = globe.camera.position.length() - 1;
+      const gain = THREE.MathUtils.clamp(altitude / (HOME_DISTANCE - 1), 1e-5, 1.6);
+      const radiansPerPixel = 0.55 * gain * 2 * Math.PI / Math.max(1, globe.rect.h);
+      rotateGlobe(globe, dx * radiansPerPixel, dy * radiansPerPixel);
+    } else if (pointers.size === 2 && event.pointerType === "touch") {
+      const other = [...pointers.values()].find((entry) => entry !== pointer)!;
+      const before = Math.hypot(pointer.x - other.x, pointer.y - other.y);
+      const after = Math.hypot(event.clientX - other.x, event.clientY - other.y);
+      if (before > 0 && after > 0) zoomBy(globe, before / after);
+    }
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
   });
   const end = (event: PointerEvent) => {
     const start = pointers.get(event.pointerId);
+    if (!start) return;
     pointers.delete(event.pointerId);
-    const wasMulti = multi;
-    if (pointers.size === 0) multi = false;
-    if (!start || wasMulti || event.type !== "pointerup") return;
+    const wasGesture = multiplePointers || dragged;
+    if (pointers.size === 0) {
+      multiplePointers = false;
+      dragged = false;
+    }
+    if (wasGesture || event.type !== "pointerup") return;
     const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y);
     if (moved > 6 || performance.now() - start.t > 700) return;
     const { x, y } = localPoint(globe, event);
@@ -918,6 +932,7 @@ for (const globe of Object.values(globes)) {
   };
   panel.addEventListener("pointerup", end);
   panel.addEventListener("pointercancel", end);
+  panel.addEventListener("lostpointercapture", end);
   // Rótulo al pasar el ratón: como mucho una búsqueda por fotograma (el ratón manda más eventos que fotogramas).
   let hover: PointerEvent | null = null;
   let hoverFrame = 0;
@@ -1933,7 +1948,7 @@ const pathZoom = $("#path-zoom");
 const marsPanel = globes.mars.panel;
 const earthPanel = globes.earth.panel;
 const browseInstructions = $(".gl-howto");
-const browsePositions = new Map<GlobeId, THREE.Vector3>();
+const browseViews = new Map<GlobeId, { position: THREE.Vector3; orientation: THREE.Quaternion }>();
 const browseFrames = new Map<GlobeId, boolean>();
 const pathRay = new THREE.Raycaster();
 const unitSphere = new THREE.Sphere(new THREE.Vector3(), 1);
@@ -2032,23 +2047,30 @@ const pathPlanner = mountPathPlanner({
       stopFlight(globe);
       globe.panel.classList.remove("is-over-point");
       if (active) {
-        browsePositions.set(globe.id, globe.camera.position.clone());
+        browseViews.set(globe.id, {
+          position: globe.camera.position.clone(),
+          orientation: globe.camera.quaternion.clone(),
+        });
+        globe.camera.lookAt(0, 0, 0);
         browseFrames.set(globe.id, frameLines[globe.id].group.visible);
         frameLines[globe.id].group.visible = false;
       } else {
-        const position = browsePositions.get(globe.id);
-        if (position) globe.camera.position.copy(position);
+        const savedView = browseViews.get(globe.id);
+        if (savedView) {
+          globe.camera.position.copy(savedView.position);
+          globe.camera.quaternion.copy(savedView.orientation);
+        }
         frameLines[globe.id].group.visible = browseFrames.get(globe.id) ?? false;
       }
       for (const layer of globe.layers) {
         layer.points.visible = !active && (layer.items[0]?.kind !== "heat" || layer.items[0].visible);
       }
       if (globe.id !== "moon") routeLayers[globe.id].group.visible = active;
-      globe.controls.update();
     }
     if (active) {
-      globes.mars.camera.position.copy(direction(18.47, 77.36)).setLength(1 + MIN_ALTITUDE.mars);
-      globes.mars.controls.update();
+      const { camera } = globes.mars;
+      camera.position.copy(direction(18.47, 77.36)).setLength(1 + MIN_ALTITUDE.mars);
+      camera.lookAt(0, 0, 0);
     }
     measure();
   },
@@ -2096,7 +2118,6 @@ marsPanel.addEventListener("pointercancel", clearPathHover);
 
 for (const [selector, factor] of [["#path-zoom-in", .63], ["#path-zoom-out", 1.59]] as const) {
   const button = $<HTMLButtonElement>(selector);
-  button.addEventListener("pointerdown", (event) => event.stopPropagation());
   button.addEventListener("click", () => zoomBy(globes.mars, factor));
 }
 marsPanel.addEventListener("keydown", (event) => {
@@ -2112,16 +2133,10 @@ marsPanel.addEventListener("keydown", (event) => {
     zoomBy(globe, event.key === "-" ? 1.59 : .63);
   } else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
     event.preventDefault();
-    cancelAnimationFrame(globe.animation);
     const step = (camera.position.length() - 1) * .08;
-    const orbit = new THREE.Spherical().setFromVector3(camera.position);
-    if (event.key === "ArrowLeft") orbit.theta -= step / Math.max(.01, Math.sin(orbit.phi));
-    if (event.key === "ArrowRight") orbit.theta += step / Math.max(.01, Math.sin(orbit.phi));
-    if (event.key === "ArrowUp") orbit.phi -= step;
-    if (event.key === "ArrowDown") orbit.phi += step;
-    camera.position.setFromSpherical(orbit.makeSafe());
-    globe.controls.update();
-    requestRender();
+    const horizontal = event.key === "ArrowLeft" ? step : event.key === "ArrowRight" ? -step : 0;
+    const vertical = event.key === "ArrowUp" ? step : event.key === "ArrowDown" ? -step : 0;
+    rotateGlobe(globe, horizontal, vertical);
   }
 });
 
