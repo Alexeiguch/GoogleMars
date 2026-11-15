@@ -1565,10 +1565,6 @@ matchList.addEventListener("click", (event) => {
   if (analog) void selectAnalog(analog);
 });
 
-/**
- * Resolución propia del modelo de elevación de un parche de la Tierra, leída de su fuente en el catálogo
- * («Copernicus DEM GLO-30 · ESA» → 30 m). null si la fuente no la dice (3DEP: más fino que la malla).
- */
 /** Qué dos cuerpos se comparan (cabecera del paso 03): Marte ↔ Tierra o Luna ↔ Tierra, nunca la Luna con Marte. */
 function renderPair() {
   const subject = compare.subject;
@@ -1578,6 +1574,10 @@ function renderPair() {
   pair.dataset.body = body;
 }
 
+/**
+ * Resolución propia del modelo de elevación de un parche de la Tierra, leída de su fuente en el catálogo
+ * («Copernicus DEM GLO-30 · ESA» → 30 m). null si la fuente no la dice (3DEP: más fino que la malla).
+ */
 function nativeMetres(site: Site | undefined) {
   const found = site?.source.match(/GLO-(\d+)/);
   return found ? Number(found[1]) : null;

@@ -234,7 +234,7 @@ main.gl {
   position: absolute;
   z-index: 4;
   left: 50%;
-  bottom: 52px;   /* sobre la leyenda y los créditos, sin tapar los rótulos de los globos */
+  bottom: 92px;   /* por encima de la leyenda y de los créditos de cada globo (no los tapa), sin tapar los rótulos */
   transform: translateX(-50%);
   width: max-content;
   max-width: min(680px, calc(100% - 24px));

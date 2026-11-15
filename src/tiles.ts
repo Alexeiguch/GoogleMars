@@ -136,11 +136,24 @@ export class TileLayer {
     while (level < this.maxLevel && (size * 2 ** (level + 1)) / span <= pxPerDeg * 1.001) level++;
     this.localFloor = level;
     this.waiting = false;
+    this.preloadRoots = false;
     this.options.onLoad();
   }
 
-  /** No pedir nada hasta saber si hay imagen local (setLocalBase o setNoLocalBase): evita pedir niveles que no harán falta. */
-  waitForLocalBase() { this.waiting = true; }
+  /**
+   * No pedir nada hasta saber si hay imagen local (setLocalBase o setNoLocalBase): evita pedir niveles que no harán
+   * falta. Si la imagen local tarda más de graceMs (máquina cargada), se piden ya los primeros niveles para no
+   * enseñar la esfera lisa; cuando llegue la imagen local, setLocalBase deja de usarlos.
+   */
+  waitForLocalBase(graceMs = 1500) {
+    this.waiting = true;
+    window.setTimeout(() => {
+      if (!this.waiting) return;
+      this.waiting = false;
+      this.preloadRoots = true;
+      this.options.onLoad();
+    }, graceMs);
+  }
 
   /** Llamar si la imagen global local no existe o no se pudo cargar: los mosaicos pasan a ser la única imagen. */
   setNoLocalBase() {
