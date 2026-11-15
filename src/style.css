@@ -76,7 +76,7 @@ a { color: inherit; text-underline-offset: .24em; }
 button, select { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: default; }
-:where(button, select, summary, a, canvas):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+:where(button, select, summary, a, canvas, [tabindex]):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 ::selection { color: var(--signal-ink); background: var(--signal); }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 html { scrollbar-color: var(--border) transparent; }
@@ -136,7 +136,7 @@ main > *, body > footer { animation: rise var(--t-enter) var(--ease-out) 60ms bo
 .brand-event__logo { display: block; width: auto; height: 32px; flex: none; }
 .brand-event__text { display: grid; }
 .brand-event__name { color: var(--text); font-weight: 500; }
-.views { display: flex; flex-wrap: wrap; align-self: stretch; align-items: stretch; gap: 0 22px; margin-left: auto; }
+.views { display: flex; flex-wrap: nowrap; align-self: stretch; align-items: stretch; gap: 0 22px; margin-left: auto; }
 .views a { display: inline-flex; align-items: center; gap: .35em; border-block-end: 2px solid transparent; font-size: 15px; color: var(--muted); text-decoration: none; white-space: nowrap; }
 .views a:hover { color: #fff; }
 .views a[aria-current="page"] { color: #fff; border-block-end-color: var(--signal); }
@@ -391,13 +391,14 @@ footer a:hover { color: var(--text); }
 .leaflet-container .leaflet-control-attribution { background: var(--overlay); color: var(--muted); }
 .leaflet-container .leaflet-control-attribution a { color: var(--text); }
 
-/* Con la insignia del reto y cinco vistas la cabecera no cabe en una fila: las vistas bajan a una segunda. */
-@media (max-width: 1365px) {
-  :root { --header-h: 113px; }
+/* Con la insignia del reto y cinco vistas (677 px en español) la cabecera solo cabe en una fila
+   desde unos 1460 px: por debajo, las vistas bajan a una segunda fila. */
+@media (max-width: 1479px) {
+  :root { --header-h: 98px; }
   .masthead { min-height: 0; flex-wrap: wrap; gap: 0 20px; }
   .wordmark, .brand-event, .prefs { margin-block: 10px; }
   .prefs { margin-left: auto; }
-  .views { order: 3; width: 100%; margin: 0; min-height: 40px; border-top: 1px solid #1d2846; }
+  .views { order: 3; flex-wrap: wrap; width: 100%; margin: 0; min-height: 40px; border-top: 1px solid #1d2846; }
   .views a { min-height: 40px; }
   .views a[href="#sources"] { margin-left: auto; }
 }
@@ -411,7 +412,7 @@ footer a:hover { color: var(--text); }
 }
 
 @media (max-width: 700px) {
-  :root { --pad: 16px; --header-h: 158px; }
+  :root { --pad: 16px; --header-h: 146px; }
   /* Fila 1: nombre y preferencias. Fila 2: insignia. Fila 3: vistas como pestañas iguales. */
   .masthead { gap: 0 10px; }
   .wordmark { font-size: 17px; gap: 7px; }
