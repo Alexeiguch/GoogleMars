@@ -57,7 +57,7 @@ const MAX_CACHED = 160;
 const QUALITY = 1.3;
 const RENDER_ORDER = -100;  // por debajo de los puntos y de la capa polar; la esfera base va en -1000
 /** Una petición que tarda más que esto cuenta como red lenta (aviso); pasado TIMEOUT_MS se cancela. */
-const SLOW_MS = 4000;
+const SLOW_MS = 6000;
 const TIMEOUT_MS = 12000;
 /** Esperas antes de cada reintento de un mosaico fallido; agotadas, no se vuelve a pedir hasta retryFailed(). */
 const RETRY_MS = [3000, 12000, 30000];
@@ -112,6 +112,8 @@ export class TileLayer {
   private localFloor = -1;
   /** Sin imagen global local: los primeros niveles se piden siempre, para tener algo que enseñar. */
   private preloadRoots = false;
+  /** Esperando a saber el detalle de la imagen local (waitForLocalBase): aún no se pide nada. */
+  private waiting = false;
 
   constructor(private readonly options: TileLayerOptions) {
     this.maxLevel = Math.max(...options.sources.map((s) => s.maxLevel));
@@ -131,12 +133,18 @@ export class TileLayer {
     let level = -1;
     while (level < this.maxLevel && (size * 2 ** (level + 1)) / span <= pxPerDeg * 1.001) level++;
     this.localFloor = level;
+    this.waiting = false;
+    this.options.onLoad();
   }
+
+  /** No pedir nada hasta saber si hay imagen local (setLocalBase o setNoLocalBase): evita pedir niveles que no harán falta. */
+  waitForLocalBase() { this.waiting = true; }
 
   /** Llamar si la imagen global local no existe o no se pudo cargar: los mosaicos pasan a ser la única imagen. */
   setNoLocalBase() {
     this.localFloor = -1;
     this.preloadRoots = true;
+    this.waiting = false;
     this.options.onLoad();
   }
 
@@ -442,7 +450,7 @@ export class TileLayer {
       for (const root of this.roots) collect(root);
     }
 
-    if (load) {
+    if (load && !this.waiting) {
       const queue = [...preload.map((node) => ({ node, distance: 0 })), ...wanted]
         .sort((a, b) => a.node.z - b.node.z || a.distance - b.distance);
       // Con la red caída se pide de uno en uno: basta para notar que vuelve, sin lanzar decenas de peticiones fallidas.

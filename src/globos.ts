@@ -23,7 +23,7 @@ import {
   refById, topSite, twinKeyOf, twinsOf,
   windowName, type Body, type EarthPoint, type EarthRole, type EarthSite, type GlobeId, type Reference,
 } from "./globosData";
-import { TileLayer, direction, type TileLayerOptions } from "./tiles";
+import { TileLayer, direction, type TileHealth, type TileLayerOptions } from "./tiles";
 
 // ---------------------------------------------------------------------------------------------
 // Franja de introducción: textos propios de esta página (no están en i18n.ts) y cifras de los datos ya cargados.
@@ -34,18 +34,18 @@ const UI_TEXT: UiText = {
     "more.for": "Para {site}, un sitio de Marte con relieve HiRISE de {w} × {w} km. Elige un análogo para compararlo en 3D.",
     "pick.hirise": "Marte · relieve HiRISE · {cat}",
     "lg.hirise": "Toca un parche HiRISE de Marte para ver sus análogos y comparar el terreno en 3D.",
-    "detail.compare": "Comparar el terreno en 3D",
     "step.pick": "Elige un sitio de la Luna o de Marte",
     "pick.label": "Sitio que se compara con la Tierra",
     "pick.show": "Buscar análogos",
-    "pick.note": "Sitios de referencia de la Luna y de Marte (ventanas de 30 km) y parches de Marte con relieve HiRISE (2 km). «Buscar análogos» ordena sus lugares más parecidos de la Tierra y los marca en los globos; también puedes tocar los sitios en los globos.",
-    "intro.short": "TerraTwin busca en toda la Tierra los lugares que más se parecen a sitios de la Luna y de Marte. Los rombos son esos sitios y los puntos de la Tierra, sus parecidos: toca uno, o elige un sitio, para ver en qué se parecen y en qué no.",
-    "net.down": "Las imágenes externas (Esri, NASA Trek) no cargan. Se muestran las imágenes globales incluidas en la app; los puntos, las fichas y la comparación de terreno en 3D siguen funcionando.",
-    "net.slow": "Las imágenes externas (Esri, NASA Trek) tardan en cargar. Mientras tanto se muestran las imágenes globales incluidas en la app; todo lo demás funciona.",
+    "pick.note": "Sitios de referencia de la Luna y de Marte (ventanas de {win} km) y parches de Marte con relieve HiRISE ({patch} km). «Buscar análogos» los marca en los globos junto a sus lugares más parecidos de la Tierra; también puedes tocar los sitios en los globos.",
+    "intro.short": "TerraTwin busca en toda la Tierra los lugares que más se parecen a sitios de la Luna y de Marte. Los rombos son esos sitios; los puntos de la Tierra, sus parecidos. Toca uno para ver en qué se parecen y en qué no.",
+    "net.down": "Las imágenes externas (Esri, NASA Trek) no cargan. Se ven las imágenes globales incluidas en la app; los puntos, las fichas y la comparación de terreno siguen funcionando.",
+    "net.slow": "Las imágenes externas (Esri, NASA Trek) tardan en cargar. Mientras tanto se ven las imágenes globales incluidas en la app; todo lo demás funciona.",
     "net.retry": "Reintentar",
     "tiles.loading": "Cargando detalle…",
-    "scale.resampled": "Tierra: Copernicus GLO-{native} ({native} m) remuestreado a {c} m, más fino que el dato: sus pendientes salen algo más suaves",
-    "pick.refs": "{body} · sitios de referencia (30 km)",
+    "scale.resampled": "Tierra: GLO-{native} ({native} m) remuestreado a celdas de {c} m, más finas que el dato; sus pendientes salen algo más suaves",
+    "cmp.pair": "{a} ↔ {b}",
+    "pick.refs": "{body} · sitios de referencia ({w} km)",
     "more.forRef": "Para {site} ({body}), una ventana de {w} km: sus {n} gemelos de la Tierra, comparados con la misma ventana y la misma escala.",
     "flat.scale": "Relieve sombreado en 2D · {w} × {w} km · el relieve 3D de este sitio aún no está exportado",
     "moon.noAir": "sin atmósfera",
@@ -61,18 +61,18 @@ const UI_TEXT: UiText = {
     "more.for": "For {site}, a Mars site with {w} × {w} km of HiRISE relief. Pick an analog to compare it in 3D.",
     "pick.hirise": "Mars · HiRISE relief · {cat}",
     "lg.hirise": "Tap a HiRISE patch on Mars to see its analogs and compare the terrain in 3D.",
-    "detail.compare": "Compare the terrain in 3D",
     "step.pick": "Choose a Moon or Mars site",
     "pick.label": "Site compared with Earth",
     "pick.show": "Find analogs",
-    "pick.note": "Moon and Mars reference sites (30 km windows) and Mars patches with HiRISE relief (2 km). \"Find analogs\" ranks the most similar places on Earth and marks them on the globes; you can also tap the sites on the globes.",
-    "intro.short": "TerraTwin searches all of Earth's land for the places most like Moon and Mars sites. Diamonds are those sites and the dots on Earth are their look-alikes: tap one, or pick a site, to see where they match and where they do not.",
-    "net.down": "External imagery (Esri, NASA Trek) is not loading. You are seeing the global images built into the app; the points, the details and the 3D terrain comparison still work.",
+    "pick.note": "Moon and Mars reference sites ({win} km windows) and Mars patches with HiRISE relief ({patch} km). \"Find analogs\" marks them on the globes together with their most similar places on Earth; you can also tap the sites on the globes.",
+    "intro.short": "TerraTwin searches all of Earth's land for the places most like sites on the Moon and Mars. Diamonds are those sites; dots on Earth are their look-alikes. Tap one to see where they match and where they don't.",
+    "net.down": "External imagery (Esri, NASA Trek) is not loading. You are seeing the global images built into the app; the points, the details and the terrain comparison still work.",
     "net.slow": "External imagery (Esri, NASA Trek) is slow to load. Meanwhile you are seeing the global images built into the app; everything else works.",
     "net.retry": "Retry",
     "tiles.loading": "Loading detail…",
-    "scale.resampled": "Earth: Copernicus GLO-{native} ({native} m) resampled to {c} m, finer than the data, so its slopes read slightly gentler",
-    "pick.refs": "{body} · reference sites (30 km)",
+    "scale.resampled": "Earth: GLO-{native} ({native} m) resampled to {c} m cells, finer than the source data, so its slopes read slightly gentler",
+    "cmp.pair": "{a} ↔ {b}",
+    "pick.refs": "{body} · reference sites ({w} km)",
     "more.forRef": "For {site} ({body}), a {w} km window: its {n} Earth twins, compared with the same window and the same scale.",
     "flat.scale": "2D shaded relief · {w} × {w} km · the 3D relief for this site has not been exported yet",
     "moon.noAir": "no atmosphere",
@@ -84,7 +84,6 @@ const UI_TEXT: UiText = {
     "intro.figPatches": "Earth points compared",
   },
 };
-bindUiText(UI_TEXT);
 const ui = (key: string, params: Record<string, string | number> = {}) =>
   UI_TEXT[getLang()][key].replace(/\{(\w+)\}/g, (_, k: string) => String(params[k] ?? ""));
 /**
@@ -125,6 +124,8 @@ const MIN_ALTITUDE: Record<GlobeId, number> = { earth: 0.0004, moon: 0.01, mars:
  */
 const WINDOW_KM = 30;
 const PATCH_KM = 2;
+// Textos fijos de la página (data-ui); sus cifras salen de estas constantes.
+bindUiText(UI_TEXT, { win: WINDOW_KM, patch: PATCH_KM });
 /** Al elegir un punto, el cuadrado ocupa esta fracción del lado menor de la vista (con 30 km, unos 77 km de altura). */
 const FRAME_FILL = 0.6;
 /** El lado menor de la vista abarca siempre 36° (render() abre el campo vertical en paneles estrechos). */
@@ -428,7 +429,13 @@ type Globe = {
 // Mosaicos de alta resolución (src/tiles.ts). Todos permiten CORS; sin conexión se ve la imagen global.
 
 const TREK = "https://trek.nasa.gov/tiles";
-const TILE_SOURCES: Record<GlobeId, Omit<TileLayerOptions, "onLoad">> = {
+/**
+ * La imagen global local (public/imagery/) es la misma cartografía que los primeros niveles de mosaicos: solo en Marte
+ * (Viking MDIM 2.1). Allí esos niveles no se piden y, al acercar, se ve la imagen local hasta que llega el detalle.
+ * En la Luna y la Tierra la imagen local es otra (más suave) y los mosaicos se siguen pidiendo desde el primer nivel visible.
+ */
+const LOCAL_IS_TILE_IMAGERY: Record<GlobeId, boolean> = { moon: false, earth: false, mars: true };
+const TILE_SOURCES: Record<GlobeId, Omit<TileLayerOptions, "onLoad" | "onHealth">> = {
   earth: {
     scheme: "mercator",
     sources: [{
@@ -549,6 +556,7 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
   scene.add(tiles.group);
   const texture = TEXTURES[id];
   if (texture && renderer) {
+    if (LOCAL_IS_TILE_IMAGERY[id]) tiles.waitForLocalBase();
     loadGlobeTexture(`${import.meta.env.BASE_URL}imagery/${texture}`, (map) => {
       map.anisotropy = Math.min(8, renderer!.capabilities.getMaxAnisotropy());
       const gain = id === "moon" ? MOON_BASE_GAIN : 1;   // en valores sRGB, como se midió
@@ -558,8 +566,8 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
       // En Marte la imagen local es el mismo mosaico Viking que los primeros niveles de mosaicos, con más
       // detalle: esos niveles ni se piden ni se dibujan (al acercar se ve la imagen local hasta que llega CTX).
       const width = (map.image as { width?: number } | null)?.width;
-      if (LOCAL_IS_TILE_IMAGERY[id] && width) tiles.setLocalBase(width);
-      requestRender();
+      if (LOCAL_IS_TILE_IMAGERY[id]) tiles.setLocalBase(width ?? 0);
+      requestRender(globes[id]);
     }, () => tiles.setNoLocalBase());
   } else if (renderer) {
     tiles.setNoLocalBase();
@@ -598,18 +606,17 @@ for (const id of ["moon", "earth", "mars"] as GlobeId[]) {
     rect: { x: 0, y: 0, w: 0, h: 0 }, tiles,
   };
 }
-const globeList = Object.values(globes);
 
 // ---------------------------------------------------------------------------------------------
 // Zoom por altura: rueda y pellizco
 
 function zoomBy(globe: Globe, factor: number) {
-  cancelAnimationFrame(globe.animation);
+  stopFlight(globe);
   const { camera, controls } = globe;
   const altitude = THREE.MathUtils.clamp((camera.position.length() - 1) * factor, MIN_ALTITUDE[globe.id], MAX_DISTANCE - 1);
   camera.position.setLength(1 + altitude);
   controls.update();
-  requestRender();
+  requestRender(globe);
 }
 
 for (const globe of Object.values(globes)) {
@@ -643,29 +650,47 @@ for (const globe of Object.values(globes)) {
 // ---------------------------------------------------------------------------------------------
 // Dibujo bajo demanda
 
+// Un solo requestAnimationFrame por fotograma, por muchos eventos de puntero o mosaicos que lleguen entre medias.
+// Solo se vuelve a dibujar el globo que cambió (preserveDrawingBuffer conserva la imagen de los otros dos).
 let frame = 0;
 let contextLost = false;
-function requestRender() {
-  if (!frame && renderer && !contextLost) frame = requestAnimationFrame(render);
+const dirty = new Set<Globe>();
+function requestRender(globe?: Globe) {
+  if (!renderer || contextLost) return;
+  if (globe) dirty.add(globe);
+  else for (const g of Object.values(globes)) dirty.add(g);
+  if (!frame) frame = requestAnimationFrame(render);
+}
+
+/** Tamaño del canvas y rectángulo de cada globo: se miden al cambiar el tamaño, no en cada fotograma. */
+const view = { w: 0, h: 0 };
+function measure() {
+  view.w = canvas.clientWidth;
+  view.h = canvas.clientHeight;
+  const box = canvas.getBoundingClientRect();
+  for (const globe of Object.values(globes)) {
+    const r = globe.panel.getBoundingClientRect();
+    globe.rect = { x: r.left - box.left, y: r.top - box.top, w: r.width, h: r.height };
+  }
+  requestRender();
 }
 
 const size = new THREE.Vector2();
+const toCamera = new THREE.Vector3();
 function render() {
   frame = 0;
-  if (!renderer || contextLost) return;
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  if (!width || !height) return;
+  if (!renderer || contextLost || !view.w || !view.h) return;
   renderer.getSize(size);
-  if (size.x !== width || size.y !== height) renderer.setSize(width, height, false);
-  const box = canvas.getBoundingClientRect();
-  renderer.setScissorTest(false);
-  renderer.clear();
+  if (size.x !== view.w || size.y !== view.h) {
+    renderer.setSize(view.w, view.h, false);   // vacía el canvas: hay que volver a dibujar los tres
+    for (const g of Object.values(globes)) dirty.add(g);
+  }
+  const height = view.h;
+  const list = [...dirty];
+  dirty.clear();
   renderer.setScissorTest(true);
-  for (const globe of Object.values(globes)) {
-    const r = globe.panel.getBoundingClientRect();
-    const rect = { x: r.left - box.left, y: r.top - box.top, w: r.width, h: r.height };
-    globe.rect = rect;
+  for (const globe of list) {
+    const rect = globe.rect;
     if (rect.w < 2 || rect.h < 2) continue;
     const { camera } = globe;
     camera.aspect = rect.w / rect.h;
@@ -680,19 +705,64 @@ function render() {
     camera.updateProjectionMatrix();
     // La luz acompaña a la cámara con el mismo ángulo a cualquier altura (si no, de cerca el suelo queda en sombra).
     globe.light.position.copy(camera.position).setLength(HOME_DISTANCE).add(lightOffset);
-    globe.tiles.update(camera, rect.h * pixelRatio);
+    // En pleno vuelo de cámara no se piden mosaicos de las alturas intermedias.
+    const loading = globe.tiles.update(camera, rect.h * pixelRatio, !globe.flying);
+    setLoading(globe, loading && !globe.flying);
     // Cuadrado de la zona comparada: grosor en píxeles del panel; oculto si queda en la cara de atrás.
     const frame = frameLines[globe.id];
     if (frame.group.visible) {
-      for (const line of frame.group.children as Line2[]) (line.material as LineMaterial).resolution.set(rect.w, rect.h);
-      frame.group.children.forEach((line) => { line.visible = frame.center.dot(camera.position.clone().sub(frame.center)) > 0; });
+      const front = frame.center.dot(toCamera.copy(camera.position).sub(frame.center)) > 0;
+      for (const line of frame.group.children as Line2[]) {
+        (line.material as LineMaterial).resolution.set(rect.w, rect.h);
+        line.visible = front;
+      }
     }
     const y = height - rect.y - rect.h;
     renderer.setViewport(rect.x, y, rect.w, rect.h);
     renderer.setScissor(rect.x, y, rect.w, rect.h);
-    renderer.render(globe.scene, camera);
+    renderer.render(globe.scene, camera);   // autoClear con scissor: borra solo el rectángulo de este globo
   }
 }
+
+// ---------------------------------------------------------------------------------------------
+// Estado de la red externa: indicador «Cargando detalle…» por globo y aviso visible si los mosaicos fallan o tardan.
+
+function setLoading(globe: Globe, loading: boolean) {
+  // Con la red caída o lenta ya lo dice el aviso general: el indicador se oculta.
+  const show = loading && network === "ok";
+  if (globe.loading === show) return;
+  globe.loading = show;
+  globe.panel.classList.toggle("is-loading", show);
+}
+
+const netBox = $<HTMLElement>("#gl-net");
+const netText = netBox.querySelector<HTMLElement>(".gl-net-text")!;
+let network: TileHealth = "ok";
+let netTimer = 0;
+function syncNetwork() {
+  const states = Object.values(globes).map((g) => g.tiles.health());
+  const next: TileHealth = states.includes("down") ? "down" : states.includes("slow") ? "slow" : "ok";
+  if (next === network) return;
+  // Para quitar el aviso se espera un poco: un mosaico suelto que llega no lo hace parpadear.
+  clearTimeout(netTimer);
+  if (next === "ok") { netTimer = window.setTimeout(() => applyNetwork("ok"), 1500); return; }
+  applyNetwork(next);
+}
+function applyNetwork(state: TileHealth) {
+  network = state;
+  netBox.hidden = state === "ok";
+  netBox.dataset.state = state;
+  if (state !== "ok") netText.textContent = ui(state === "down" ? "net.down" : "net.slow");
+  for (const globe of Object.values(globes)) {
+    if (state !== "ok") setLoading(globe, false);
+  }
+  requestRender();
+}
+netBox.querySelector<HTMLButtonElement>(".gl-net-retry")!.addEventListener("click", () => {
+  for (const globe of Object.values(globes)) globe.tiles.retryFailed();
+});
+addEventListener("online", () => { for (const globe of Object.values(globes)) globe.tiles.retryFailed(); });
+onLangChange(() => { if (network !== "ok") applyNetwork(network); });
 
 // ---------------------------------------------------------------------------------------------
 // Visibilidad, resaltado y recuento
@@ -725,8 +795,15 @@ function refreshPoints() {
 // ---------------------------------------------------------------------------------------------
 // Cámara
 
-function flyTo(globe: Globe, target: THREE.Vector3, distance?: number) {
+function stopFlight(globe: Globe) {
   cancelAnimationFrame(globe.animation);
+  if (!globe.flying) return;
+  globe.flying = false;
+  requestRender(globe);   // al parar, se piden los mosaicos de donde se ha quedado la cámara
+}
+
+function flyTo(globe: Globe, target: THREE.Vector3, distance?: number) {
+  stopFlight(globe);
   const { camera, controls } = globe;
   const from = camera.position.clone().normalize();
   const to = target.clone().normalize();
@@ -749,11 +826,13 @@ function flyTo(globe: Globe, target: THREE.Vector3, distance?: number) {
     camera.position.copy(dir).multiplyScalar(distance);
     camera.lookAt(0, 0, 0);
     controls.update();
-    requestRender();
+    requestRender(globe);
   };
   if (duration === 0) { apply(1); return; }
+  globe.flying = true;
   const tick = (now: number) => {
     const t = Math.min((now - start) / duration, 1);
+    if (t >= 1) globe.flying = false;   // el último fotograma ya pide los mosaicos del destino
     apply(t);
     if (t < 1) globe.animation = requestAnimationFrame(tick);
   };
@@ -766,7 +845,7 @@ for (const globe of Object.values(globes)) {
   reset.addEventListener("pointerdown", (event) => event.stopPropagation());
   reset.addEventListener("click", () => flyTo(globe, globe.home, HOME_DISTANCE));
   // Cualquier gesto del usuario cancela un vuelo en curso.
-  globe.controls.addEventListener("start", () => cancelAnimationFrame(globe.animation));
+  globe.controls.addEventListener("start", () => stopFlight(globe));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -825,9 +904,13 @@ for (const globe of Object.values(globes)) {
   };
   panel.addEventListener("pointerup", end);
   panel.addEventListener("pointercancel", end);
-  panel.addEventListener("pointermove", (event) => {
-    if (event.pointerType !== "mouse" || event.buttons) return;
-    if ((event.target as HTMLElement).closest("button")) { hideTip(); return; }
+  // Rótulo al pasar el ratón: como mucho una búsqueda por fotograma (el ratón manda más eventos que fotogramas).
+  let hover: PointerEvent | null = null;
+  let hoverFrame = 0;
+  const hoverPick = () => {
+    hoverFrame = 0;
+    const event = hover;
+    if (!event) return;
     const { x, y } = localPoint(globe, event);
     const item = pick(globe, x, y);
     panel.classList.toggle("is-over-point", !!item);
@@ -838,8 +921,14 @@ for (const globe of Object.values(globes)) {
     const left = event.clientX - s.left + 14;
     tip.style.left = `${Math.min(left, s.width - tip.offsetWidth - 6)}px`;
     tip.style.top = `${event.clientY - s.top + 14}px`;
+  };
+  panel.addEventListener("pointermove", (event) => {
+    if (event.pointerType !== "mouse" || event.buttons) return;
+    if ((event.target as HTMLElement).closest("button")) { hover = null; hideTip(); return; }
+    hover = event;
+    if (!hoverFrame) hoverFrame = requestAnimationFrame(hoverPick);
   });
-  panel.addEventListener("pointerleave", () => { hideTip(); panel.classList.remove("is-over-point"); });
+  panel.addEventListener("pointerleave", () => { hover = null; hideTip(); panel.classList.remove("is-over-point"); });
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1057,7 +1146,7 @@ function renderDetail(item: Item) {
       html += `<p class="gl-sub"><a href="${esc(ref.source_url)}" target="_blank" rel="noopener">${esc(t("gl.source"))}</a></p>`;
     }
     if (comparableRef(ref)) {
-      html += `<p class="gl-sub"><a href="#comparison">${esc(ui("detail.compare"))} <span aria-hidden="true">↓</span></a></p>`;
+      html += `<p class="gl-sub"><a href="#comparison">${esc(t("v.compareLink"))} <span aria-hidden="true">↓</span></a></p>`;
     }
     if (twins.length) {
       html += `<h3>${t("gl.twinsTitle")}</h3><ol class="gl-twins">${twins.map((site) => {
@@ -1105,7 +1194,7 @@ function renderDetail(item: Item) {
       html += `<h3>${t("v.matchesTitle")}</h3><ol class="gl-twins gl-analogs">${compare.analogs.map((analog, index) =>
         `<li><button type="button" data-match="${index}" aria-pressed="${analog === compare.analog}"><span>${esc(analogName(analog))}<small>${esc(analogOrigin(analog))}</small></span><b>${pct(analog.total)}</b></button></li>`,
       ).join("")}</ol>`;
-      html += `<p class="gl-sub"><a href="#comparison">${esc(ui("detail.compare"))} <span aria-hidden="true">↓</span></a></p>`;
+      html += `<p class="gl-sub"><a href="#comparison">${esc(t("v.compareLink"))} <span aria-hidden="true">↓</span></a></p>`;
     }
     if (patch.sourceUrl) html += `<p class="gl-sub"><a href="${esc(patch.sourceUrl)}" target="_blank" rel="noopener">${esc(patch.source || t("gl.source"))}</a></p>`;
   } else {
@@ -1135,7 +1224,7 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !detail.hidden) clearSelection();
 });
 // El panel de detalle cambia el tamaño de los globos en escritorio.
-new ResizeObserver(() => requestRender()).observe(stage);
+new ResizeObserver(measure).observe(stage);
 
 // ---------------------------------------------------------------------------------------------
 // Comparación de terreno con la Tierra (lo que era el «Visor 3D de Marte», ampliado a la Luna):
@@ -1318,11 +1407,19 @@ pickSelect.addEventListener("change", () => {
   if (selected?.kind === "patch" || selected?.kind === "ref") select(item);
   else setComparison(item);
 });
+// «Find analogs» (paso de la demo): el sitio y sus análogos en los globos, con la lista en la ficha y su enlace
+// «Compare terrain ↓». La comparación 3D de ese sitio empieza a cargar ya (setComparison dentro de select).
 $("#hirise-show").addEventListener("click", () => {
   const item = itemById.get(pickSelect.value);
   if (!item) return;
   select(item);
   stage.scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth", block: "center" });
+});
+// Cualquier enlace a la comparación: si el terreno no llegó a cargar (fallo de red), se vuelve a pedir al ir allí.
+document.addEventListener("click", (event) => {
+  const link = (event.target as HTMLElement).closest?.('a[href="#comparison"]');
+  if (!link || !compare.analog || compare.statusKey !== "v.loadError") return;
+  void selectAnalog(compare.analog, false);
 });
 
 function showFlat(subject: Subject, analog: Analog) {
@@ -1468,10 +1565,37 @@ matchList.addEventListener("click", (event) => {
   if (analog) void selectAnalog(analog);
 });
 
+/**
+ * Resolución propia del modelo de elevación de un parche de la Tierra, leída de su fuente en el catálogo
+ * («Copernicus DEM GLO-30 · ESA» → 30 m). null si la fuente no la dice (3DEP: más fino que la malla).
+ */
+/** Qué dos cuerpos se comparan (cabecera del paso 03): Marte ↔ Tierra o Luna ↔ Tierra, nunca la Luna con Marte. */
+function renderPair() {
+  const subject = compare.subject;
+  const body: Body = subject?.ref?.body ?? "mars";
+  const pair = $("#cmp-pair");
+  pair.textContent = subject ? ui("cmp.pair", { a: bodyName(body), b: bodyName("earth") }) : "";
+  pair.dataset.body = body;
+}
+
+function nativeMetres(site: Site | undefined) {
+  const found = site?.source.match(/GLO-(\d+)/);
+  return found ? Number(found[1]) : null;
+}
+
 function renderScaleText() {
   const subject = compare.subject;
   const scale = $("#grid-scale");
-  if (!subject || subject.patch) { scale.textContent = t("v.gridScale", { w: patchWidth / 1000, c: cellSize }); return; }
+  renderPair();
+  if (!subject || subject.patch) {
+    let text = t("v.gridScale", { w: patchWidth / 1000, c: cellSize });
+    // Honestidad del dato: el terreno de los parches GLO-30 está remuestreado a una malla más fina que el dato
+    // (pipeline/analogs/patches.py). No se corrige aquí porque cambiaría las puntuaciones; se declara.
+    const native = nativeMetres(compare.analog?.match?.site);
+    if (native !== null && native > cellSize) text += ` · ${ui("scale.resampled", { native, c: cellSize })}`;
+    scale.textContent = text;
+    return;
+  }
   if (compare.flat) { scale.textContent = ui("flat.scale", { w: WINDOW_KM }); return; }
   void l0Manifest().then((m) => {
     if (m && compare.subject === subject && !compare.flat) {
@@ -1580,7 +1704,7 @@ function fillRefs() {
   refSelect.value = selected?.kind === "patch" ? selected.id : (refFilter ?? "");
   pickSelect.innerHTML = BODIES.map((body) => {
     const refs = globeReferences.filter((r) => r.body === body && comparableRef(r));
-    return refs.length ? `<optgroup label="${esc(ui("pick.refs", { body: bodyName(body) }))}">${refs.map((r) =>
+    return refs.length ? `<optgroup label="${esc(ui("pick.refs", { body: bodyName(body), w: WINDOW_KM }))}">${refs.map((r) =>
       `<option value="ref:${esc(r.id)}">${refName(r.id)}</option>`).join("")}</optgroup>` : "";
   }).join("") + hiriseOptions();
   if (compare.subject) pickSelect.value = compare.subject.item.id;
