@@ -12,6 +12,10 @@ export default defineConfig({
         lunaMarte: resolve(import.meta.dirname, "luna-marte.html"),
         globos: resolve(import.meta.dirname, "globos.html"),
       },
+      output: {
+        // three.js en su propio archivo: no cambia al tocar el código de los globos, así que el navegador lo reutiliza.
+        codeSplitting: { groups: [{ name: "three", test: /node_modules[\\/]three[\\/]/ }] },
+      },
     },
   },
 });

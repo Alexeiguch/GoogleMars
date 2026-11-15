@@ -63,6 +63,8 @@ const TIMEOUT_MS = 12000;
 const RETRY_MS = [3000, 12000, 30000];
 /** Fallos seguidos (sin ningún mosaico bueno entre medias) a partir de los cuales la red se da por caída. */
 const DOWN_STREAK = 3;
+/** Niveles por encima de cada hoja que se piden primero como relleno rápido (ver update). */
+const COARSE = 3;
 
 type Node = {
   z: number;
@@ -408,6 +410,15 @@ export class TileLayer {
       if (node.z <= this.localFloor) continue;
       node.lastUsed = this.frame;
       if (loadable(node)) wanted.push(leaf);
+      // Un antecesor COARSE niveles más arriba cubre de golpe 4^COARSE hojas: llega antes (la cola va de menos a
+      // más detalle) y tapa la imagen local con algo de detalle mientras llegan las hojas (al acabar un vuelo).
+      if (node.z > 0 && this.source(node.z) === this.source(Math.max(0, node.z - COARSE))) {
+        const coarse = this.ancestorAt(node, Math.max(node.z - COARSE, this.localFloor + 1, 0));
+        if (coarse && coarse !== node) {
+          coarse.lastUsed = this.frame;
+          if (loadable(coarse)) wanted.push({ node: coarse, distance: leaf.distance });
+        }
+      }
       if (node.state === "idle" || node.state === "loading" || (node.state === "error" && node.retryAt !== Infinity)) pending++;
       while (node.state !== "ready") {
         const parent = this.parentOf(node);

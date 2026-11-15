@@ -234,7 +234,7 @@ main.gl {
   position: absolute;
   z-index: 4;
   left: 50%;
-  top: 56px;
+  bottom: 52px;   /* sobre la leyenda y los créditos, sin tapar los rótulos de los globos */
   transform: translateX(-50%);
   width: max-content;
   max-width: min(680px, calc(100% - 24px));
@@ -478,8 +478,13 @@ main.gl {
   }
 }
 @media (max-width: 640px) {
-  main.gl { padding-bottom: 8px; min-height: 720px; }
-  .gl-title { width: 100%; font-size: 28px; }
+  /* Algo más alto que la pantalla: los tres globos ganan alto y aún queda cabecera para desplazar con el dedo. */
+  main.gl { padding-bottom: 8px; min-height: 880px; }
+  /* El título repite la pestaña activa («3D globes»): en el móvil queda solo para lectores de pantalla. */
+  .gl-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* El paso «Compare terrain» está justo debajo de los globos: el atajo sobra en 375 px. */
+  .gl-jump { display: none; }
+  .gl-intro { font-size: 13.5px; line-height: 1.35; }
   .gl-about { padding-top: 24px; }
   .gl-toolbar { gap: 6px; padding: 10px 0 8px; }
   .gl-mode { width: 100%; gap: 10px; }

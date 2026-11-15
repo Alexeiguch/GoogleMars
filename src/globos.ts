@@ -1,5 +1,5 @@
-// Página «Globos 3D»: Luna | Tierra | Marte en un solo canvas (un contexto WebGL), con viewports y scissor
-// como src/globes.ts. Se dibuja solo cuando algo cambia (sin bucle continuo).
+// Página «Globos 3D»: Luna | Tierra | Marte en un solo canvas (un contexto WebGL), con viewports y scissor.
+// Se dibuja solo cuando algo cambia (sin bucle continuo) y solo el globo que cambió.
 import "@fontsource/barlow/latin-400.css";
 import "@fontsource/barlow/latin-500.css";
 import "@fontsource/barlow/latin-600.css";
@@ -43,7 +43,7 @@ const UI_TEXT: UiText = {
     "net.slow": "Las imágenes externas (Esri, NASA Trek) tardan en cargar. Mientras tanto se ven las imágenes globales incluidas en la app; todo lo demás funciona.",
     "net.retry": "Reintentar",
     "tiles.loading": "Cargando detalle…",
-    "scale.resampled": "Tierra: GLO-{native} ({native} m) remuestreado a celdas de {c} m, más finas que el dato; sus pendientes salen algo más suaves",
+    "scale.resampled": "Tierra: datos GLO-{native} de {native} m remuestreados a {c} m; sus pendientes salen algo más suaves",
     "cmp.pair": "{a} ↔ {b}",
     "pick.refs": "{body} · sitios de referencia ({w} km)",
     "more.forRef": "Para {site} ({body}), una ventana de {w} km: sus {n} gemelos de la Tierra, comparados con la misma ventana y la misma escala.",
@@ -70,7 +70,7 @@ const UI_TEXT: UiText = {
     "net.slow": "External imagery (Esri, NASA Trek) is slow to load. Meanwhile you are seeing the global images built into the app; everything else works.",
     "net.retry": "Retry",
     "tiles.loading": "Loading detail…",
-    "scale.resampled": "Earth: GLO-{native} ({native} m) resampled to {c} m cells, finer than the source data, so its slopes read slightly gentler",
+    "scale.resampled": "Earth: {native} m GLO-{native} data resampled to {c} m, so its slopes read slightly gentler",
     "cmp.pair": "{a} ↔ {b}",
     "pick.refs": "{body} · reference sites ({w} km)",
     "more.forRef": "For {site} ({body}), a {w} km window: its {n} Earth twins, compared with the same window and the same scale.",
