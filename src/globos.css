@@ -504,3 +504,12 @@ main.gl {
   .gl-reset { top: 10px; right: 6px; min-height: 32px; padding: 0 8px; font-size: 12px; }
   .gl-bar { grid-template-columns: 110px 1fr 30px; }
 }
+
+/* Pantallas táctiles: selects de 16 px (con menos, Safari de iPhone agranda la página al tocarlos y no vuelve)
+   y 44 px de zona de toque en los enlaces sueltos y en el desplegable del método, sin mover el diseño. */
+@media (pointer: coarse) {
+  .gl-field select, .gl-pick-field select { font-size: 16px; }
+  #ranking-method summary { padding-block: 12px; }
+  .step-head > a { padding-block: 12px; margin-block: -12px; }
+  .site a { padding-block: 14px; margin-top: -8px; margin-bottom: -14px; }
+}

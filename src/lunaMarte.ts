@@ -398,6 +398,16 @@ const likeName = (s: EarthSite) => (s.twin_key ? groupName(s.twin_key) : refLabe
 // ---- ranking ------------------------------------------------------------------------------
 type RankMode = "final" | "new" | "l0";
 let rankMode: RankMode = "final";
+/** Marcadores que dibuja drawRankPins según el zoom: números del ranking (renderRanking) y estrellas de las historias (renderFeatured). */
+type RankPin = { s: EarthSite; n: number; title: string; go: () => void };
+type StarPin = { s: EarthSite; title: string; go: () => void };
+let rankPins: RankPin[] = [];
+let starPins: StarPin[] = [];
+let rankColor = "";
+const PIN_GAP = 26; // px: un poco más que el número (24 px)
+const PIN_MAX_ZOOM = 10; // a este zoom se separan hasta sitios a ~10 km; si siguen juntos, se abre el mejor
+const PIN_R = 12; // radio del número
+const STAR_R = 16; // radio de la estrella (30 px) con su borde
 const rankModes = document.querySelectorAll<HTMLButtonElement>("[data-rank]");
 for (const b of rankModes) {
   b.addEventListener("click", () => {
@@ -433,20 +443,91 @@ function renderRanking() {
   $("#rank-note").hidden = mode !== "new";
   $("#rank-note").textContent = m("newNote");
 
-  if (rankLayer) map.removeLayer(rankLayer);
-  rankLayer = L.layerGroup().addTo(map);
   const list = mode === "final" ? fin : mode === "new" ? nw : DATA.bodies[body].sites;
   const ranking = $("#ranking");
   ranking.replaceChildren();
+  rankPins = [];
+  rankColor = color;
   list.forEach((s, i) => {
     const title = t(mode === "final" ? "lm.finalTitle" : mode === "new" ? "lm.newTitle" : "lm.rankTitle", { n: i + 1 });
     const { li, button } = listItem(s, rankBadge(i + 1, color), t("lm.similarTo", { name: likeName(s) }), levelsLine(s));
     const go = register(`rank-${mode}-${i}`, button, (fly) => select(s, title, null, fly));
-    const icon = L.divIcon({ className: "", iconSize: [24, 24], html: rankBadge(i + 1, color) });
-    L.marker([s.lat, s.lon], { icon, title: `${title} · ${coord(s.lat, s.lon)}` }).addTo(rankLayer!).on("click", () => go());
+    rankPins.push({ s, n: i + 1, title, go });
     ranking.append(li);
   });
+  drawRankPins();
 }
+
+/**
+ * Marcadores del mapa, redibujados en cada zoom para que no se tapen:
+ * - los números del ranking que se tocarían se agrupan bajo el de mejor puesto, que muestra «+N» con cuántos hay
+ *   debajo; tocar el grupo acerca el mapa hasta separarlos (a zoom 2, Irán, el Sahara o Chile eran una pila ilegible);
+ * - las estrellas de las historias van primero, y lo que caería encima de algo ya dibujado se corre al lado más cercano libre.
+ *   Las historias también están en el ranking, así que sin esto la estrella tapa su propio número.
+ */
+function drawRankPins() {
+  if (rankLayer) map.removeLayer(rankLayer);
+  const layer = (rankLayer = L.layerGroup().addTo(map));
+  const z = map.getZoom();
+  const placed: { at: L.Point; r: number }[] = [];
+  /** Desplazamiento (px) para que un marcador de radio r en «at» no toque ninguno ya dibujado. */
+  const nudge = (at: L.Point, r: number): L.Point => {
+    const free = (p: L.Point) => placed.every((q) => q.at.distanceTo(p) >= q.r + r + 1);
+    let shift = L.point(0, 0);
+    if (!free(at)) {
+      search: for (let ring = 1; ring <= 3; ring++) {
+        for (let k = 0; k < 12; k++) {
+          const a = -Math.PI / 4 + (k * Math.PI) / 6; // empieza arriba a la derecha y gira
+          const step = L.point(Math.cos(a), Math.sin(a)).multiplyBy(ring * (r + STAR_R + 1) / 2);
+          if (free(at.add(step))) { shift = step; break search; }
+        }
+      }
+    }
+    placed.push({ at: at.add(shift), r });
+    return shift;
+  };
+
+  for (const star of starPins) {
+    const shift = nudge(map.project([star.s.lat, star.s.lon], z), STAR_R);
+    const icon = L.divIcon({ className: "lm-pin", iconSize: [30, 30], iconAnchor: [15 - shift.x, 15 - shift.y],
+      html: `<span class="lm-rank lm-star" style="box-shadow:0 0 0 3px ${rankColor}">★</span>` });
+    L.marker([star.s.lat, star.s.lon], { icon, zIndexOffset: 1000, title: star.title }).addTo(layer).on("click", () => star.go());
+  }
+
+  const groups: { at: L.Point; pins: RankPin[] }[] = [];
+  for (const pin of rankPins) {
+    // En orden de ranking: el primero de cada grupo es el mejor y marca la posición del grupo.
+    const at = map.project([pin.s.lat, pin.s.lon], z);
+    const near = groups.find((g) => g.at.distanceTo(at) < PIN_GAP);
+    if (near) near.pins.push(pin);
+    else groups.push({ at, pins: [pin] });
+  }
+  for (const { at, pins } of groups) {
+    const [best, ...rest] = pins;
+    const where: L.LatLngTuple = [best.s.lat, best.s.lon];
+    const shift = nudge(at, PIN_R);
+    const iconAnchor: L.PointTuple = [PIN_R - shift.x, PIN_R - shift.y];
+    if (!rest.length) {
+      const icon = L.divIcon({ className: "lm-pin", iconSize: [24, 24], iconAnchor, html: rankBadge(best.n, rankColor) });
+      L.marker(where, { icon, title: `${best.title} · ${coord(best.s.lat, best.s.lon)}` }).addTo(layer).on("click", () => best.go());
+      continue;
+    }
+    const icon = L.divIcon({
+      className: "lm-pin",
+      iconSize: [24, 24],
+      iconAnchor,
+      html: `${rankBadge(best.n, rankColor)}<span class="lm-more" aria-hidden="true">+${rest.length}</span>`,
+    });
+    const bounds = L.latLngBounds(pins.map((p): L.LatLngTuple => [p.s.lat, p.s.lon]));
+    const title = t("lm.pinGroup", { list: pins.map((p) => p.n).join(", ") });
+    L.marker(where, { icon, title }).addTo(layer).on("click", () => {
+      const target = Math.min(map.getBoundsZoom(bounds, false, L.point(112, 112)), PIN_MAX_ZOOM);
+      if (target <= map.getZoom()) best.go();
+      else map.flyToBounds(bounds, { padding: [56, 56], maxZoom: PIN_MAX_ZOOM });
+    });
+  }
+}
+map.on("zoomend", drawRankPins);
 
 // ---- gemelos por grupo ---------------------------------------------------------------------
 const openGroups = new Set<string>();
@@ -867,11 +948,11 @@ function featuredSite(f: Featured): EarthSite | null {
 }
 
 function renderFeatured() {
-  const color = BODY_COLOR[body];
   const featured = $("#featured");
   featured.replaceChildren();
   const stories = (Array.isArray(DATA.featured) ? DATA.featured : []).filter((f) => f && f.body === body);
   let firstKey: string | null = null;
+  starPins = [];
   for (const f of stories) {
     const s = featuredSite(f);
     if (!s) continue;
@@ -884,13 +965,14 @@ function renderFeatured() {
     const key = `feat-${f.ref}`;
     btn.addEventListener("click", () => { storyOpen = true; });   // antes que el de register: la historia se abre desplegada
     const go = register(key, btn, (fly) => select(s, tr(f.title), tr(f.story), fly));
-    const icon = L.divIcon({ className: "", iconSize: [30, 30],
-      html: `<span class="lm-rank lm-star" style="box-shadow:0 0 0 3px ${color}">★</span>` });
-    L.marker([s.lat, s.lon], { icon, zIndexOffset: 1000, title: tr(f.title) }).addTo(baseLayer!).on("click", () => { storyOpen = true; go(); });
+    // drawRankPins dibuja la estrella; desde el mapa, la historia también se abre desplegada
+    starPins.push({ s, title: tr(f.title), go: () => { storyOpen = true; go(); } });
     featured.append(btn);
     firstKey ??= key;
   }
   $("#fold-featured").hidden = !firstKey;
+  drawRankPins(); // ahora con las estrellas de este cuerpo
+
   return firstKey;
 }
 
@@ -932,6 +1014,7 @@ function render() {
   baseLayer = L.layerGroup().addTo(map);
   openers.clear();
   selectedEl = null;
+  starPins = []; // las de la pestaña anterior; renderFeatured pone las nuevas
   if (heatBody !== body) {
     if (heatLayer) map.removeLayer(heatLayer);
     heatLayer = L.layerGroup().addTo(map);

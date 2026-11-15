@@ -284,6 +284,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "lm.newTitle": "Nuevo n.º {n}",
     "lm.newNote": "Solo candidatos lejos de los análogos conocidos y sin estudios encontrados: lo que el reto pide descubrir. «Sin revisar» = bibliografía pendiente.",
     "lm.finalTitle": "Final n.º {n}",
+    "lm.pinGroup": "Puestos {list}: acerca el mapa para verlos por separado",
     "lm.levelsShort": "terreno 30/10/{k} km: {a} · {b} · {c}",
     "lm.terrainLevels": "Terreno por escala",
     "lm.levelBar": "{km} km ({lv})",
@@ -628,6 +629,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "lm.newTitle": "New #{n}",
     "lm.newNote": "Only candidates away from known analogs and with no studies found: what the challenge asks us to discover. «Not reviewed» = literature pending.",
     "lm.finalTitle": "Final #{n}",
+    "lm.pinGroup": "Ranks {list}: zoom in to see them one by one",
     "lm.levelsShort": "terrain 30/10/{k} km: {a} · {b} · {c}",
     "lm.terrainLevels": "Terrain by scale",
     "lm.levelBar": "{km} km ({lv})",
@@ -936,7 +938,7 @@ const dataEn: Record<string, string> = {
   "El punto cae en Sévrei, Ömnögovi (Mongolia). Solo hay indicios: el proyecto MARS-V (ONG mongola, con la Mars Society) planea una estación análoga de Marte en el Gobi (Dundgovi y Ömnögovi), pero ninguna fuente abierta da el sitio exacto, así que no pude confirmar que esté a menos de 75 km. No hallé estudios científicos ni resúmenes de LPSC/ADS sobre este lugar, ni nada de análogo lunar. Todo lo hallado es de Marte y de prensa o divulgación. Una segunda revisión independiente no lo confirmó: las tres fuentes (Universe Magazine, 2025; comunicado de la Mars Society, 2023; columna de la Yale Review of International Studies, 2024) son prensa, un anuncio y una opinión; ninguna da un sitio ni coordenadas, y como Dundgovi y Ömnögovi abarcan cientos de km, no se puede saber si la estación quedaría a menos de 75 km de Sévrei.":
     "The point falls in Sévrei, Ömnögovi (Mongolia). There are only hints: the MARS-V project (a Mongolian NGO, with the Mars Society) plans a Mars analog station in the Gobi (Dundgovi and Ömnögovi), but no open source gives the exact site, so we could not confirm that it is within 75 km. We found no scientific studies or LPSC/ADS abstracts about this place, and nothing about a lunar analog. Everything found is about Mars and comes from the press or popular outreach. A second independent check did not confirm it: the three sources (Universe Magazine, 2025; a Mars Society release, 2023; a Yale Review of International Studies column, 2024) are press coverage, an announcement and an opinion piece; none gives a site or coordinates, and since Dundgovi and Ömnögovi span hundreds of km, there is no way to tell whether the station would be within 75 km of Sévrei.",
   "El punto cae en el distrito de Tazrouk (Tamanrasset, Argelia), al este del macizo volcánico del Hoggar (Ahaggar), en la zona de la cuenca de Amadror. Tras 11 búsquedas en inglés, francés y árabe no encontré ningún estudio que use o proponga este lugar, ni otro a menos de 75 km, como análogo lunar o marciano. Tampoco encontré pruebas de rovers ni astrobiología en la zona. Lo más cercano son estudios de OTROS sitios saharianos, todos lejos: la cuenca de Ahnet (resumen EPSC-DPS 2025, análogo de Marte, que abrí) y la sal plana de Tanezrouft (proyecto AZALEA, EANA 2024, que solo vi en los resultados de búsqueda). Ambos están a cientos de km, fuera del criterio. La NASA bautizó cuadrantes de Marte con parques argelinos (Tassili n'Ajjer, Ghoufi, Djurdjura), pero es una nomenclatura inspirada en el parecido visual, no un estudio de análogo, y no incluye el Hoggar. No pude abrir la página de Marsdaily (demasiadas redirecciones); usé Arab News.":
-    "The point falls in Tazrouk District (Tamanrasset, Algeria), east of the volcanic Hoggar (Ahaggar) massif, in the Amadror basin area. After 11 searches in English, French and Arabic we found no study that uses or proposes this place, or another within 75 km, as a lunar or Martian analog. Nor did we find rover tests or astrobiology in the area. The closest are studies of OTHER Saharan sites, all far away: the Ahnet basin (EPSC-DPS 2025 abstract, Mars analog, which we opened) and the Tanezrouft salt flat (AZALEA project, EANA 2024, which we only saw in search results). Both are hundreds of km away, outside the criterion. NASA named quadrangles of Mars after Algerian parks (Tassili n'Ajjer, Ghoufi, Djurdjura), but that is naming inspired by visual resemblance, not an analog study, and it does not include the Hoggar. We could not open the Marsdaily page (too many redirects); I used Arab News.",
+    "The point falls in Tazrouk District (Tamanrasset, Algeria), east of the volcanic Hoggar (Ahaggar) massif, in the Amadror basin area. After 11 searches in English, French and Arabic we found no study that uses or proposes this place, or another within 75 km, as a lunar or Martian analog. Nor did we find rover tests or astrobiology in the area. The closest are studies of OTHER Saharan sites, all far away: the Ahnet basin (EPSC-DPS 2025 abstract, Mars analog, which we opened) and the Tanezrouft salt flat (AZALEA project, EANA 2024, which we only saw in search results). Both are hundreds of km away, outside the criterion. NASA named quadrangles of Mars after Algerian parks (Tassili n'Ajjer, Ghoufi, Djurdjura), but that is naming inspired by visual resemblance, not an analog study, and it does not include the Hoggar. We could not open the Marsdaily page (too many redirects); we used Arab News.",
   "El punto cae en la Puna de Atacama (Chile, cerca del límite con Argentina), a unos 44 km del volcán Socompa. Allí, Schmidt et al. 2018 propone los suelos de tefra de las cumbres volcánicas (Socompa y Llullaillaco) como análogo de Marte, y Farías et al. 2013 estudia estromatolitos de la Laguna Socompa como análogo de la Tierra temprana, sin Marte. Ningún estudio abierto trata el salar del candidato en sí. No hay nada específico de análogo lunar, y el paisaje de cumbre volcánica no es el mismo que el del salar. Llullaillaco queda a unos 89 km, fuera del radio. Los textos que hablan de «paisaje marciano» en Arizaro o Tolar Grande son solo prensa de viajes. Verificación independiente: confirmado (Life at extreme elevations on Atacama volcanoes: the closest thing to Mars on Earth? (Schmidt et al., 2018)).":
     "The point falls in the Puna de Atacama (Chile, near the border with Argentina), about 44 km from the Socompa volcano. There, Schmidt et al. 2018 propose the tephra soils of the volcanic summits (Socompa and Llullaillaco) as a Mars analog, and Farías et al. 2013 study the stromatolites of Laguna Socompa as an early-Earth analog, without Mars. No open study deals with the candidate's salt flat itself. There is nothing specific about a lunar analog, and the volcanic summit landscape is not the same as that of the salt flat. Llullaillaco is about 89 km away, outside the radius. The texts that speak of a “Martian landscape” in Arizaro or Tolar Grande are only travel journalism. Independent verification: confirmed (Life at extreme elevations on Atacama volcanoes: the closest thing to Mars on Earth? (Schmidt et al., 2018)).",
   "El punto cae en la llanura de la Tamesna (daïra de In Guezzam, sur de Argelia, unos 70 km al NNE de In Guezzam). Tras 12 búsquedas (inglés, francés y árabe) no hay ningún estudio que use o proponga este lugar, ni otro a menos de 75 km, como análogo planetario o sitio de pruebas. Los análogos saharianos publicados están lejos: cuenca de Ahnet y salares del Tanezrouft (cientos de km al norte), pruebas de rovers en Marruecos, y rastros de dust devils en el Ténéré (Níger, lejos al este). El único texto que une la Tamesna con Marte es un relato de caza de meteoritos de 2002 (meteorite-recon.com), que abrí: usa imágenes de Marte solo como referencia geomorfológica y no es un estudio de análogo planetario. Genéricos como \"el Sahara es un análogo de Marte\" (EGU2018, IMS2016) no nombran este lugar; el PDF del EGU2018 no pude leerlo y la página de IMS2016 no cargó.":
@@ -983,6 +985,209 @@ const dataEn: Record<string, string> = {
     "After 9 searches in English and Persian no study comes up that proposes the Ashar/Mehrestan area (inner Makran, Sistan and Baluchestan) as a planetary analog, nor any other place within about 75 km. The closest are the “Martian mountains” of Chabahar, more than 150 km away and with only tourist sources, the Pirgel mud volcano near Khash (about 160 km) and the megaripples of the Lut Desert. The Lut is a Mars analog (not a Moon one) and is much farther away, so none of them meets the criterion.",
   "Tras unas 13 búsquedas en inglés, francés y árabe no encontré ningún estudio que use o proponga este punto (Tazrouk, Tamanrasset, este del Hoggar) ni nada a menos de 75 km como análogo lunar/marciano, sitio de pruebas de rovers o de astrobiología. Solo aparecen análogos saharianos lejanos: la cuenca de Ahnet (EPSC-DPS 2025, unos 600 km, para Marte; abierto) y los sitios de Marruecos (Ibn Battuta). El resumen LPI-1738 (2013) nombra el Hoggar solo de pasada como centro volcánico del Sahara, sin estudiarlo. Las menciones al Tassili n'Ajjer (a unos 450 km) vienen de notas de prensa sobre nombres de rasgos marcianos y no las abrí. La ausencia de resultados no prueba que no exista algún estudio local no indexado.":
     "After about 13 searches in English, French and Arabic we found no study that uses or proposes this point (Tazrouk, Tamanrasset, east of the Hoggar), or anything within 75 km, as a lunar/Martian analog, rover test site or astrobiology site. Only distant Saharan analogs come up: the Ahnet basin (EPSC-DPS 2025, about 600 km, for Mars; opened) and the sites in Morocco (Ibn Battuta). The LPI-1738 abstract (2013) names the Hoggar only in passing as a volcanic center of the Sahara, without studying it. The mentions of Tassili n'Ajjer (about 450 km away) come from press notes about the names of Martian features, and we did not open them. The absence of results does not prove that no unindexed local study exists.",
+  // Traducciones añadidas por el equipo el 15/11 (commit 5ea7f7e). Si una frase también está en
+  // i18n.datos.en.ts, manda la de ese archivo (Object.assign de abajo).
+  // Notas de fuente y nombres de las referencias (results.json → references[] y references_fine[]).
+  // Las de teselas y ventanas se traducen con las reglas de dataEnPatterns, que reusan estas.
+  "Gazetteer of Planetary Nomenclature (IAU/USGS): Shackleton, D = 20.92 km, -89.67, 129.78 (planetográfica, +Este; cotejado el 14/11/2026). Mismo id que la referencia de la v1.":
+    "Gazetteer of Planetary Nomenclature (IAU/USGS): Shackleton, D = 20.92 km, -89.67, 129.78 (planetographic, +East; checked on 14 Nov 2026). Same id as the v1 reference.",
+  "Gazetteer of Planetary Nomenclature, Tooting (Feature 6059), leído del shapefile oficial MARS_nomenclature_center_pts (asc-planetarynames-data); el metadato dice latitud planetocéntrica y longitud positiva al este: center_lat 23.2070, center_lon 207.7613E → -152.2387; diámetro 27.86 km, por lo que el cráter cabe casi entero en la ventana de 30 km. HiRISE ESP_062934_2040 ('Pitted Material from Tooting Crater', 23.498, 207.567E) lo describe como uno de los cráteres más jóvenes >20 km.":
+    "Gazetteer of Planetary Nomenclature, Tooting (Feature 6059), read from the official shapefile MARS_nomenclature_center_pts (asc-planetarynames-data); the metadata says planetocentric latitude and positive-east longitude: center_lat 23.2070, center_lon 207.7613E → -152.2387; diameter 27.86 km, so the crater fits almost entirely in the 30 km window. HiRISE ESP_062934_2040 ('Pitted Material from Tooting Crater', 23.498, 207.567E) describes it as one of the youngest craters >20 km.",
+  "Gazetteer, Korolev (Feature 3091), leído del shapefile oficial (planetocéntrica, este positivo): center_lat 72.7677, center_lon 164.584E (ya en -180..180); diámetro 81.37 km. El centro cae sobre el montículo de hielo que rellena el cráter. Cotejo HiRISE: 'Edge of Korolev Crater Ice Mound' (ESP_019248_2530) 72.912, 166.186E; 'Western Rim Region of Korolev Crater' (PSP_007961_2530) 72.899, 162.006E.":
+    "Gazetteer, Korolev (Feature 3091), read from the official shapefile (planetocentric, positive east): center_lat 72.7677, center_lon 164.584E (already in -180..180); diameter 81.37 km. The center falls on the ice mound that fills the crater. HiRISE cross-check: 'Edge of Korolev Crater Ice Mound' (ESP_019248_2530) 72.912, 166.186E; 'Western Rim Region of Korolev Crater' (PSP_007961_2530) 72.899, 162.006E.",
+  "Gläser et al., tabla 1: -89.7849, 203.97 E; iluminación media 81.0 %. Mazarico et al. (2011): -89.78, 204.27 E.":
+    "Gläser et al., table 1: -89.7849, 203.97 E; mean illumination 81.0 %. Mazarico et al. (2011): -89.78, 204.27 E.",
+  "Golombek et al. (2020), Earth and Space Science, 'Location and Setting of the Mars InSight Lander, Instruments, and Landing Site'. Leí el resumen vía la API de Europe PMC (PMC7583488): 'The lander is located at 4.502384°N, 135.623447°E', en un sistema 'positive east, planetocentric'. Sin conversión.":
+    "Golombek et al. (2020), Earth and Space Science, 'Location and Setting of the Mars InSight Lander, Instruments, and Landing Site'. We read the abstract through the Europe PMC API (PMC7583488): 'The lander is located at 4.502384°N, 135.623447°E', in a 'positive east, planetocentric' system. No conversion.",
+  "LROC 'IM-2 Athena Seen Obliquely' (10-mar-2025): 84.7906° S, 29.1957° E (cotejado el 14/11/2026). Quedó de lado dentro de un cráter de ~20 m cerca del centro de Mons Mouton. El sitio previsto era -84.78, 29.13 (LROC 'IM-2 Landing Region', https://lroc.im-ldi.com/images/1401).":
+    "LROC 'IM-2 Athena Seen Obliquely' (10 Mar 2025): 84.7906° S, 29.1957° E (checked on 14 Nov 2026). It ended up on its side inside a ~20 m crater near the center of Mons Mouton. The planned site was -84.78, 29.13 (LROC 'IM-2 Landing Region', https://lroc.im-ldi.com/images/1401).",
+  "La página ODE (Nodo de Geociencias del PDS) da 'Viking Lander 1: 22.269° N, 312.049° E'. No dice si la latitud es planetocéntrica (ODE trabaja normalmente en planetocéntrica con longitud este). La longitud se pasó de 0-360 a -180..180: 312.049-360 = -47.951.":
+    "The ODE page (PDS Geosciences Node) gives 'Viking Lander 1: 22.269° N, 312.049° E'. It does not say whether the latitude is planetocentric (ODE normally works in planetocentric with east longitude). The longitude was converted from 0-360 to -180..180: 312.049-360 = -47.951.",
+  "Latitud -88.2 de la tabla NASA GSFC TFAWS 2025 (área 399.8 km²). Longitud -66.7 = centro del mosaico LROC 'de Gerlache Rim' NAC_ROI_DEGERRIMLO1_P885S2933 (centro -88.5, 293.3 E; límites lat -89.02 a -87.79, lon -83.18 a -41.31; cotejado el 14/11/2026), que puede abarcar Rim 1 y Rim 2: longitud INCIERTA y límites del mosaico, no de la región. Cráter de Gerlache (IAU, Feature/1439): -88.48, -88.34. También región en 2022.":
+    "Latitude -88.2 from the NASA GSFC TFAWS 2025 table (area 399.8 km²). Longitude -66.7 = center of the LROC mosaic 'de Gerlache Rim' NAC_ROI_DEGERRIMLO1_P885S2933 (center -88.5, 293.3 E; bounds lat -89.02 to -87.79, lon -83.18 to -41.31; checked on 14 Nov 2026), which may cover both Rim 1 and Rim 2: the longitude is UNCERTAIN and the bounds are the mosaic's, not the region's. De Gerlache crater (IAU, Feature/1439): -88.48, -88.34. Also a region in 2022.",
+  "Liu, Li, Zhang et al. (2022), Nature Astronomy, 'Geomorphic contexts and science focus of the Zhurong landing site on Mars': 'the Zhurong rover landed at 109.925° E, 25.066° N at an elevation of −4,099.4 m'. El artículo no dice si la latitud es planetocéntrica, aunque así lo indica el uso de la longitud este. Sin conversión.":
+    "Liu, Li, Zhang et al. (2022), Nature Astronomy, 'Geomorphic contexts and science focus of the Zhurong landing site on Mars': 'the Zhurong rover landed at 109.925° E, 25.066° N at an elevation of −4,099.4 m'. The article does not say whether the latitude is planetocentric, although the use of east longitude suggests it is. No conversion.",
+  "Lunar Pit Locations de LROC (LUNAR_PIT_LOCATIONS.CSV, PDS LROLRC_2001/EXTRAS; Atlas de fosos de LROC), leído el 14/11/2026: Mare Ingenii Pit, -35.9494, 166.0559.":
+    "LROC Lunar Pit Locations (LUNAR_PIT_LOCATIONS.CSV, PDS LROLRC_2001/EXTRAS; LROC pit atlas), read on 14 Nov 2026: Mare Ingenii Pit, -35.9494, 166.0559.",
+  "Lunar Pit Locations de LROC (LUNAR_PIT_LOCATIONS.CSV, PDS LROLRC_2001/EXTRAS; Atlas de fosos de LROC), leído el 14/11/2026: Mare Tranquillitatis Pit, 8.3355, 33.222; 105 m de profundidad interior.":
+    "LROC Lunar Pit Locations (LUNAR_PIT_LOCATIONS.CSV, PDS LROLRC_2001/EXTRAS; LROC pit atlas), read on 14 Nov 2026: Mare Tranquillitatis Pit, 8.3355, 33.222; 105 m interior depth.",
+  "Lunar Pit Locations de LROC (LUNAR_PIT_LOCATIONS.CSV, PDS LROLRC_2001/EXTRAS; Atlas de fosos de LROC), leído el 14/11/2026: Marius Hills Pit, 14.0917, -56.7701 (303.2299 E); 40 m de profundidad.":
+    "LROC Lunar Pit Locations (LUNAR_PIT_LOCATIONS.CSV, PDS LROLRC_2001/EXTRAS; LROC pit atlas), read on 14 Nov 2026: Marius Hills Pit, 14.0917, -56.7701 (303.2299 E); 40 m deep.",
+  "Mismo mosaico LROC compartido con Mons Mouton (NAC_ROI_MTMOUTONLO1_P854S0353, centro -85.4, 35.3; lon 27.29 a 43.23). La longitud propia NO está verificada. GSFC TFAWS 2025: latitud -85.4, área 398.7 km². Cráter Nobile (IAU, Feature/4321): -85.28, 53.27. También región en 2022.":
+    "Same LROC mosaic shared with Mons Mouton (NAC_ROI_MTMOUTONLO1_P854S0353, center -85.4, 35.3; lon 27.29 to 43.23). Its own longitude is NOT verified. GSFC TFAWS 2025: latitude -85.4, area 398.7 km². Nobile crater (IAU, Feature/4321): -85.28, 53.27. Also a region in 2022.",
+  "Mosaico LROC NAC_ROI_AMUNDRIMLO1_P842S0693: centro -84.2, 69.3; límites lat -84.65 a -83.80, lon 65.10 a 73.51 (cotejado el 14/11/2026). Cráter Amundsen (IAU): -84.44, 83.07.":
+    "LROC mosaic NAC_ROI_AMUNDRIMLO1_P842S0693: center -84.2, 69.3; bounds lat -84.65 to -83.80, lon 65.10 to 73.51 (checked on 14 Nov 2026). Amundsen crater (IAU): -84.44, 83.07.",
+  "Mosaico LROC NAC_ROI_CABEUSPKLO1_P836S2912 ('Peak Near Cabeus B', candidata de Artemis III): centro -83.6, 291.2 E (= -68.8); límites lat -84.06 a -83.21, lon -72.47 a -64.80 (página cotejada el 14/11/2026). GSFC TFAWS 2025 (NTRS 20250007692): latitud del centro -83.6, área 397.3 km² (extent_km = raíz del área). Cráter Cabeus B (IAU, Feature/8058): -82.26, -54.58.":
+    "LROC mosaic NAC_ROI_CABEUSPKLO1_P836S2912 ('Peak Near Cabeus B', Artemis III candidate): center -83.6, 291.2 E (= -68.8); bounds lat -84.06 to -83.21, lon -72.47 to -64.80 (page checked on 14 Nov 2026). GSFC TFAWS 2025 (NTRS 20250007692): center latitude -83.6, area 397.3 km² (extent_km = square root of the area). Cabeus B crater (IAU, Feature/8058): -82.26, -54.58.",
+  "Mosaico LROC NAC_ROI_DEGERKCHLO1_P858S24363: centro -85.8, 243.6 E (= -116.4); límites lat -86.27 a -85.39, lon -122.59 a -110.48 (cotejado el 14/11/2026).":
+    "LROC mosaic NAC_ROI_DEGERKCHLO1_P858S24363: center -85.8, 243.6 E (= -116.4); bounds lat -86.27 to -85.39, lon -122.59 to -110.48 (checked on 14 Nov 2026).",
+  "Mosaico LROC NAC_ROI_FAUSTINILO1_P878S0900: centro -87.8, 90.0; límites lat -88.19 a -87.54, lon 79.51 a 100.49 (cotejado el 14/11/2026). 15x15 km según la nota de NASA de 2022. Rejilla USGS en DOI 10.5066/P13FD9ZD (no leída).":
+    "LROC mosaic NAC_ROI_FAUSTINILO1_P878S0900: center -87.8, 90.0; bounds lat -88.19 to -87.54, lon 79.51 to 100.49 (checked on 14 Nov 2026). 15x15 km according to NASA's 2022 note. USGS grid at DOI 10.5066/P13FD9ZD (not read).",
+  "Mosaico LROC NAC_ROI_HAWORTH_LO1_P867S3363: centro -86.7, 336.3 E (= -23.7); límites lat -87.39 a -86.11, lon -34.98 a -12.36 (cotejado el 14/11/2026). GSFC TFAWS 2025: latitud -86.7, área 886.6 km². Cráter Haworth (IAU, Feature/14502): -87.45, -5.17. También región en 2022.":
+    "LROC mosaic NAC_ROI_HAWORTH_LO1_P867S3363: center -86.7, 336.3 E (= -23.7); bounds lat -87.39 to -86.11, lon -34.98 to -12.36 (checked on 14 Nov 2026). GSFC TFAWS 2025: latitude -86.7, area 886.6 km². Haworth crater (IAU, Feature/14502): -87.45, -5.17. Also a region in 2022.",
+  "Mosaico LROC NAC_ROI_MALAPERTLO1_P860S0003: centro -86.0, 0.3; límites lat -86.33 a -85.63, lon -5.66 a 5.15 (cotejado el 14/11/2026). GSFC TFAWS 2025: latitud -86.0, área 439.9 km². Mons Malapert (IAU, Feature/16338): -85.98, -1.67. También región en 2022.":
+    "LROC mosaic NAC_ROI_MALAPERTLO1_P860S0003: center -86.0, 0.3; bounds lat -86.33 to -85.63, lon -5.66 to 5.15 (checked on 14 Nov 2026). GSFC TFAWS 2025: latitude -86.0, area 439.9 km². Mons Malapert (IAU, Feature/16338): -85.98, -1.67. Also a region in 2022.",
+  "Mosaico LROC NAC_ROI_MOUTNPLTLO1_P843S0306: centro -84.3, 30.6; límites lat -85.76 a -82.85, lon 15.49 a 46.61 (cotejado el 14/11/2026). GSFC TFAWS 2025: latitud -84.2, área 4428.4 km², mucho mayor que las demás regiones. Mons Mouton (IAU, Feature/16070): -84.60, 31.00.":
+    "LROC mosaic NAC_ROI_MOUTNPLTLO1_P843S0306: center -84.3, 30.6; bounds lat -85.76 to -82.85, lon 15.49 to 46.61 (checked on 14 Nov 2026). GSFC TFAWS 2025: latitude -84.2, area 4428.4 km², much larger than the other regions. Mons Mouton (IAU, Feature/16070): -84.60, 31.00.",
+  "Mosaico LROC NAC_ROI_NOBILE02LO1_P839S0587: centro -83.9, 58.7; límites lat -84.40 a -83.50, lon 54.46 a 63.02 (cotejado el 14/11/2026). GSFC TFAWS 2025: latitud -83.9, área 397.8 km². Peña-Asensio et al. (Acta Astronautica; arXiv 2406.19863) sitúan su punto óptimo en -84.20156, 60.69989. También región en 2022.":
+    "LROC mosaic NAC_ROI_NOBILE02LO1_P839S0587: center -83.9, 58.7; bounds lat -84.40 to -83.50, lon 54.46 to 63.02 (checked on 14 Nov 2026). GSFC TFAWS 2025: latitude -83.9, area 397.8 km². Peña-Asensio et al. (Acta Astronautica; arXiv 2406.19863) place their optimal point at -84.20156, 60.69989. Also a region in 2022.",
+  "Mosaico LROC NAC_ROI_SHKLTNPKLO1_P888S1247 (y el #2, SHKLTNPKLO2, con el mismo centro y límites): centro -88.8, 124.7; límites lat -89.17 a -88.44, lon 107.53 a 141.84 (cotejado el 14/11/2026).":
+    "LROC mosaic NAC_ROI_SHKLTNPKLO1_P888S1247 (and #2, SHKLTNPKLO2, with the same center and bounds): center -88.8, 124.7; bounds lat -89.17 to -88.44, lon 107.53 to 141.84 (checked on 14 Nov 2026).",
+  "Mosaico LROC compartido 'Nobile Rim 1 and Mons Mouton (Leibnitz Beta Plateau)' NAC_ROI_MTMOUTONLO1_P854S0353: centro -85.4, 35.3; límites lat -86.07 a -84.82, lon 27.29 a 43.23 (cotejado el 14/11/2026). Lat y lon son las del mosaico compartido: la longitud propia de la región NO está verificada. GSFC TFAWS 2025: latitud -85.4, área 255.2 km². Región 'Leibnitz Beta Plateau' en 2022 (Mons Mouton aprobado por la IAU el 13-may-2022).":
+    "Shared LROC mosaic 'Nobile Rim 1 and Mons Mouton (Leibnitz Beta Plateau)' NAC_ROI_MTMOUTONLO1_P854S0353: center -85.4, 35.3; bounds lat -86.07 to -84.82, lon 27.29 to 43.23 (checked on 14 Nov 2026). Lat and lon are those of the shared mosaic: the region's own longitude is NOT verified. GSFC TFAWS 2025: latitude -85.4, area 255.2 km². Region 'Leibnitz Beta Plateau' in 2022 (Mons Mouton approved by the IAU on 13 May 2022).",
+  "No es el centro de la región (no verificado): es el punto C1 de máxima iluminación media de la cresta Shackleton–de Gerlache según Gläser et al. ('Illumination conditions at the lunar poles: Implications for future exploration', Planetary and Space Science), tabla 1: -89.4505, 222.84 E (= -137.16). No hay mosaico LROC de la región. Rejilla USGS en DOI 10.5066/P13FD9ZD (no leída). Mismo punto que el sitio connecting_ridge_c1.":
+    "Not the center of the region (not verified): it is point C1, the one with the highest mean illumination on the Shackleton–de Gerlache ridge according to Gläser et al. ('Illumination conditions at the lunar poles: Implications for future exploration', Planetary and Space Science), table 1: -89.4505, 222.84 E (= -137.16). There is no LROC mosaic of the region. USGS grid at DOI 10.5066/P13FD9ZD (not read). Same point as the site connecting_ridge_c1.",
+  "No hay coordenadas publicadas de esta región. Se usa el punto C2 de Connecting Ridge de Gläser et al. (tabla 1: -89.3157, 245.94 E = -114.06), pero NO consta que corresponda a 'Connecting Ridge Extension'. Polígono en la release USGS DOI 10.5066/P13FD9ZD (no leída). Mismo punto que el sitio connecting_ridge_c2.":
+    "There are no published coordinates for this region. Point C2 of Connecting Ridge from Gläser et al. is used (table 1: -89.3157, 245.94 E = -114.06), but there is NO record that it corresponds to 'Connecting Ridge Extension'. Polygon in the USGS release DOI 10.5066/P13FD9ZD (not read). Same point as the site connecting_ridge_c2.",
+  "ODE da dos soluciones. Uso la triangulación cartográfica: '14.5692° S, 175.4729° E'. La solución Doppler es 14.571892° S, 175.47848° E. Sin conversión de longitud.":
+    "ODE gives two solutions. We use the cartographic triangulation: '14.5692° S, 175.4729° E'. The Doppler solution is 14.571892° S, 175.47848° E. No longitude conversion.",
+  "ODE, triangulación cartográfica: '1.9462° S, 354.4734° E'. La solución Doppler es 1.9483° S, 354.47417° E. Longitud convertida: 354.4734-360 = -5.5266.":
+    "ODE, cartographic triangulation: '1.9462° S, 354.4734° E'. The Doppler solution is 1.9483° S, 354.47417° E. Converted longitude: 354.4734-360 = -5.5266.",
+  "ODE: 'Pathfinder: 19.095° N, 326.747° E'. Longitud convertida: 326.747-360 = -33.253.":
+    "ODE: 'Pathfinder: 19.095° N, 326.747° E'. Converted longitude: 326.747-360 = -33.253.",
+  "ODE: 'Phoenix: 68.22° N, 234.25° E'. Longitud convertida: 234.25-360 = -125.75. Solo dos decimales en la fuente.":
+    "ODE: 'Phoenix: 68.22° N, 234.25° E'. Converted longitude: 234.25-360 = -125.75. Only two decimals in the source.",
+  "ODE: 'Viking Lander 2: 47.668° N, 134.280° E'. No hizo falta convertir. La página no dice el sistema de latitud.":
+    "ODE: 'Viking Lander 2: 47.668° N, 134.280° E'. No conversion was needed. The page does not state the latitude system.",
+  "Posición = centro del cráter Slater (Gazetteer IAU, planetográfica +Este: -88.08, 111.29; D = 25.12 km; cotejado el 14/11/2026). La tabla GSFC TFAWS 2025 da para la región latitud -87.1 y área 399.3 km²: la región está a ~30 km del centro del cráter hacia el ecuador y su longitud no está verificada. No hay mosaico LROC de la región (solo el de la PSR de Slater, NAC_ROI_PSRSLATRLOA, centro -87.5, 121.4, que no es la región).":
+    "Position = center of Slater crater (IAU Gazetteer, planetographic +East: -88.08, 111.29; D = 25.12 km; checked on 14 Nov 2026). The GSFC TFAWS 2025 table gives the region a latitude of -87.1 and an area of 399.3 km²: the region lies ~30 km from the crater center toward the equator, and its longitude is not verified. There is no LROC mosaic of the region (only the one of the Slater PSR, NAC_ROI_PSRSLATRLOA, center -87.5, 121.4, which is not the region).",
+  "Primer punto (sol 3, site 2, drive 0) del GeoJSON oficial de recorrido de NASA/JPL: lon 137.441633, lat -4.589467. Ya está en longitud este -180..180. Concuerda con ODE ('MSL Gale (Curiosity): 4.59° S, 137.44° E'). El archivo no indica el datum de latitud, pero la cartografía de MSL es planetocéntrica.":
+    "First point (sol 3, site 2, drive 0) of the official NASA/JPL traverse GeoJSON: lon 137.441633, lat -4.589467. Already in east longitude -180..180. It agrees with ODE ('MSL Gale (Curiosity): 4.59° S, 137.44° E'). The file does not state the latitude datum, but MSL cartography is planetocentric.",
+  "Primer punto del GeoJSON oficial de recorrido de NASA/JPL (sol 13, site 3, drive 0, dist_total_m 0, 'Site increment, no motion'): lon 77.45088572, lat 18.44462715. Es la posición antes del primer movimiento, que figura en sol 14. Ya está en longitud este. No encontré un documento de NASA que dé '18.4447N 77.4508E' de forma explícita; esa cifra solo aparece en Wikipedia.":
+    "First point of the official NASA/JPL traverse GeoJSON (sol 13, site 3, drive 0, dist_total_m 0, 'Site increment, no motion'): lon 77.45088572, lat 18.44462715. It is the position before the first drive, which appears at sol 14. Already in east longitude. We did not find a NASA document that gives '18.4447N 77.4508E' explicitly; that figure only appears on Wikipedia.",
+  "Página HiRISE 'A Closer Look at Holden Crater' (PSP_003077_1530): Latitude (centered) -26.960°, Longitude (East) 325.457° → -34.543. El texto dice que los depósitos afloran mejor en el sector suroeste, bajo abanicos aluviales. Centro del Gazetteer (-26.04, 325.981E, 153 km) no usado.":
+    "HiRISE page 'A Closer Look at Holden Crater' (PSP_003077_1530): Latitude (centered) -26.960°, Longitude (East) 325.457° → -34.543. The text says the deposits are best exposed in the southwest sector, beneath alluvial fans. Gazetteer center (-26.04, 325.981E, 153 km) not used.",
+  "Página HiRISE 'Candidate Cavern Entrance Northeast of Arsia Mons' (PSP_003647_1745): Latitude (centered) -5.532°, Longitude (East) 241.396° → -118.604. Texto: punto muy oscuro en una llanura de lava polvorienta al noreste de Arsia Mons, sin borde elevado ni eyecta. Nota: la interpretación como caverna es discutida (otras fuentes lo consideran un pozo cilíndrico). El centro del Gazetteer de Arsia Mons (-8.257, 239.908E) caería en la caldera.":
+    "HiRISE page 'Candidate Cavern Entrance Northeast of Arsia Mons' (PSP_003647_1745): Latitude (centered) -5.532°, Longitude (East) 241.396° → -118.604. Text: a very dark spot on a dusty lava plain northeast of Arsia Mons, with no raised rim or ejecta. Note: its interpretation as a cavern is disputed (other sources consider it a cylindrical pit). The Gazetteer center of Arsia Mons (-8.257, 239.908E) would fall in the caldera.",
+  "Página HiRISE 'Channels on a Streamlined Island of Kasei Vallis' (ESP_075855_2100): Latitude (centered) 29.866°, Longitude (East) 307.916° → -52.084. El texto dice que son canales pequeños en el fondo de Kasei Valles, en el borde de sotavento de una isla aerodinámica. Gazetteer (centro 25.136, 297.122E, 1580 km de longitud) no usado por ser enorme.":
+    "HiRISE page 'Channels on a Streamlined Island of Kasei Vallis' (ESP_075855_2100): Latitude (centered) 29.866°, Longitude (East) 307.916° → -52.084. The text says these are small channels on the floor of Kasei Valles, on the lee edge of a streamlined island. Gazetteer (center 25.136, 297.122E, 1580 km long) not used because it is huge.",
+  "Página HiRISE 'Continual Dune and Ripple Migration in Nili Patera' (ESP_028575_1890): Latitude (centered) 8.722°, Longitude (East) 67.345° (ya en -180..180). A ~0.3° del centro del Gazetteer de Nili Patera (8.969, 67.167E, 67.5 km).":
+    "HiRISE page 'Continual Dune and Ripple Migration in Nili Patera' (ESP_028575_1890): Latitude (centered) 8.722°, Longitude (East) 67.345° (already in -180..180). About 0.3° from the Gazetteer center of Nili Patera (8.969, 67.167E, 67.5 km).",
+  "Página HiRISE 'Delta Structure in Eberswalde Crater' (PSP_001336_1560): Latitude (centered) -23.835°, Longitude (East) 326.381° → -33.619. Eberswalde fue candidato de MSL, pero nunca hubo aterrizaje. Centro del Gazetteer: -23.975, 326.703E (62 km).":
+    "HiRISE page 'Delta Structure in Eberswalde Crater' (PSP_001336_1560): Latitude (centered) -23.835°, Longitude (East) 326.381° → -33.619. Eberswalde was an MSL candidate, but nothing ever landed there. Gazetteer center: -23.975, 326.703E (62 km).",
+  "Página HiRISE 'Exposed Faults in Coprates Chasma Wall' (PSP_005069_1670): Latitude (centered) -12.836°, Longitude (East) 299.915° → 299.915 - 360 = -60.085. El texto dice que muestra parte del borde norte de Coprates Chasma con fallas y capas en las laderas. Centro del Gazetteer (-13.365, 299.262E) no usado porque el accidente mide 958 km y el centro caería en el fondo.":
+    "HiRISE page 'Exposed Faults in Coprates Chasma Wall' (PSP_005069_1670): Latitude (centered) -12.836°, Longitude (East) 299.915° → 299.915 - 360 = -60.085. The text says it shows part of the northern edge of Coprates Chasma, with faults and layers on the slopes. Gazetteer center (-13.365, 299.262E) not used because the feature is 958 km long and the center would fall on the floor.",
+  "Página HiRISE 'Fans of Lava Flows on the Flanks of Olympus Mons' (PSP_002909_2000): Latitude (centered) 19.701°, Longitude (East) 226.059° → -133.941. Está a ~1° al norte del centro del Gazetteer (18.653, 226.198E), es decir, sobre el flanco norte fuera de la caldera, como pide el tipo 'flanco'.":
+    "HiRISE page 'Fans of Lava Flows on the Flanks of Olympus Mons' (PSP_002909_2000): Latitude (centered) 19.701°, Longitude (East) 226.059° → -133.941. It is ~1° north of the Gazetteer center (18.653, 226.198E), that is, on the northern flank outside the caldera, as the 'flank' type requires.",
+  "Página HiRISE 'Gullies and... Gullies? in Terra Sirenum' (PSP_001697_1390): Latitude (centered) -40.807°, Longitude (East) 200.209° → -159.791. El texto dice que es un cráter sin nombre dentro del cráter Newton. Está dentro de los límites de Newton en el Gazetteer (lat -43.03 a -37.97, lon 198.64–205.30E). Alternativa: sitio RSL de Newton ESP_040491_1375 (-42.287, 202.200E).":
+    "HiRISE page 'Gullies and... Gullies? in Terra Sirenum' (PSP_001697_1390): Latitude (centered) -40.807°, Longitude (East) 200.209° → -159.791. The text says it is an unnamed crater inside Newton crater. It lies within the bounds of Newton in the Gazetteer (lat -43.03 to -37.97, lon 198.64–205.30E). Alternative: the Newton RSL site ESP_040491_1375 (-42.287, 202.200E).",
+  "Página HiRISE 'Gullies on the Northwest Rim of Hale Crater' (ESP_014074_1445): Latitude (centered) -35.093°, Longitude (East) 322.414° → -37.586. El centro del Gazetteer de Hale (-35.688, 323.638E, 137 km) caería en el fondo/pico central; por eso se usa el borde con barrancos.":
+    "HiRISE page 'Gullies on the Northwest Rim of Hale Crater' (ESP_014074_1445): Latitude (centered) -35.093°, Longitude (East) 322.414° → -37.586. The Gazetteer center of Hale (-35.688, 323.638E, 137 km) would fall on the floor or the central peak, so the gullied rim is used instead.",
+  "Página HiRISE 'Lobate Debris Apron in Deuteronilus Mensae' (ESP_016959_2240): Latitude (centered) 43.621°, Longitude (East) 28.618° (ya en -180..180). Dentro de los límites de Deuteronilus Mensae en el Gazetteer (39.57–49.86N, 13.68–35.37E).":
+    "HiRISE page 'Lobate Debris Apron in Deuteronilus Mensae' (ESP_016959_2240): Latitude (centered) 43.621°, Longitude (East) 28.618° (already in -180..180). Within the bounds of Deuteronilus Mensae in the Gazetteer (39.57–49.86N, 13.68–35.37E).",
+  "Página HiRISE 'Mars Mysteries: Unveiling the Icy Craters' (ESP_025840_2240): Latitude (centered) 43.884°, Longitude (East) 204.346° → -155.654. El texto dice 'a 13-meter diameter crater in Arcadia Planitia where ice was exposed'. Está dentro de los límites de Arcadia Planitia en el Gazetteer (33.88–64.20N, 165.78–210.39E).":
+    "HiRISE page 'Mars Mysteries: Unveiling the Icy Craters' (ESP_025840_2240): Latitude (centered) 43.884°, Longitude (East) 204.346° → -155.654. The text says 'a 13-meter diameter crater in Arcadia Planitia where ice was exposed'. It lies within the bounds of Arcadia Planitia in the Gazetteer (33.88–64.20N, 165.78–210.39E).",
+  "Página HiRISE 'Mawrth Vallis Phyllosilicates and Crater (MSL)' (PSP_009616_2035): Latitude (centered) 23.345°, Longitude (East) 342.615° → -17.385. El texto dice que la imagen está justo al este de la tercera elipse candidata de MSL y que la zona contiene minerales de arcilla. Centro del Gazetteer: 22.430, 343.027E.":
+    "HiRISE page 'Mawrth Vallis Phyllosilicates and Crater (MSL)' (PSP_009616_2035): Latitude (centered) 23.345°, Longitude (East) 342.615° → -17.385. The text says the image is just east of the third MSL candidate ellipse and that the area contains clay minerals. Gazetteer center: 22.430, 343.027E.",
+  "Página HiRISE 'North Polar Layered Deposits in Head Scarp of Chasma Boreale' (PSP_001334_2645): Latitude (centered) 84.410°, Longitude (East) 343.495° → -16.505. Alternativa: 'Steepest Scarp in the North Polar Layered Deposits' (PSP_001550_2640) 83.821, 235.286E.":
+    "HiRISE page 'North Polar Layered Deposits in Head Scarp of Chasma Boreale' (PSP_001334_2645): Latitude (centered) 84.410°, Longitude (East) 343.495° → -16.505. Alternative: 'Steepest Scarp in the North Polar Layered Deposits' (PSP_001550_2640) 83.821, 235.286E.",
+  "Página HiRISE 'Outcrops of Layers in the South Polar Layered Deposits' (PSP_004664_0955): Latitude (centered) -84.219°, Longitude (East) 229.148° → -130.852. Centro del Gazetteer de Planum Australe: -83.35, 157.70E (1430 km), no usado.":
+    "HiRISE page 'Outcrops of Layers in the South Polar Layered Deposits' (PSP_004664_0955): Latitude (centered) -84.219°, Longitude (East) 229.148° → -130.852. Gazetteer center of Planum Australe: -83.35, 157.70E (1430 km), not used.",
+  "Página HiRISE 'Proposed Site for Future Exploration in Nili Fossae Carbonate Plains' (ESP_032728_2020): Latitude (centered) 21.731°, Longitude (East) 79.062° (ya en -180..180). La página no tiene texto descriptivo; el contexto de los carbonatos viene del comunicado de NASA PIA19817, que cita esta observación (solo lo vi en resultados de búsqueda). Centro del Gazetteer de Nili Fossae: 22.018, 76.695E.":
+    "HiRISE page 'Proposed Site for Future Exploration in Nili Fossae Carbonate Plains' (ESP_032728_2020): Latitude (centered) 21.731°, Longitude (East) 79.062° (already in -180..180). The page has no descriptive text; the carbonate context comes from NASA release PIA19817, which cites this observation (we only saw it in search results). Gazetteer center of Nili Fossae: 22.018, 76.695E.",
+  "Página HiRISE 'Recent Gully Activity on Mars' (ESP_020661_1440): Latitude (centered) -35.729°, Longitude (East) 129.386° (ya en -180..180). Coincide con el centro del Gazetteer (Feature 14593: -35.7179, 129.3998E, diámetro 7.03 km), así que la ventana de 30 km abarca todo el cráter.":
+    "HiRISE page 'Recent Gully Activity on Mars' (ESP_020661_1440): Latitude (centered) -35.729°, Longitude (East) 129.386° (already in -180..180). It matches the Gazetteer center (Feature 14593: -35.7179, 129.3998E, diameter 7.03 km), so the 30 km window covers the whole crater.",
+  "Página HiRISE 'Scallop and Polygonal Features in Utopia Planitia' (PSP_002070_2250): Latitude (centered) 44.730°, Longitude (East) 88.485° (ya en -180..180). El texto dice que en Utopia el terreno festoneado está entre 45 y 50°N. Alternativa: ESP_025620_2275 (47.067, 93.754E).":
+    "HiRISE page 'Scallop and Polygonal Features in Utopia Planitia' (PSP_002070_2250): Latitude (centered) 44.730°, Longitude (East) 88.485° (already in -180..180). The text says that in Utopia the scalloped terrain lies between 45 and 50°N. Alternative: ESP_025620_2275 (47.067, 93.754E).",
+  "Página HiRISE 'Sedimentary Layers in West Candor Chasma' (ESP_026378_1730): Latitude (centered) -6.733°, Longitude (East) 284.485°. Conversión oeste/este: 284.485 - 360 = -75.515. HiRISE ya da latitud planetocéntrica (comprobado: Gasa en HiRISE -35.729 coincide con el centro del Gazetteer -35.718; en planetográfica diferiría ~0.3°). Se elige este punto y no el centro del Gazetteer (-6.533, 289.221E, Candor Chasma mide 810 km) porque la ventana de 30 km debe caer sobre los depósitos estratificados.":
+    "HiRISE page 'Sedimentary Layers in West Candor Chasma' (ESP_026378_1730): Latitude (centered) -6.733°, Longitude (East) 284.485°. West/east conversion: 284.485 - 360 = -75.515. HiRISE already gives planetocentric latitude (checked: Gasa in HiRISE, -35.729, matches the Gazetteer center, -35.718; in planetographic it would differ by ~0.3°). This point is chosen instead of the Gazetteer center (-6.533, 289.221E; Candor Chasma is 810 km long) because the 30 km window must fall on the layered deposits.",
+  "Página HiRISE 'Small Eruptive Vents South of Pavonis Mons' (ESP_056959_1745, HiPOD 10 dic 2020): Latitude (centered) -5.493°, Longitude (East) 245.642° → -114.358. La página leída solo trae el título y metadatos (la descripción de respiraderos junto a escudos bajos proviene del resultado de búsqueda del HiPOD). Alternativa cercana verificada: 'En Echelon Fissure Vents South of Pavonis Mons' (ESP_035768_1730) -6.721°, 245.994°E.":
+    "HiRISE page 'Small Eruptive Vents South of Pavonis Mons' (ESP_056959_1745, HiPOD 10 Dec 2020): Latitude (centered) -5.493°, Longitude (East) 245.642° → -114.358. The page we read only has the title and metadata (the description of vents next to low shields comes from the HiPOD search result). Nearby verified alternative: 'En Echelon Fissure Vents South of Pavonis Mons' (ESP_035768_1730) -6.721°, 245.994°E.",
+  "Página HiRISE 'Uplifted Blocks of Light-Toned Layered Deposits' (ESP_054753_1825): Latitude (centered) 2.262°, Longitude (East) 340.079° → -19.921. Centro del Gazetteer de Aram Chaos: 2.523, 337.608E (-22.392); se usa el punto HiRISE porque cae sobre los bloques estratificados.":
+    "HiRISE page 'Uplifted Blocks of Light-Toned Layered Deposits' (ESP_054753_1825): Latitude (centered) 2.262°, Longitude (East) 340.079° → -19.921. Gazetteer center of Aram Chaos: 2.523, 337.608E (-22.392); the HiRISE point is used because it falls on the layered blocks.",
+  "Página HiRISE 'Wind Carved Rock' (ESP_046504_1785): Latitude (centered) -1.488°, Longitude (East) 196.359° → -163.641. El texto dice que son yardangs en Medusae Fossae. Dentro de los límites del Gazetteer de Medusae Fossae (-6.04 a -1.39, 195.04–199.31E).":
+    "HiRISE page 'Wind Carved Rock' (ESP_046504_1785): Latitude (centered) -1.488°, Longitude (East) 196.359° → -163.641. The text says these are yardangs in Medusae Fossae. Within the Gazetteer bounds of Medusae Fossae (-6.04 to -1.39, 195.04–199.31E).",
+  "Resumen #1002 del taller EZ 2015 (Barker, James, Chamitoff, Clifford): 'a Landing Site (LS) located in Arcadia Planetia, along the Phlegra Dorsa, at 39°N 172°E'. La fuente no indica el sistema de latitud. Valores redondeados a grados enteros.":
+    "Abstract #1002 from the 2015 EZ workshop (Barker, James, Chamitoff, Clifford): 'a Landing Site (LS) located in Arcadia Planetia, along the Phlegra Dorsa, at 39°N 172°E'. The source does not state the latitude system. Values rounded to whole degrees.",
+  "Resumen #1009: 'The plateau above the Mawrth Vallis outflow channel near 340.8°E, 24.3°N'. Longitud convertida: 340.8-360 = -19.2. Aviso: el texto da la ubicación aproximada de la meseta y no la llama explícitamente 'centro de la EZ'.":
+    "Abstract #1009: 'The plateau above the Mawrth Vallis outflow channel near 340.8°E, 24.3°N'. Converted longitude: 340.8-360 = -19.2. Caveat: the text gives the approximate location of the plateau and does not explicitly call it the 'center of the EZ'.",
+  "Resumen #1011 (Viola, McEwen, Dundas): 'Erebus Montes: This proposed site is centered near 192.1°E, 39.0°N'. Longitud convertida: 192.1-360 = -167.9. El mismo resumen propone una segunda EZ, Acheron Fossae, en 220.6°E, 39.8°N (-139.4). La fuente no indica el sistema de latitud.":
+    "Abstract #1011 (Viola, McEwen, Dundas): 'Erebus Montes: This proposed site is centered near 192.1°E, 39.0°N'. Converted longitude: 192.1-360 = -167.9. The same abstract proposes a second EZ, Acheron Fossae, at 220.6°E, 39.8°N (-139.4). The source does not state the latitude system.",
+  "Resumen #1012: 'centered at 20°05' N, 126°38' E'. Paso de grados y minutos a decimal: 20+5/60 = 20.0833 y 126+38/60 = 126.6333. La fuente no indica el sistema de latitud.":
+    "Abstract #1012: 'centered at 20°05' N, 126°38' E'. Degrees and minutes to decimal: 20+5/60 = 20.0833 and 126+38/60 = 126.6333. The source does not state the latitude system.",
+  "Resumen #1033 (Head et al.): 'The Dichotomy Boundary Deuteronilus Mensae (DBDM) Exploration Zone (EZ) (39.11° N, 23.199° E)'. Sin conversión. Otra EZ en la misma región es la #1044 de Plaut, con un mapa de 20–24°E y 40–42°N. La fuente no indica el sistema de latitud.":
+    "Abstract #1033 (Head et al.): 'The Dichotomy Boundary Deuteronilus Mensae (DBDM) Exploration Zone (EZ) (39.11° N, 23.199° E)'. No conversion. Another EZ in the same region is Plaut's #1044, with a map of 20–24°E and 40–42°N. The source does not state the latitude system.",
+  "Resumen #1034: 'The center of the Exploration Zone is 17.747° N 77.037° E'. Sin conversión. El centro de la EZ está a unos 0,7° al suroeste del lugar de aterrizaje de Perseverance.":
+    "Abstract #1034: 'The center of the Exploration Zone is 17.747° N 77.037° E'. No conversion. The center of the EZ is about 0.7° southwest of the Perseverance landing site.",
+  "Resumen #1036: 'centered atop an inferred tilted fault block ... in the western aspect of Coprates Chasma, 293.367°E -11.684°N'. Longitud convertida: 293.367-360 = -66.633. No sirve como sustituto de Ius Chasma: en el taller de 2015 no encontré ninguna EZ propia de Ius Chasma. Otra EZ de cañón es la de Melas Chasma oriental (#1007), cuyo texto extraído no daba coordenadas numéricas.":
+    "Abstract #1036: 'centered atop an inferred tilted fault block ... in the western aspect of Coprates Chasma, 293.367°E -11.684°N'. Converted longitude: 293.367-360 = -66.633. It does not work as a substitute for Ius Chasma: in the 2015 workshop we found no EZ in Ius Chasma itself. Another canyon EZ is the eastern Melas Chasma one (#1007), whose extracted text gave no numeric coordinates.",
+  "Resumen #1037: 'Located at 39.05° S, 101.91° E, the Hellas Rim EZ'. Sin conversión. Hay una EZ vecina de Rice et al. (#1038), 'centered near 40°S; 104°E'.":
+    "Abstract #1037: 'Located at 39.05° S, 101.91° E, the Hellas Rim EZ'. No conversion. There is a neighboring EZ by Rice et al. (#1038), 'centered near 40°S; 104°E'.",
+  "Resumen #1041: 'located in the northwest region of Terra Sirenum (29° S, 166° W)'. La fuente usa longitud oeste: 166°W = -166° este. Son las coordenadas del cráter (110 km de diámetro), redondeadas a grados enteros. El resumen sitúa la EZ/LS sobre el fondo del cráter, pero no da su centro exacto. La fuente no indica si la longitud oeste es planetográfica.":
+    "Abstract #1041: 'located in the northwest region of Terra Sirenum (29° S, 166° W)'. The source uses west longitude: 166°W = -166° east. These are the coordinates of the crater (110 km in diameter), rounded to whole degrees. The abstract places the EZ/LS on the crater floor but does not give its exact center. The source does not say whether the west longitude is planetographic.",
+  "Resumen #1053: 'The proposed EZ (48.062E, 42.187N) is in the Protonilus Mensae region'. Sin conversión. La fuente no indica el sistema de latitud.":
+    "Abstract #1053: 'The proposed EZ (48.062E, 42.187N) is in the Protonilus Mensae region'. No conversion. The source does not state the latitude system.",
+  "SLDEM2015 (59 m). Solo gemelos: no entra en el ranking ni en la validación del polo sur":
+    "SLDEM2015 (59 m). Twins only: not part of the ranking or of the south pole validation",
+  "Solo existe el mosaico LROC genérico 'de Gerlache Rim' NAC_ROI_DEGERRIMLO1_P885S2933 (centro -88.5, 293.3 E = -66.7; límites lat -89.02 a -87.79, lon -83.18 a -41.31; cotejado el 14/11/2026), que puede cubrir Rim 1 y Rim 2. No hay centro verificado para Rim 1. Polígono en la release USGS DOI 10.5066/P13FD9ZD (no leída).":
+    "Only the generic LROC mosaic 'de Gerlache Rim' NAC_ROI_DEGERRIMLO1_P885S2933 exists (center -88.5, 293.3 E = -66.7; bounds lat -89.02 to -87.79, lon -83.18 to -41.31; checked on 14 Nov 2026), which may cover both Rim 1 and Rim 2. There is no verified center for Rim 1. Polygon in the USGS release DOI 10.5066/P13FD9ZD (not read).",
+  "Parche HiRISE del visor 3D (src/data/catalog.json, id 'dteec_002175_2210_001410_2210_a01', categoría 'Impact terrain'): 100×100 celdas a 20 m (public/terrain/dteec_002175_2210_001410_2210_a01.f32), remuestreado a 30 m por media de áreas. Fuente del parche: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/PSP_002175_2210_PSP_001410_2210/DTEEC_002175_2210_001410_2210_A01.tif.":
+    "HiRISE patch from the 3D viewer (src/data/catalog.json, id 'dteec_002175_2210_001410_2210_a01', category 'Impact terrain'): 100×100 cells at 20 m (public/terrain/dteec_002175_2210_001410_2210_a01.f32), resampled to 30 m by area averaging. Patch source: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/PSP_002175_2210_PSP_001410_2210/DTEEC_002175_2210_001410_2210_A01.tif.",
+  "Parche HiRISE del visor 3D (src/data/catalog.json, id 'dteec_008669_1705_009025_1705_a01', categoría 'Valleys & fans'): 100×100 celdas a 20 m (public/terrain/dteec_008669_1705_009025_1705_a01.f32), remuestreado a 30 m por media de áreas. Fuente del parche: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/PSP_008669_1705_PSP_009025_1705/DTEEC_008669_1705_009025_1705_A01.tif.":
+    "HiRISE patch from the 3D viewer (src/data/catalog.json, id 'dteec_008669_1705_009025_1705_a01', category 'Valleys & fans'): 100×100 cells at 20 m (public/terrain/dteec_008669_1705_009025_1705_a01.f32), resampled to 30 m by area averaging. Patch source: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/PSP_008669_1705_PSP_009025_1705/DTEEC_008669_1705_009025_1705_A01.tif.",
+  "Parche HiRISE del visor 3D (src/data/catalog.json, id 'dteec_020873_1640_020161_1640_a01', categoría 'Ridges & layered terrain'): 100×100 celdas a 20 m (public/terrain/dteec_020873_1640_020161_1640_a01.f32), remuestreado a 30 m por media de áreas. Fuente del parche: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_020873_1640_ESP_020161_1640/DTEEC_020873_1640_020161_1640_A01.tif.":
+    "HiRISE patch from the 3D viewer (src/data/catalog.json, id 'dteec_020873_1640_020161_1640_a01', category 'Ridges & layered terrain'): 100×100 cells at 20 m (public/terrain/dteec_020873_1640_020161_1640_a01.f32), resampled to 30 m by area averaging. Patch source: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_020873_1640_ESP_020161_1640/DTEEC_020873_1640_020161_1640_A01.tif.",
+  "Parche HiRISE del visor 3D (src/data/catalog.json, id 'dteec_022482_1830_022337_1830_a01', categoría 'Ridges & layered terrain'): 100×100 celdas a 20 m (public/terrain/dteec_022482_1830_022337_1830_a01.f32), remuestreado a 30 m por media de áreas. Fuente del parche: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_022482_1830_ESP_022337_1830/DTEEC_022482_1830_022337_1830_A01.tif.":
+    "HiRISE patch from the 3D viewer (src/data/catalog.json, id 'dteec_022482_1830_022337_1830_a01', category 'Ridges & layered terrain'): 100×100 cells at 20 m (public/terrain/dteec_022482_1830_022337_1830_a01.f32), resampled to 30 m by area averaging. Patch source: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_022482_1830_ESP_022337_1830/DTEEC_022482_1830_022337_1830_A01.tif.",
+  "Parche HiRISE del visor 3D (src/data/catalog.json, id 'dteec_041282_1520_047150_1520_a01', categoría 'Ridges & layered terrain'): 100×100 celdas a 20 m (public/terrain/dteec_041282_1520_047150_1520_a01.f32), remuestreado a 30 m por media de áreas. Fuente del parche: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_041282_1520_ESP_047150_1520/DTEEC_041282_1520_047150_1520_A01.tif.":
+    "HiRISE patch from the 3D viewer (src/data/catalog.json, id 'dteec_041282_1520_047150_1520_a01', category 'Ridges & layered terrain'): 100×100 cells at 20 m (public/terrain/dteec_041282_1520_047150_1520_a01.f32), resampled to 30 m by area averaging. Patch source: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_041282_1520_ESP_047150_1520/DTEEC_041282_1520_047150_1520_A01.tif.",
+  "Parche HiRISE del visor 3D (src/data/catalog.json, id 'dteed_054086_2330_054007_2330_a01', categoría 'Ridges & layered terrain'): 100×100 celdas a 20 m (public/terrain/dteed_054086_2330_054007_2330_a01.f32), remuestreado a 30 m por media de áreas. Fuente del parche: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_054086_2330_ESP_054007_2330/DTEED_054086_2330_054007_2330_A01.tif.":
+    "HiRISE patch from the 3D viewer (src/data/catalog.json, id 'dteed_054086_2330_054007_2330_a01', category 'Ridges & layered terrain'): 100×100 cells at 20 m (public/terrain/dteed_054086_2330_054007_2330_a01.f32), resampled to 30 m by area averaging. Patch source: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_054086_2330_ESP_054007_2330/DTEED_054086_2330_054007_2330_A01.tif.",
+  "Parche HiRISE del visor 3D (src/data/catalog.json, id 'dteed_072690_1925_064631_1925_a01', categoría 'Valleys & fans'): 100×100 celdas a 20 m (public/terrain/dteed_072690_1925_064631_1925_a01.f32), remuestreado a 30 m por media de áreas. Fuente del parche: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_072690_1925_ESP_064631_1925/DTEED_072690_1925_064631_1925_A01.tif.":
+    "HiRISE patch from the 3D viewer (src/data/catalog.json, id 'dteed_072690_1925_064631_1925_a01', category 'Valleys & fans'): 100×100 cells at 20 m (public/terrain/dteed_072690_1925_064631_1925_a01.f32), resampled to 30 m by area averaging. Patch source: HiRISE · NASA/JPL/USGS; DTM: https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_072690_1925_ESP_064631_1925/DTEED_072690_1925_064631_1925_A01.tif.",
+  "Parche HiRISE del visor 3D (src/data/catalog.json, id 'jezero', categoría 'Valleys & fans'): 100×100 celdas a 20 m (public/terrain/jezero.f32), remuestreado a 30 m por media de áreas. Fuente del parche: HiRISE · NASA/JPL/USGS.":
+    "HiRISE patch from the 3D viewer (src/data/catalog.json, id 'jezero', category 'Valleys & fans'): 100×100 cells at 20 m (public/terrain/jezero.f32), resampled to 30 m by area averaging. Patch source: HiRISE · NASA/JPL/USGS.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: A11_LM, módulo lunar Eagle, 0.67416, 23.47314.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: A11_LM, lunar module Eagle, 0.67416, 23.47314.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: A12_LM, módulo lunar Intrepid, -3.0128, -23.4219.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: A12_LM, lunar module Intrepid, -3.0128, -23.4219.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: A14_LM, módulo lunar Antares, -3.64589, -17.47194.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: A14_LM, lunar module Antares, -3.64589, -17.47194.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: A15_LM, módulo lunar Falcon, 26.13239, 3.6333.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: A15_LM, lunar module Falcon, 26.13239, 3.6333.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: A16_LM, módulo lunar Orion, -8.9734, 15.5011.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: A16_LM, lunar module Orion, -8.9734, 15.5011.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: A17_LM, módulo lunar Challenger, 20.1911, 30.7723.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: A17_LM, lunar module Challenger, 20.1911, 30.7723.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: ChangE3, módulo de aterrizaje, 44.1214, -19.5117.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: ChangE3, lander, 44.1214, -19.5117.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: ChangE4, módulo de aterrizaje, -45.4562, 177.5886.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: ChangE4, lander, -45.4562, 177.5886.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: ChangE5, módulo de aterrizaje, 43.0576, -51.9161.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: ChangE5, lander, 43.0576, -51.9161.",
+  "Shapefile 'Anthropogenic Objects' de LROC (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; mantiene las coordenadas de Wagner et al. 2017, Icarus 283), leído el 14/11/2026: ChangE6, módulo de aterrizaje, -41.6383, -153.9857.":
+    "LROC 'Anthropogenic Objects' shapefile (ANTHROPOGENIC_OBJECTS_180.ZIP, PDS LROLRC_2001/EXTRAS; keeps the coordinates of Wagner et al. 2017, Icarus 283), read on 14 Nov 2026: ChangE6, lander, -41.6383, -153.9857.",
+  "Apollo 15 (Hadley–Apeninos)":
+    "Apollo 15 (Hadley–Apennines)",
+  "Apollo 16 (tierras altas de Descartes)":
+    "Apollo 16 (Descartes Highlands)",
+  "Chang'e 4 (cráter Von Kármán, cara oculta)":
+    "Chang'e 4 (Von Kármán crater, far side)",
+  "Chang'e 6 (cuenca Apollo, cara oculta)":
+    "Chang'e 6 (Apollo basin, far side)",
+  "Foso de Mare Ingenii (posible tubo de lava, cara oculta)":
+    "Mare Ingenii pit (possible lava tube, far side)",
+  "Foso de Mare Tranquillitatis (posible tubo de lava)":
+    "Mare Tranquillitatis pit (possible lava tube)",
+  "Foso de Marius Hills (posible tubo de lava)":
+    "Marius Hills pit (possible lava tube)",
+  "posición no verificada (centro_crater_iau_lon_no_verificada)":
+    "position not verified (IAU crater center; longitude not verified)",
+  "posición no verificada (lat_gsfc_lon_mosaico_compartido_no_verificada)":
+    "position not verified (GSFC latitude, longitude from a shared mosaic; not verified)",
+  "posición no verificada (no_verificada_centro_mosaico_compartido)":
+    "position not verified (not verified; center of a shared mosaic)",
+  "posición no verificada (no_verificada_punto_c2_glaser)":
+    "position not verified (not verified; Gläser point C2)",
+  "posición no verificada (punto_c1_glaser_no_es_centro)":
+    "position not verified (Gläser point C1, not the center)",
+  // Nombres en español del catálogo de parches (catalog.json) en el visor de globos.
+  "Departamento Antofagasta de la Sierra, Argentina":
+    "Antofagasta de la Sierra Department, Argentina",
+  "Provincia de Chañaral, Chile":
+    "Chañaral Province, Chile",
+  "Provincia de Tocopilla, Chile":
+    "Tocopilla Province, Chile",
 };
 
 Object.assign(dataEn, DATOS_EN);
@@ -994,9 +1199,11 @@ const dataEnPatterns: [RegExp, string][] = [
 ];
 
 /** Textos de los datos en inglés con parte variable que se muestran en español. */
-const dataEsPatterns: [RegExp, string][] = [
+const dataEsPatterns: [RegExp, string | ((match: string, ...groups: string[]) => string)][] = [
   [/^Antarctica · (.+)$/, "Antártida · $1"],
   [/^Greenland · (.+)$/, "Groenlandia · $1"],
+  // Teselas de las referencias HiRISE de results.json («Western Jezero · tesela 3»).
+  [/^(.+)( · tesela \d+(?: de \d+ km)?)$/, (_, name, rest) => `${tr(name)}${rest}`],
 ];
 
 const en = () => current === "en";
@@ -1076,7 +1283,356 @@ const dataRules: [RegExp, (m: RegExpExecArray) => string][] = [
   [/^Lunar Pit Locations de LROC \((.+?); Atlas de fosos de LROC\), leído el (\d+)\/(\d+)\/(\d+): ([^;]+?)(?:; (\d+) m de profundidad( interior)?)?\.$/, (m) => en()
     ? `LROC Lunar Pit Locations (${m[1]}; LROC pit atlas), read on ${dateText(m[2], m[3], m[4])}: ${m[5]}${m[6] ? `; ${m[6]} m ${m[7] ? "inner depth" : "deep"}` : ""}.`
     : m[0]],
+
 ];
+
+/** Nombres del catálogo de parches traducidos por el equipo (commit 5ea7f7e): respaldo de DATOS_ES. */
+const dataEs: Record<string, string> = {
+  "2km crater on south polar layered deposits":
+    "Cráter de 2 km sobre los depósitos estratificados del polo sur",
+  "Alcoves on south polar layered deposit scarp":
+    "Nichos en un escarpe de los depósitos estratificados del polo sur",
+  "Alluvial fan in Arabia Terra":
+    "Abanico aluvial en Arabia Terra",
+  "Alluvial fan in far western Tyrrhena Terra":
+    "Abanico aluvial en el extremo oeste de Tyrrhena Terra",
+  "Alluvial fan surface with inverted channels":
+    "Superficie de abanico aluvial con canales invertidos",
+  "Alluvial fans in unnamed crater":
+    "Abanicos aluviales en un cráter sin nombre",
+  "Barchan dunes in Dulovo Crater region":
+    "Dunas barjanes en la región del cráter Dulovo",
+  "Basal exposure of south polar layered deposits":
+    "Afloramiento basal de los depósitos estratificados del polo sur",
+  "Bullseye Crater of Medusae Fossae formation over platy-ridged lava":
+    "Cráter en diana de la formación Medusae Fossae sobre lava en placas con crestas",
+  "Central structure and layered bedrock in 25-kilometer diameter crater":
+    "Estructura central y roca estratificada en un cráter de 25 km de diámetro",
+  "Central structure and layering of a large impact crater":
+    "Estructura central y capas de un gran cráter de impacto",
+  "Central structure of a large impact crater":
+    "Estructura central de un gran cráter de impacto",
+  "Central uplift of an impact crater":
+    "Levantamiento central de un cráter de impacto",
+  "Cerberus region intra-crater dune field":
+    "Campo de dunas dentro de un cráter en la región de Cerberus",
+  "Change detection in barchan dune source":
+    "Detección de cambios en la zona de origen de dunas barjanes",
+  "Changes in intracrater dunes":
+    "Cambios en dunas dentro de un cráter",
+  "Channelized lava flow though a constriction with well-preserved highstands":
+    "Colada de lava canalizada por un estrechamiento, con marcas de nivel alto bien conservadas",
+  "Circular feature and cone cluster in platy lavas in Cerberus Palus":
+    "Forma circular y grupo de conos en lavas en placas de Cerberus Palus",
+  "Classic barchan dunes":
+    "Dunas barjanes clásicas",
+  "Colorful layered bedrock in eroded crater in Terra Sirenum":
+    "Roca estratificada multicolor en un cráter erosionado de Terra Sirenum",
+  "Columnar jointing exposed in an impact crater in Marte Vallis":
+    "Disyunción columnar expuesta en un cráter de impacto de Marte Vallis",
+  "Columnar jointing in wall of impact crater":
+    "Disyunción columnar en la pared de un cráter de impacto",
+  "Crater ejecta lower than plains":
+    "Eyecta de cráter más baja que la llanura",
+  "Crater on south polar layered deposits":
+    "Cráter sobre los depósitos estratificados del polo sur",
+  "Dark dune field topography in Bunge Crater":
+    "Topografía de un campo de dunas oscuras en el cráter Bunge",
+  "Deformation of north polar layered deposit strata":
+    "Deformación de los estratos de los depósitos estratificados del polo norte",
+  "Distal extent of inverted delta material":
+    "Extremo distal de material deltaico invertido",
+  "Dune forms in Viking 1 image 436S03":
+    "Formas de dunas de la imagen 436S03 del Viking 1",
+  "Dune interaction with topography in Ganges Chasma":
+    "Interacción de las dunas con el relieve en Ganges Chasma",
+  "Dune monitoring in crater":
+    "Seguimiento de dunas en un cráter",
+  "Dunes on slope in CTX B01_009975_1728_XI_07S094W":
+    "Dunas en pendiente en CTX B01_009975_1728_XI_07S094W",
+  "Echus Chasma layered deposits":
+    "Depósitos estratificados de Echus Chasma",
+  "Exposure of polar layered deposits on ridges and troughs":
+    "Afloramiento de depósitos estratificados polares en crestas y depresiones",
+  "Exposure of polar layered deposits with unconformities":
+    "Afloramiento de depósitos estratificados polares con discordancias",
+  "Exposure of south polar layered deposits":
+    "Afloramiento de los depósitos estratificados del polo sur",
+  "Exposures of layered bedrock northwest of Hellas region":
+    "Afloramientos de roca estratificada al noroeste de la región de Hellas",
+  "Fan at intersection of valley and crater wall in Xanthe Terra":
+    "Abanico donde un valle llega a la pared de un cráter en Xanthe Terra",
+  "Fan/deltaic landform in west Eberswalde Crater":
+    "Abanico o delta en el oeste del cráter Eberswalde",
+  "Faults in south polar layered deposits Promethei Lingula region":
+    "Fallas en los depósitos estratificados del polo sur, región de Promethei Lingula",
+  "Fresh 1-km impact crater in Arcadia Planitia":
+    "Cráter de impacto reciente de 1 km en Arcadia Planitia",
+  "Fresh crater":
+    "Cráter reciente",
+  "Fresh crater with lots of gullies":
+    "Cráter reciente con muchos barrancos",
+  "Fresh double-layered crater with possible ponded materials":
+    "Cráter reciente de doble capa con posibles materiales encharcados",
+  "Fresh impact crater":
+    "Cráter de impacto reciente",
+  "Fresh impact crater with gullies and bedrock":
+    "Cráter de impacto reciente con barrancos y roca madre",
+  "Fresh shallow valley":
+    "Valle poco profundo reciente",
+  "High-lava mark in Kasei Valles":
+    "Marca del nivel más alto de la lava en Kasei Valles",
+  "Impact crater with active slope processes":
+    "Cráter de impacto con procesos activos en las laderas",
+  "Impact crater with central pit on floor of larger crater":
+    "Cráter de impacto con foso central en el fondo de un cráter mayor",
+  "Intact layered rocks uplifted in unnamed crater off of Solis Dorsa":
+    "Rocas estratificadas intactas levantadas en un cráter sin nombre junto a Solis Dorsa",
+  "Interesting periglacial assemblage in Utopia Planitia":
+    "Conjunto periglaciar interesante en Utopia Planitia",
+  "Intracrater climbing dunes south of Aonia Terra":
+    "Dunas trepadoras dentro de un cráter al sur de Aonia Terra",
+  "Intracrater dune changes":
+    "Dunas cambiantes dentro de un cráter",
+  "Intracrater dunes":
+    "Dunas dentro de un cráter",
+  "Intracrater sand dunes and patch changes":
+    "Dunas de arena dentro de un cráter y cambios en manchas",
+  "Islands and pendant bar like form in lava channel":
+    "Islas y formas de barra colgante en un canal de lava",
+  "Large dated impact crater":
+    "Gran cráter de impacto datado",
+  "Lava channel and cataract in south-central Elysium Planitia":
+    "Canal de lava y catarata en el centro-sur de Elysium Planitia",
+  "Lava falls in northern Kasei Valles":
+    "Cascadas de lava en el norte de Kasei Valles",
+  "Lava filling a large crater in Elysium Planitia":
+    "Lava que rellena un gran cráter en Elysium Planitia",
+  "Lava flow spilling into crater in southwestern Daedalia Planum":
+    "Colada de lava que se vierte en un cráter en el suroeste de Daedalia Planum",
+  "Lava spilling into crater":
+    "Lava que se vierte en un cráter",
+  "Lava vent with channels":
+    "Boca de lava con canales",
+  "Layered bedrock in central uplift":
+    "Roca estratificada en un levantamiento central",
+  "Layered deposits in crater in Arabia Terra":
+    "Depósitos estratificados en un cráter de Arabia Terra",
+  "Layered deposits in impact crater in Utopia Planitia":
+    "Depósitos estratificados en un cráter de impacto de Utopia Planitia",
+  "Layered materials on northeast Hellas Planitia rim":
+    "Materiales estratificados en el borde noreste de Hellas Planitia",
+  "Layered mesa in Coprates Chasm":
+    "Meseta estratificada en Coprates Chasma",
+  "Layered yardangs":
+    "Yardangs estratificados",
+  "Libya Montes layered deposits and possible MSL rover landing site":
+    "Depósitos estratificados de Libya Montes y posible sitio de aterrizaje del rover MSL",
+  "Light-toned layered deposits within valleys southwest of Ladon Valles":
+    "Depósitos estratificados claros en valles al suroeste de Ladon Valles",
+  "Light-toned layered material along Ius Chasma plateau":
+    "Material estratificado claro a lo largo de la meseta de Ius Chasma",
+  "Lineated valley fill in Deuteronilus Mensae":
+    "Relleno de valle lineado en Deuteronilus Mensae",
+  "Lobate debris apron with ridge-like structures in Tempe Terra":
+    "Delantal de derrubios lobulado con estructuras en cresta en Tempe Terra",
+  "Lobate form at intersection of short valley and crater wall":
+    "Forma lobulada donde un valle corto llega a la pared de un cráter",
+  "Mass movement on wall of crater in Lyot Crater ejecta blanket":
+    "Movimiento en masa en la pared de un cráter dentro del manto de eyecta del cráter Lyot",
+  "McLaughlin Crater dunes":
+    "Dunas del cráter McLaughlin",
+  "Noachis Terra sand dune topography":
+    "Topografía de dunas de arena en Noachis Terra",
+  "North polar layered deposits 160-meter diameter crater monitoring":
+    "Seguimiento de un cráter de 160 m de diámetro en los depósitos estratificados del polo norte",
+  "North polar linear dune source changes":
+    "Cambios en la zona de origen de dunas lineales del polo norte",
+  "Northeast Melas Chasma dune fields and wall rock":
+    "Campos de dunas y roca de la pared en el noreste de Melas Chasma",
+  "Northern Hellas Planitia layered bedrock":
+    "Roca estratificada en el norte de Hellas Planitia",
+  "Northern plains ridge":
+    "Cresta de las llanuras del norte",
+  "Pasted-on material on crater ejecta":
+    "Material adherido sobre eyecta de cráter",
+  "Possible future landing site near eastern valley of Jezero Crater":
+    "Posible sitio de aterrizaje futuro cerca del valle oriental del cráter Jezero",
+  "Possible glacier on mesa wall in Protonilus Mensae":
+    "Posible glaciar en la pared de una meseta de Protonilus Mensae",
+  "Possible volcanic vent east of Olympus Mons":
+    "Posible boca volcánica al este de Olympus Mons",
+  "Potential lava flow in Xanthe Terra":
+    "Posible colada de lava en Xanthe Terra",
+  "Relatively dust free lavas from Arsia Mons":
+    "Lavas de Arsia Mons con relativamente poco polvo",
+  "Reticulate bedform and recent impact crater":
+    "Forma de lecho reticulada y cráter de impacto reciente",
+  "Reull Vallis and valley cut through crater":
+    "Reull Vallis y un valle que corta un cráter",
+  "Ridges in Diacria region":
+    "Crestas en la región de Diacria",
+  "Sinuos ridges in eastern Peta Crater":
+    "Crestas sinuosas en el este del cráter Peta",
+  "Sinuous channel in Tharsis region":
+    "Canal sinuoso en la región de Tharsis",
+  "Sinuous ridges with scroll-bar deposits":
+    "Crestas sinuosas con depósitos de barra de meandro",
+  "Sinuous troughs and ridges near Sirenum Fossae":
+    "Depresiones y crestas sinuosas cerca de Sirenum Fossae",
+  "Sinus Meridiani dune changes":
+    "Cambios en las dunas de Sinus Meridiani",
+  "Small crater filled by deltaic deposits":
+    "Cráter pequeño relleno de depósitos deltaicos",
+  "Small lobe of glacial cover on fresh impact crater":
+    "Pequeño lóbulo de cubierta glaciar sobre un cráter de impacto reciente",
+  "Small ridge near Licus Vallis":
+    "Cresta pequeña cerca de Licus Vallis",
+  "South polar layered deposits":
+    "Depósitos estratificados del polo sur",
+  "South polar layered deposits exposed in Chasma Australe wall":
+    "Depósitos estratificados del polo sur expuestos en la pared de Chasma Australe",
+  "South polar layered deposits exposed in Promethei Lingula":
+    "Depósitos estratificados del polo sur expuestos en Promethei Lingula",
+  "South polar layered deposits exposed in Ultimum Chasma":
+    "Depósitos estratificados del polo sur expuestos en Ultimum Chasma",
+  "Steepest north polar scarp":
+    "El escarpe más empinado del polo norte",
+  "Sulfates and valley system in Melas Chasma basin":
+    "Sulfatos y red de valles en la cuenca de Melas Chasma",
+  "Tomini Crater western ejecta":
+    "Eyecta occidental del cráter Tomini",
+  "Tributary glacier-like feature with parallel lineations on valley wall":
+    "Forma tipo glaciar tributario con lineaciones paralelas en la pared de un valle",
+  "Uplift of layered materials from the intersection of two craters":
+    "Levantamiento de materiales estratificados donde se cruzan dos cráteres",
+  "Valley-inverted channel transition in Arabia Terra":
+    "Transición de valle a canal invertido en Arabia Terra",
+  "Well-preserved 4-km impact crater":
+    "Cráter de impacto de 4 km bien conservado",
+  "Well-preserved impact crater with steep slopes":
+    "Cráter de impacto bien conservado con laderas empinadas",
+  "Western Jezero":
+    "Jezero occidental",
+  "Wrinkle ridges in west Meridiani Planum":
+    "Crestas arrugadas en el oeste de Meridiani Planum",
+  "Al Wusta Governorate, Oman":
+    "Gobernación de Al Wusta, Omán",
+  "Algodones Dunes":
+    "Dunas de Algodones",
+  "Amboy Crater":
+    "Cráter Amboy",
+  "Asyut, Egypt":
+    "Asiut, Egipto",
+  "Boshruyeh County, Iran":
+    "Condado de Boshruyeh, Irán",
+  "Canyonlands rim":
+    "Borde de Canyonlands",
+  "Carrizozo lava flow":
+    "Colada de lava de Carrizozo",
+  "Death Valley Canyon fan":
+    "Abanico de Death Valley Canyon",
+  "District of Al-Jufra, Libya":
+    "Distrito de Al Jufra, Libia",
+  "Dumont Dunes":
+    "Dunas Dumont",
+  "Eastern Province, Saudi Arabia":
+    "Provincia Oriental, Arabia Saudita",
+  "Emery County, United States":
+    "Condado de Emery, Estados Unidos",
+  "Ennedi-Ouest, Chad":
+    "Ennedi Oeste, Chad",
+  "Eureka Dunes":
+    "Dunas Eureka",
+  "Furnace Creek fan":
+    "Abanico de Furnace Creek",
+  "Green River near Mineral Bottom":
+    "Río Green cerca de Mineral Bottom",
+  "Hadramaut Governorate, Yemen":
+    "Gobernación de Hadramaut, Yemen",
+  "Halfa - حلفا, Sudan":
+    "Halfa - حلفا, Sudán",
+  "Hanaupah Canyon fan":
+    "Abanico de Hanaupah Canyon",
+  "Ica, Peru":
+    "Ica, Perú",
+  "Illizi District, Algeria":
+    "Distrito de Illizi, Argelia",
+  "Iranshahr County, Iran":
+    "Condado de Iranshahr, Irán",
+  "Kanaio lava field":
+    "Campo de lava de Kanaio",
+  "Kelso Dunes":
+    "Dunas Kelso",
+  "Kennicott Glacier":
+    "Glaciar Kennicott",
+  "Keriya County, China":
+    "Condado de Keriya, China",
+  "Khaki Safed, Afghanistan":
+    "Khaki Safed, Afganistán",
+  "Kufra, Libya":
+    "Kufra, Libia",
+  "Kīlauea East Rift":
+    "Rift este del Kīlauea",
+  "Leh district, India":
+    "Distrito de Leh, India",
+  "Malha - مالحة, Sudan":
+    "Malha - مالحة, Sudán",
+  "Matruh, Egypt":
+    "Matruh, Egipto",
+  "Mendenhall Glacier":
+    "Glaciar Mendenhall",
+  "Mesquite Flat dunes":
+    "Dunas de Mesquite Flat",
+  "Meteor Crater":
+    "Cráter Meteor",
+  "Murzuq, Libya":
+    "Murzuq, Libia",
+  "New Valley, Egypt":
+    "Nuevo Valle, Egipto",
+  "Painted Desert":
+    "Desierto Pintado",
+  "Panjgur District, Pakistan":
+    "Distrito de Panjgur, Pakistán",
+  "Pisgah lava field":
+    "Campo de lava de Pisgah",
+  "Red Sea State, Sudan":
+    "Estado del Mar Rojo, Sudán",
+  "Red Sea, Egypt":
+    "Mar Rojo, Egipto",
+  "Ruoqiang County, China":
+    "Condado de Ruoqiang, China",
+  "Ruth Glacier":
+    "Glaciar Ruth",
+  "SP Crater lava field":
+    "Campo de lava del cráter SP",
+  "San Juan River Goosenecks":
+    "Meandros del río San Juan (Goosenecks)",
+  "Shuanghu County, China":
+    "Condado de Shuanghu, China",
+  "South Fork Badlands":
+    "Badlands de South Fork",
+  "Suhaj, Egypt":
+    "Suhaj, Egipto",
+  "Sunset Crater":
+    "Cráter Sunset",
+  "Tabelbala, Algeria":
+    "Tabelbala, Argelia",
+  "Tazrouk District, Algeria":
+    "Distrito de Tazrouk, Argelia",
+  "Tinduf Disctrict, Algeria":
+    "Distrito de Tinduf, Argelia",
+  "Trail Canyon fan":
+    "Abanico de Trail Canyon",
+  "Ubehebe Crater":
+    "Cráter Ubehebe",
+  "White Sands dune field":
+    "Campo de dunas de White Sands",
+  "Xizang, China":
+    "Xizang (Tíbet), China",
+  "d'In Ghar District, Algeria":
+    "Distrito de In Ghar, Argelia",
+};
 
 function initialLang(): Lang {
   return document.documentElement.lang === "en" ? "en" : "es";
@@ -1093,7 +1649,10 @@ export function t(key: string, params?: Params): string {
   return params ? text.replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? "")) : text;
 }
 
-/** Traduce un texto que viene de los datos (en español). */
+/**
+ * Traduce un texto que viene de los datos. En inglés, los textos en español (dataEn); en español,
+ * los nombres en inglés del catálogo de parches (dataEs). Si no lo conoce, lo devuelve igual.
+ */
 export function tr(text: string): string;
 export function tr(text: string | null | undefined): string | null | undefined;
 export function tr(text: string | null | undefined) {
@@ -1103,9 +1662,11 @@ export function tr(text: string | null | undefined) {
     if (exact != null) return exact;
   } else {
     // Algunos textos de los datos llegan en inglés (títulos HiRISE, lugares de la Tierra): se muestran en español.
-    const exact = DATOS_ES[text];
+    const exact = DATOS_ES[text] ?? dataEs[text];
     if (exact != null) return exact;
-    for (const [re, out] of dataEsPatterns) if (re.test(text)) return text.replace(re, out);
+    for (const [re, out] of dataEsPatterns) {
+      if (re.test(text)) return typeof out === "string" ? text.replace(re, out) : text.replace(re, out);
+    }
   }
   for (const [re, write] of dataRules) {
     const m = re.exec(text);

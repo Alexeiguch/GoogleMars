@@ -1740,8 +1740,10 @@ function fillGoto() {
         ? a.text.localeCompare(b.text, lang)
         : (bestScore(b.item) - bestScore(a.item))));
     if (!list.length) return "";
+    // Dos ventanas del mismo análogo (p. ej. «Puna de Atacama (…)») tienen el mismo nombre: se distinguen por la posición.
+    const repeated = new Set(list.map((x) => x.text).filter((text, i, all) => all.indexOf(text) !== i));
     return `<optgroup label="${esc(t("gl.group", { body: bodyName(globe), n: list.length }))}">${list.map(({ item, text }) =>
-      `<option value="${esc(item.id)}">${esc(text)}</option>`).join("")}</optgroup>`;
+      `<option value="${esc(item.id)}">${esc(repeated.has(text) ? `${text} · ${coord(item.lat, item.lon)}` : text)}</option>`).join("")}</optgroup>`;
   });
   gotoSelect.innerHTML = `<option value="">${esc(t("gl.choosePoint"))}</option>${groups.join("")}`;
   gotoSelect.value = selected && selected.visible && selected.kind !== "heat" ? selected.id : "";
