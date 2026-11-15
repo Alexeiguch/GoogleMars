@@ -255,7 +255,7 @@ const LocalEarth = L.GridLayer.extend({
     return tile;
   },
 }) as unknown as new (options?: L.GridLayerOptions) => L.GridLayer;
-new LocalEarth({ maxNativeZoom: 4, maxZoom: 13, attribution: localAttribution, className: "lm-local-tiles" }).addTo(map);
+new LocalEarth({ maxNativeZoom: 4, maxZoom: 13, className: "lm-local-tiles" }).addTo(map);
 const esriLayer = L.tileLayer(EARTH_TILES, { attribution, maxZoom: 13 }).addTo(map);
 
 /**
@@ -285,9 +285,17 @@ function watchTiles(layer: L.TileLayer, onState: (down: boolean) => void, slowMs
   arm();
 }
 let mapDown = false;
+let localShown = "";
 function renderAviso() {
   const box = document.getElementById("map-aviso");
   if (box) box.textContent = mapDown ? m("offline") : "";
+  // La atribución del mapa local solo se muestra cuando es el mapa local el que se ve.
+  const want = mapDown ? localAttribution : "";
+  if (want !== localShown) {
+    if (localShown) map.attributionControl.removeAttribution(localShown);
+    if (want) map.attributionControl.addAttribution(want);
+    localShown = want;
+  }
 }
 watchTiles(esriLayer, (down) => { mapDown = down; renderAviso(); });
 const legend = new L.Control({ position: "bottomright" });
@@ -301,17 +309,13 @@ function renderMapText() {
     map.attributionControl.removeAttribution(attribution).addAttribution(next);
     attribution = next;
   }
-  const nextLocal = m("localAttribution");
-  if (nextLocal !== localAttribution) {
-    map.attributionControl.removeAttribution(localAttribution).addAttribution(nextLocal);
-    localAttribution = nextLocal;
-  }
+  localAttribution = m("localAttribution");
   renderAviso();
 }
 
 // ---- disposición: tres columnas (sitios · ficha · mapa) o apilado en pantallas estrechas ------
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-const stacked = () => matchMedia("(max-width: 1099px)").matches;
+const stacked = () => matchMedia("(max-width: 860px)").matches;
 /** El bloque principal ocupa lo que queda de pantalla bajo la cabecera y la frase de entrada, midan lo que midan. */
 function fitLayout() {
   const layout = $(".lm-layout");
@@ -494,7 +498,7 @@ function renderTwins() {
     det.append(sum);
     const name = groupName(key);
     det.append(twinList(l0, `twin-${key}`, t("lm.twins30"), true, (k) => t("lm.twinTitle", { k: k + 1, name })));
-    det.append(twinList(l1, `ftwin-${key}`, t("lm.twins10"), false, (k) => `${t("lm.twinTitle", { k: k + 1, name })} · 10 km`));
+    det.append(twinList(l1, `ftwin-${key}`, t("lm.twins10"), false, (k) => `${t("lm.twinTitle", { k: k + 1, name })} · ${fmt(windowKm(body, "L1"), 0)} km`));
     if (!l0.length && !l1.length) {
       const p = document.createElement("p");
       p.className = "lm-note";
@@ -819,7 +823,7 @@ function renderRefDetail() {
   const l1 = fineOf(body)?.twins?.[key] ?? [];
   const name = groupName(key);
   tw.append(twinList(l0, `rtwin-${key}`, t("lm.twins30"), true, (k) => t("lm.twinTitle", { k: k + 1, name })));
-  tw.append(twinList(l1, `rftwin-${key}`, t("lm.twins10"), false, (k) => `${t("lm.twinTitle", { k: k + 1, name })} · 10 km`));
+  tw.append(twinList(l1, `rftwin-${key}`, t("lm.twins10"), false, (k) => `${t("lm.twinTitle", { k: k + 1, name })} · ${fmt(windowKm(body, "L1"), 0)} km`));
   if (!l0.length && !l1.length) tw.innerHTML = `<p class="lm-note">${t("lm.noTwins")}</p>`;
 }
 
@@ -1086,9 +1090,13 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
   const unlike = axes.filter((a) => !a.ok).map((a) => m(`axis.${a.key}`));
   const verdict = `<p class="lm-verdict">${alike.length ? `<span class="ok">${esc(m("alike", { list: joinList(alike) }))}</span>` : ""}${
     unlike.length ? `<span class="no">${esc(m("notAlike", { list: joinList(unlike) }))}</span>` : ""}</p>`;
-  const axisHtml = axes.map((a) => `<section class="lm-axis ${a.ok ? "ok" : "no"}">
-      ${bar(`<em class="lm-mark" aria-hidden="true">${a.ok ? "✓" : "✗"}</em>${a.label}<span class="lm-vh">: ${esc(m(a.ok ? "verdictOk" : "verdictNo"))}</span>`, a.v, a.color)}
-      ${a.items.length ? `<ul class="lm-why">${a.items.join("")}</ul>` : ""}
+  // Marcador: total y los tres ejes con ✓/✗ (de un vistazo). Debajo de las imágenes, los datos de cada veredicto.
+  const mark = (ok: boolean) => `<em class="lm-mark ${ok ? "ok" : "no"}" aria-hidden="true">${ok ? "✓" : "✗"}</em>`;
+  const axisBars = axes.map((a) =>
+    bar(`${mark(a.ok)}${a.label}<span class="lm-vh">: ${esc(m(a.ok ? "verdictOk" : "verdictNo"))}</span>`, a.v, a.color)).join("");
+  const axisHtml = axes.filter((a) => a.items.length).map((a) => `<section class="lm-axis ${a.ok ? "ok" : "no"}">
+      <h4 class="lm-axis-h">${mark(a.ok)}${esc(m(`axisHead.${a.key}`))}<span class="lm-vh">: ${esc(m(a.ok ? "verdictOk" : "verdictNo"))}</span></h4>
+      <ul class="lm-why">${a.items.join("")}</ul>
     </section>`).join("");
 
   // Terreno por escala: solo las escalas medidas (una barra sola repetiría la de terreno).
@@ -1117,8 +1125,8 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
     ${verdict}
     <div class="lm-bars lm-total">
       ${bar(t("lm.bar.total"), s.score, "var(--body)")}
+      ${axisBars}
     </div>
-    <div class="lm-axes">${axisHtml}</div>
     <div class="lm-compare">
       <div class="lm-cmp-modes" role="group" aria-label="${t("lm.cmpLabel")}">
         <button type="button" data-cmp="relief" aria-pressed="${cmpMode === "relief"}">${t("lm.cmpRelief")}</button>
@@ -1131,6 +1139,7 @@ function select(s: EarthSite, title: string, story: string | null = null, fly = 
     </div>
     <p class="lm-cta-row"><a class="lm-cta" href="${esc(url3d)}">${esc(m("open3d"))} <span aria-hidden="true">→</span></a>
       <span class="lm-note">${esc(m("open3dNote"))}</span></p>
+    ${axisHtml ? `<h3 class="lm-subtitle">${esc(m("whyHead"))}</h3><div class="lm-axes">${axisHtml}</div>` : ""}
     ${story ? `<details class="lm-storyfold" id="story-fold"${storyOpen ? " open" : ""}><summary>${esc(m("storyFold"))}</summary><p class="lm-story">${esc(story)}</p></details>` : ""}
     ${levelBars}
     ${robustHtml(s)}
@@ -1328,7 +1337,7 @@ function setBody(next: Body) {
   refSel = null;
   openGroups.clear();
   showAllGroups = false;
-  for (const tab of tabs) tab.setAttribute("aria-selected", String(tab.dataset.body === body));
+  for (const tab of tabs) tab.setAttribute("aria-pressed", String(tab.dataset.body === body));
   document.documentElement.dataset.body = body;
   render();
 }

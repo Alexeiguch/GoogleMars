@@ -49,9 +49,9 @@
       <section class="lm-layout" aria-label="Análogos de la Luna y Marte en toda la Tierra" data-i18n-attr="aria-label:lm.layoutLabel">
         <!-- 1 · Elegir un sitio de la Luna o de Marte. Lo secundario (historias, ranking, referencias, validación) va plegado debajo. -->
         <aside class="lm-panel" id="panel" tabindex="-1">
-          <div class="lm-tabs" role="tablist" aria-label="Cuerpo de referencia" data-i18n-attr="aria-label:lm.tabsLabel">
-            <button type="button" role="tab" data-body="moon" aria-selected="true" data-i18n="lm.tabMoon">Luna</button>
-            <button type="button" role="tab" data-body="mars" aria-selected="false" data-i18n="lm.tabMars">Marte</button>
+          <div class="lm-tabs" role="group" aria-label="Cuerpo de referencia" data-i18n-attr="aria-label:lm.tabsLabel">
+            <button type="button" data-body="moon" aria-pressed="true" data-i18n="lm.tabMoon">Luna</button>
+            <button type="button" data-body="mars" aria-pressed="false" data-i18n="lm.tabMars">Marte</button>
           </div>
           <p class="lm-loading" id="lm-loading" role="status" data-early="loading">Cargando los análogos…</p>
           <div id="lm-results" hidden>
