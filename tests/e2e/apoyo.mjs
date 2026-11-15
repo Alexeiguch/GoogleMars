@@ -321,12 +321,14 @@ function enPagina() {
       const bs = this.botones();
       const plan = { conmutadores: [], filas: [], primerasFilas: [], otros: [] };
       const vistosEn = new Set();
+      let sueltas = 0;
       bs.forEach((b, i) => {
         const tx = norm(b.textContent).slice(0, 60);
         if (b.hasAttribute('aria-pressed') && b.closest('[role="group"]')) plan.conmutadores.push([i, tx]);
         else if (b.closest('li')) {
           const plegable = b.closest('details');
-          if (!plegable) { plan.filas.push([i, tx]); if (plan.primerasFilas.length < 3) plan.primerasFilas.push([i, tx]); }
+          // Listas sueltas (ranking, análogos): las 12 primeras filas bastan para ver todos los tipos de ficha.
+          if (!plegable) { if (sueltas++ < 12) plan.filas.push([i, tx]); if (plan.primerasFilas.length < 3) plan.primerasFilas.push([i, tx]); }
           else if (!vistosEn.has(plegable)) { vistosEn.add(plegable); plan.filas.push([i, tx]); }
         } else plan.otros.push([i, tx]);
       });

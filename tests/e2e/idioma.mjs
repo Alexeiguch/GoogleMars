@@ -52,7 +52,11 @@ const NOMBRE_IDIOMA = /^(español|english|es|en)$/i;
  */
 const TOPONIMO = /\p{Lu}[\p{L}'’-]*(?:\s+(?:de|del|de la|de los|de las|la|el|los|las|y)\s+\p{Lu}[\p{L}'’-]*)+|\b(?:El|La|Los|Las)\s+(?=\p{Lu})/gu;
 /** Palabra con mayúscula inicial (nombre propio): su tilde o su eñe no delatan español («Río Tinto», «Chañaral», «Ténéré»). */
-const propio = (p, s) => new RegExp(`(^|[^\\p{L}])${p.charAt(0).toUpperCase()}${p.slice(1)}(?![\\p{L}])`, 'u').test(s);
+const propio = (p, s) => {
+  const esc = p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const m of s.matchAll(new RegExp(`(?<![\\p{L}])${esc}(?![\\p{L}])`, 'giu'))) if (/\p{Lu}/u.test(m[0].charAt(0))) return true;
+  return false;
+};
 
 export function espanolEnIngles(texto) {
   const motivos = [];
@@ -93,14 +97,15 @@ const INTERFAZ_EN = new Set(['show', 'select', 'choose', 'twin', 'twins', 'analo
  */
 export const NOMBRES_INGLESES_ACEPTADOS = [
   'Peak near Cabeus B', 'Peak near Shackleton', 'Connecting Ridge Extension', 'Connecting Ridge', 'Mons Mouton Plateau',
-  'Malapert Massif', 'Gerlache-Kocher Massif', 'Gerlache Rim', 'Nobile Rim', 'Faustini Rim A', 'Slater Plain', 'Amundsen Rim',
+  'Mouton Plateau', 'Malapert Massif', 'Gerlache-Kocher Massif', 'Gerlache Rim', 'Nobile Rim', 'Faustini Rim A', 'Slater Plain', 'Amundsen Rim',
   'Leibnitz Beta Plateau', 'Marius Hills', 'Meteor Crater', 'Bradbury Landing', 'Octavia E. Butler Landing',
 ];
 const quitarAceptados = (s) => NOMBRES_INGLESES_ACEPTADOS.reduce((acc, n) => acc.split(n).join(' '), s);
 
 export function inglesEnEspanol(texto) {
   const motivos = [];
-  const s = quitarAceptados(limpiar(String(texto ?? '')));
+  // Los títulos citados entre comillas (artículos, páginas HiRISE) van en su idioma original y no cuentan.
+  const s = quitarAceptados(limpiar(String(texto ?? ''))).replace(/'[^']{3,}'|"[^"]{3,}"|“[^”]{3,}”|«[^»]{3,}»/g, ' ');
   const ps = palabras(s);
   // Una cadena con señales claras de español no se toma por inglesa (p. ej. «LOLA DEM de 40 m»).
   const funcES = ps.filter((p) => FUNCIONALES_ES.has(p)).length;

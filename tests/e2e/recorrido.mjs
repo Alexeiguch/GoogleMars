@@ -21,7 +21,9 @@ export async function recorrer(page, nombre, { tope = 240_000 } = {}) {
   let pasos = 0;
   let cortado = false;
   const ruta = new URL(page.url()).pathname;
-  const hayTiempo = () => { if (Date.now() - inicio > tope) cortado = true; return !cortado; };
+  // Cada pestaña tiene su parte del tiempo, para que la última (Marte) no se quede sin recorrer.
+  let limite = inicio + tope;
+  const hayTiempo = () => { if (Date.now() > limite) { cortado = true; return false; } return true; };
   // Sin mayúsculas forzadas por CSS: así el texto recogido conserva las mayúsculas reales (solo afecta al aspecto).
   const neutro = () => page.addStyleTag({ content: '*{text-transform:none !important}' }).catch(() => {});
   await neutro();
@@ -78,7 +80,7 @@ export async function recorrer(page, nombre, { tope = 240_000 } = {}) {
       await paso(`${donde} · fila «${fila[1]}»`, () => page.evaluate((i) => window.__e2e.pulsarBoton(i), fila[0]));
     }
     // 4. El resto de botones (historias, «ver la ficha de la referencia», leyenda, vistas…).
-    const nOtros = Math.min(90, (await page.evaluate(() => window.__e2e.planBotones())).otros.length);
+    const nOtros = Math.min(30,(await page.evaluate(() => window.__e2e.planBotones())).otros.length);
     for (let n = 0; n < nOtros; n++) {
       const b = (await page.evaluate(() => window.__e2e.planBotones())).otros[n];
       if (!b) break;
@@ -90,6 +92,7 @@ export async function recorrer(page, nombre, { tope = 240_000 } = {}) {
   const pestanas = await page.evaluate(() => [...document.querySelectorAll('[role="tab"]')].filter((t) => window.__e2e.visible(t)).map((t) => window.__e2e.norm(t.textContent)));
   if (!pestanas.length) await explorar('página');
   for (let i = 0; i < pestanas.length; i++) {
+    limite = inicio + (tope * (i + 1)) / pestanas.length;
     await paso(`pestaña «${pestanas[i]}»`, () => page.evaluate((n) => { const t = [...document.querySelectorAll('[role="tab"]')].filter((x) => window.__e2e.visible(x))[n]; if (!t) return false; t.click(); return true; }, i));
     await explorar(`pestaña «${pestanas[i]}»`);
   }
