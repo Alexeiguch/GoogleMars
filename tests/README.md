@@ -26,7 +26,7 @@ Variables opcionales: `E2E_PASO_MS` (tiempo máximo por paso, 60000 por defecto)
 (tiempo máximo del recorrido de idioma por página, 300000), `E2E_GPU=hw` (WebGL por GPU en vez de SwiftShader),
 `E2E_VER=1` (con ventana), `E2E_CANAL` (canal de Chrome, `chrome` por defecto).
 
-La ejecución completa tarda unos 15–25 minutos con la máquina cargada (la prueba de idioma es la más larga).
+La ejecución completa tarda unos 20 minutos con la máquina cargada (la prueba de idioma es la más larga).
 La prueba de idioma deja el informe completo (cadenas ofensoras y todo el texto recogido) en
 `tests/e2e/informes/idioma-<idioma>-<página>.txt` (ignorado por git).
 
@@ -44,6 +44,16 @@ para no confundir las teselas del mapa con las imágenes de la ficha).
 | `04-carga.test.mjs` | (e) Cada página en los dos idiomas a 1920x1080 y 375x812: sin errores de consola, sin excepciones, sin peticiones locales fallidas (404…), sin desborde horizontal (`scrollWidth ≤ innerWidth`) y con el elemento `[data-intro]` (C5) entero y visible sin desplazarse, en el idioma de la página. Los mosaicos externos que no cargan (red de la sala) se anotan pero no hacen fallar. |
 | `05-sin-red.test.mjs` | (f) Sin red externa (C3): se aborta todo lo que no sea localhost. Las dos páginas siguen mostrando su contenido (el guion del mapa y los globos con dibujo), cargan imágenes locales de `/imagery/` y muestran un aviso visible `[data-aviso="sin-red"]` con `role="status"` y texto en inglés. |
 | `06-cifras.test.mjs` | (g) Las cifras de la ficha del gemelo 1 de Shackleton salen de `src/data/results.json`: la prueba lee el JSON, localiza el grupo por su nombre, y compara con lo que se ve, con el redondeo de la app: coordenadas del guion (2 decimales) y de la ficha (3), puntuación de la fila y del grupo, altitud media, barras (total, terreno, superficie, clima) y la columna del gemelo en la tabla de rasgos. Nada escrito a mano. |
+
+## Resultado en la app base (15/11, antes de fusionar las ramas de la noche)
+
+109 pruebas y subpruebas: 60 pasan y 49 fallan (20 min). Pasan el guion del mapa en los dos idiomas, «Compare
+terrain ↓» con dibujo en el lienzo 3D, las cifras de la ficha, la ausencia de excepciones, de 404 locales y de
+desborde. Fallan, por defectos reales de la app: no existe el botón «Find analogs» / «Buscar análogos» (hoy «Show it
+on the globes»); la marca (cabecera «Earth Analogs» / «Análogos terrestres», títulos sin «TerraTwin», imagen
+`brand/nasa-logo.svg`); `favicon.ico` da 404 (error de consola en la primera página); no hay `[data-intro]` ni aviso
+`[data-aviso="sin-red"]`; ids internos visibles en inglés (`moon_polar_grid`, `connecting_ridge_c1`, `nobile_rim_1`,
+un parche `dteec_…`, `dist_total_m`), y títulos HiRISE y topónimos en inglés con la app en español.
 
 ## Detectores de idioma (`e2e/idioma.mjs`)
 
