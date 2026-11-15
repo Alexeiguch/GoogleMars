@@ -13,12 +13,14 @@
         d.dataset.theme = t === "light" || t === "dark" ? t : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
       })();
     </script>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <meta name="description" content="TerraTwin searches all of Earth's land for places that resemble the candidate zones for a Moon base and sites on Mars, and tells you where they match and where they do not.">
     <title data-i18n="gl.docTitle">TerraTwin · Globos 3D</title>
   </head>
   <body>
     <main class="gl">
       <header class="masthead">
-        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">TerraTwin</span></h1>
+        <h1><span data-i18n="site.title">TerraTwin</span></h1>
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
           <a href="./luna-marte.html" data-i18n="nav.map">Mapa Luna y Marte</a>
           <a href="./globos.html" aria-current="page" data-i18n="nav.globes">Globos 3D</a>

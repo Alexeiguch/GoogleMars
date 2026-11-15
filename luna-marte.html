@@ -34,13 +34,15 @@
         for (var i = 0; i < els.length; i++) { var v = s[els[i].getAttribute("data-early")]; if (v) els[i].textContent = v; }
       };
     </script>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <meta name="description" content="TerraTwin searches all of Earth's land for places that resemble the candidate zones for a Moon base and sites on Mars, and tells you where they match and where they do not.">
     <title data-i18n="lm.docTitle">TerraTwin</title>
   </head>
   <body>
     <a class="lm-skip" href="#panel" data-early="skip">Saltar a la lista de sitios</a>
     <main class="lm">
       <header class="masthead">
-        <h1><span class="mark" aria-hidden="true"></span><span data-i18n="site.title">TerraTwin</span></h1>
+        <h1><span data-i18n="site.title">TerraTwin</span></h1>
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
           <a href="./luna-marte.html" aria-current="page" data-i18n="nav.map">Mapa Luna y Marte</a>
           <a href="./globos.html" data-i18n="nav.globes">Globos 3D</a>
