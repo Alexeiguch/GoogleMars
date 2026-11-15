@@ -1,6 +1,7 @@
 // Idioma (es/en) compartido por las dos páginas.
 // El idioma inicial lo fija el script en línea del <head> de cada HTML (localStorage → idioma del navegador).
 import { DATOS_EN } from "./i18n.datos.en";
+import { DATOS_ES } from "./i18n.datos.es";
 import { NOMBRES_ID } from "./i18n.datos.ids";
 
 export type Lang = "es" | "en";
@@ -992,6 +993,12 @@ const dataEnPatterns: [RegExp, string][] = [
   [/^Malla polar (\d+) km \((.+)\)$/, "Polar grid $1 km ($2)"],
 ];
 
+/** Textos de los datos en inglés con parte variable que se muestran en español. */
+const dataEsPatterns: [RegExp, string][] = [
+  [/^Antarctica · (.+)$/, "Antártida · $1"],
+  [/^Greenland · (.+)$/, "Groenlandia · $1"],
+];
+
 const en = () => current === "en";
 /** Nombre legible de un id interno (región, sitio o tesela) citado dentro de una nota de los datos. */
 function idName(id: string): string {
@@ -1094,6 +1101,11 @@ export function tr(text: string | null | undefined) {
   if (current === "en") {
     const exact = dataEn[text];
     if (exact != null) return exact;
+  } else {
+    // Algunos textos de los datos llegan en inglés (títulos HiRISE, lugares de la Tierra): se muestran en español.
+    const exact = DATOS_ES[text];
+    if (exact != null) return exact;
+    for (const [re, out] of dataEsPatterns) if (re.test(text)) return text.replace(re, out);
   }
   for (const [re, write] of dataRules) {
     const m = re.exec(text);
