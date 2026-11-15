@@ -94,7 +94,7 @@ Cada referencia lleva su fuente en `pipeline/analogs/reference_sites.py`.
 
 ### Puntuación
 
-1. **Rasgos de terreno.** En cada ventana se miden seis: pendiente típica, pendiente del percentil 90, fracción llana (< 5°), fracción empinada (> 15°), relieve local (p5–p95) y rugosidad a ~1 km.
+1. **Rasgos de terreno.** En cada ventana se miden seis: pendiente típica, pendiente del percentil 90, fracción llana (< 5°), fracción empinada (> 15°), relieve local (p5–p95) y rugosidad (~1 km en L0; la escala baja con el píxel en L1 y L2).
 2. **Similitud de terreno.** Cada rasgo se convierte en su percentil dentro de la Tierra y se compara con el de la referencia. La similitud es exp(−(d/0,08)²), donde d es la diferencia cuadrática media de percentiles. Así la Luna, más abrupta que casi toda la Tierra, se compara con lo más abrupto de aquí.
 3. **Terreno multiescala.** El terreno final es la media geométrica de la similitud a las tres escalas (T0, T1 y T2).
 4. **Superficie.** Fracción de suelo desnudo, más 0,6 por la fracción de nieve o hielo y 0,3 por la de musgo y liquen.
@@ -138,7 +138,7 @@ Las 10 historias de `results.json → featured`. Las tres cifras de terreno son 
 |---|---|---|---|---|
 | Changtang, Tíbet occidental (33,77°N 84,39°E, ~4.800 m) | Llanuras del polo sur lunar | nuevo | 98 / 93 / 90 | Caen 333 mm al año; el relieve lo modelan el hielo y el agua |
 | Alta cordillera de San Juan, Argentina (29,50°S 69,51°O, ~4.200 m) | Cráter Shackleton | nuevo | Pendiente típica 14,6° frente a 14,0° (30 km) | Shackleton es más profundo: 3.781 m de relieve frente a 2.027 m |
-| Cuenca de Qaidam, China (38,14°N 91,44°E, ~3.250 m) | Zona de exploración de Jezero | validación | 96 / 99 / 96 | No es nuevo: ya está publicada como análogo de Marte, y el método la encuentra sola |
+| Cuenca de Qaidam, China (38,14°N 91,44°E, ~3.250 m) | Zona de exploración de Jezero | validación | 96 / 99 / 96 | No es nuevo: ya está publicada como análogo de Marte. El método la sitúa arriba, aunque no era uno de los análogos fijados de antemano para la validación: es una coincidencia observada después |
 | Meseta de Djado, Níger (22,68°N 11,84°E) | Llanuras del cráter Gusev (Spirit) | nuevo | 98 / 100 / 93 | Es calurosa: media de 23,7 °C |
 | Iglesia, San Juan, Argentina (28,95°S 69,19°O, ~3.280 m) | Llanuras de Haworth | nuevo | 97 / 97 / 94 | Similitud climática de solo 31/100 |
 | Cuenca alta del Loa, Chile (21,86°S 68,94°O, ~3.490 m) | Laderas de Mons Mouton Plateau | nuevo | 96 / 94 / 88 | Similitud climática de solo 28/100 |
@@ -160,7 +160,10 @@ Dónde se rompe la analogía y qué no hace el método:
 - **Iluminación polar.** La luz casi permanente de las crestas y la sombra permanente de los cráteres del polo sur lunar no se modelan.
 - **Marte sin dato fino.** 18 de los 43 sitios no puntúan porque allí solo hay MOLA. Separarlos del resto es una heurística calibrada con 8 puntos, con casos dudosos en terreno empinado (Coprates, Hale, Tooting).
 - **L2 de Marte por categoría.** A 2 km casi siempre se compara con parches HiRISE de la misma categoría de terreno, no del mismo lugar: 109 de los 116 parches están a más de 100 km de todos los sitios de referencia.
-- **Comparación 3D de 2 km.** Los parches terrestres de GLO-30 se remuestrean de 30 m a 20 m, más fino que el dato, así que sus pendientes salen algo más suaves que las de HiRISE.
+- **Comparación 3D de 2 km.** Los parches terrestres de GLO-30 se remuestrean de 30 m a 20 m, más fino que el dato, así que sus pendientes podrían salir más suaves que las de HiRISE (no se ha medido).
+- **Pesos.** Los pesos 0,5 / 0,25 / 0,25 (terreno, superficie, clima) son una elección; la robustez frente a 42 combinaciones está en `pipeline/INFORME_v2.md`, sección 3 ter.
+- **Bibliografía breve en algunos sitios.** La búsqueda de Djado fue de 3 consultas y la de la alta cordillera de San Juan, breve: «no encontramos estudios» se refiere a esas búsquedas.
+- **Nombres de lugar fuera del polo.** Los nombres de los gemelos de los sitios lunares fuera del polo salen de las coordenadas (país o región), no de un geocodificador verificado uno a uno.
 - **Luna fuera del polo.** Solo gemelos a 30 y 10 km, sin L2. Los fosos miden decenas de metros: se compara el terreno que los rodea, no la cueva.
 - **Coordenadas.** Las de las regiones de Artemis son el centro de los mosaicos LROC; no pudimos descargar los polígonos oficiales. Las longitudes de Nobile Rim 1, Mons Mouton, de Gerlache Rim 2 y Slater Plain son inciertas. En las zonas de exploración de Marte no sabemos si la latitud publicada es planetocéntrica o planetográfica (hasta ~0,3°).
 - **Resolución efectiva lunar.** La capa que la mide no declara unidades; suponemos metros.
