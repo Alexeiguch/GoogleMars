@@ -77,6 +77,15 @@ main.gl {
   font-size: 15px;
 }
 .gl-field select { width: clamp(9rem, 18vw, 17rem); }
+/* Escritorio: los dos selectores siguen en la línea del título mientras quepan, aunque tengan que
+   estrecharse (hasta 9rem). Sin esto el salto de línea dependía del largo de los textos y en español
+   bajaban un renglón a anchos en los que en inglés caben. 35rem = etiquetas en español + dos selects de 9rem. */
+@media (min-width: 641px) {
+  .gl-pickers { flex: 1 1 35rem; flex-wrap: nowrap; justify-content: flex-end; }
+  .gl-field { flex: 0 1 auto; }
+  .gl-field > span { white-space: nowrap; }
+  .gl-field select { flex: 0 1 clamp(9rem, 18vw, 17rem); width: auto; min-width: 9rem; }
+}
 .gl-field select:focus-visible, .gl-seg button:focus-visible, .gl-reset:focus-visible, .gl-legend-toggle:focus-visible,
 .gl-detail button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
