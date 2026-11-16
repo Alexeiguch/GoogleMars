@@ -11,7 +11,7 @@ type Params = Record<string, string | number>;
 
 const messages: Record<Lang, Record<string, string>> = {
   es: {
-    "site.title": "TerraTwin",
+    "site.title": "GeoTwin",
     "nav.label": "Vistas",
     "nav.viewer": "Visor 3D de Marte",
     "nav.map": "Mapa Luna y Marte",
@@ -28,9 +28,9 @@ const messages: Record<Lang, Record<string, string>> = {
     "planet.moon": "Luna",
 
     // Globos 3D (globos.html, globos.ts)
-    "gl.docTitle": "TerraTwin · Globos 3D",
+    "gl.docTitle": "GeoTwin · Globos 3D",
     "path.title": "Planificador de rutas",
-    "path.docTitle": "TerraTwin · Planificador de rutas",
+    "path.docTitle": "GeoTwin · Planificador de rutas",
     "path.stage": "Rutas en los globos de Marte y la Tierra",
     "path.draw": "Dibujar ruta",
     "path.upload": "Subir ruta",
@@ -153,7 +153,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "gl.src.marsTiles": "Marte de cerca · Viking MDIM 2.1 vía NASA Mars Trek y mosaico CTX beta01 (NASA/JPL/MSSS/Caltech Murray Lab/Esri)",
 
     // Visor 3D (index.html, main.ts)
-    "v.docTitle": "TerraTwin · Visor 3D",
+    "v.docTitle": "GeoTwin · Visor 3D",
     "v.globesLabel": "Globos de los planetas",
     "v.marsPicker": "Sitio de terreno de Marte",
     "v.find": "Buscar análogos",
@@ -224,7 +224,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "src.earthImg": "Imagen de la Tierra · NASA Blue Marble",
 
     // Mapa Luna/Marte (luna-marte.html, lunaMarte.ts)
-    "lm.docTitle": "TerraTwin · Mapa de la Luna y Marte",
+    "lm.docTitle": "GeoTwin · Mapa de la Luna y Marte",
     "lm.layoutLabel": "Análogos de la Luna y Marte en toda la Tierra",
     "lm.tabsLabel": "Cuerpo de referencia",
     "lm.tabMoon": "Luna",
@@ -413,7 +413,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "lm.src.marsMini": "Minimapa de Marte · Viking MDIM 2.1",
   },
   en: {
-    "site.title": "TerraTwin",
+    "site.title": "GeoTwin",
     "nav.label": "Views",
     "nav.viewer": "Mars 3D viewer",
     "nav.map": "Moon & Mars map",
@@ -430,9 +430,9 @@ const messages: Record<Lang, Record<string, string>> = {
     "planet.moon": "Moon",
 
     // 3D globes (globos.html, globos.ts)
-    "gl.docTitle": "TerraTwin · 3D globes",
+    "gl.docTitle": "GeoTwin · 3D globes",
     "path.title": "Path Planner",
-    "path.docTitle": "TerraTwin · Path Planner",
+    "path.docTitle": "GeoTwin · Path Planner",
     "path.stage": "Routes on the Mars and Earth globes",
     "path.draw": "Draw route",
     "path.upload": "Upload route",
@@ -554,7 +554,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "gl.src.moonTiles": "Moon close-up · LRO WAC 100 m mosaic (NASA/GSFC/Arizona State University), via NASA Moon Trek",
     "gl.src.marsTiles": "Mars close-up · Viking MDIM 2.1 via NASA Mars Trek and the CTX beta01 mosaic (NASA/JPL/MSSS/Caltech Murray Lab/Esri)",
 
-    "v.docTitle": "TerraTwin · 3D viewer",
+    "v.docTitle": "GeoTwin · 3D viewer",
     "v.globesLabel": "Planet globes",
     "v.marsPicker": "Mars terrain site",
     "v.find": "Find analogs",
@@ -624,7 +624,7 @@ const messages: Record<Lang, Record<string, string>> = {
     "src.marsImg": "Mars imagery · Viking MDIM 2.1",
     "src.earthImg": "Earth imagery · NASA Blue Marble",
 
-    "lm.docTitle": "TerraTwin · Moon & Mars map",
+    "lm.docTitle": "GeoTwin · Moon & Mars map",
     "lm.layoutLabel": "Moon and Mars analogs across the whole Earth",
     "lm.tabsLabel": "Reference body",
     "lm.tabMoon": "Moon",

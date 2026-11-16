@@ -1,10 +1,10 @@
-// (d) Marca (contrato C1): «TerraTwin» en la cabecera y en el título; ninguna imagen de la NASA;
+// (d) Marca (contrato C1): «GeoTwin» en la cabecera y en el título; ninguna imagen de la NASA;
 // no aparecen «Google Mars», «Earth Analogs» ni «Análogos terrestres».
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { abrirNavegador, nuevoContexto, abrir, esperarArranque, BASE, PAGINAS, IDIOMAS, PASO } from './apoyo.mjs';
 
-const MARCA = 'TerraTwin';
+const MARCA = 'GeoTwin';
 const NOMBRES_ANTIGUOS = ['Google Mars', 'GoogleMars', 'Earth Analogs', 'Análogos terrestres'];
 
 let navegador;

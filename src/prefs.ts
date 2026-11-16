@@ -48,9 +48,28 @@ box.innerHTML = `
   <button type="button" class="theme-toggle">${sun}${moon}</button>`;
 document.querySelector(".masthead")?.append(box);
 
+// Logo oficial de NASA Space Apps (kit de spaceappschallenge.org/brand): versión blanca en tema oscuro, negra en tema claro.
+// No es el logo de la NASA («meatball»), que las reglas de Space Apps prohíben.
+const EVENT_LEAD: Record<Lang, string> = { es: "Proyecto para", en: "Built for" };
+const logo = (variant: "white" | "black") => `${import.meta.env.BASE_URL}brand/space-apps-logo-${variant}.svg`;
+const event = document.createElement("a");
+event.className = "brand-event";
+event.href = "https://www.spaceappschallenge.org/";
+event.target = "_blank";
+event.rel = "noopener";
+event.innerHTML = `
+  <span class="brand-event__lead"></span>
+  <img class="brand-event__logo brand-event__logo--dark" src="${logo("white")}" width="561" height="221" alt="">
+  <img class="brand-event__logo brand-event__logo--light" src="${logo("black")}" width="561" height="221" alt="">
+  <span class="brand-event__name">NASA Space Apps Challenge 2026</span>`;
+document.querySelector(".masthead h1")?.after(event);
+function syncEvent() {
+  event.querySelector(".brand-event__lead")!.textContent = EVENT_LEAD[getLang()];
+}
+
 const DESCRIPTIONS: Record<Lang, string> = {
-  es: "TerraTwin busca en toda la tierra firme lugares parecidos a las zonas candidatas para una base lunar y a sitios de Marte, y dice en qué se parecen y en qué no.",
-  en: "TerraTwin searches all of Earth's land for places that resemble the candidate zones for a Moon base and sites on Mars, and tells you where they match and where they do not.",
+  es: "GeoTwin busca en toda la tierra firme lugares parecidos a las zonas candidatas para una base lunar y a sitios de Marte, y dice en qué se parecen y en qué no.",
+  en: "GeoTwin searches all of Earth's land for places that resemble the candidate zones for a Moon base and sites on Mars, and tells you where they match and where they do not.",
 };
 
 // Icono de la página y descripción: se añaden aquí si el HTML no los trae, para que las dos páginas los compartan.
@@ -94,9 +113,10 @@ function syncTheme() {
 
 for (const button of langButtons) button.addEventListener("click", () => setLang(button.dataset.lang as Lang));
 themeButton.addEventListener("click", () => setTheme(currentTheme() === "dark" ? "light" : "dark"));
-onLangChange(() => { syncLang(); syncTheme(); syncDescription(); });
+onLangChange(() => { syncLang(); syncTheme(); syncDescription(); syncEvent(); });
 
 applyStatic();
 syncLang();
 syncTheme();
 syncDescription();
+syncEvent();

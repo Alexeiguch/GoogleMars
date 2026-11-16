@@ -15,7 +15,7 @@ import { mountTutorial } from "./tutorial";
 import { mapSteps } from "./tutorial.steps";
 import { nasaAnalogs, nasaText, type NasaAnalog, type NasaAnalogSite } from "./nasaAnalogs";
 import rawTerrain from "./data/nasa-terrain.json";
-import rawResults from "virtual:terratwin-results/map";
+import rawResults from "virtual:geotwin-results/map";
 import { bindMapaTextos, m, noteOrNull } from "./mapa.textos";
 
 // ---- tipos del results.json ----------------------------------------------------

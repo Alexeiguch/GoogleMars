@@ -4,7 +4,7 @@
 :root { --body: var(--moon); --lm-top: 200px; }
 :root[data-body="mars"] { --body: var(--accent); }
 
-/* Frase de entrada (contrato C5): qué es TerraTwin y qué hacer, siempre a la vista. */
+/* Frase de entrada (contrato C5): qué es GeoTwin y qué hacer, siempre a la vista. */
 .lm-intro { margin: 14px 0 16px; max-width: 92ch; color: var(--story); font-size: 17px; line-height: 1.45; text-wrap: pretty; }
 
 /* Tres columnas en escritorio: 1 · sitios, 2 · ficha del gemelo, mapa. Cada columna se desplaza por su cuenta. */

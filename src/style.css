@@ -124,7 +124,7 @@ main > :not(.masthead):not(.intro) { animation-delay: 60ms; }
   gap: 16px;
 }
 
-/* ---- Cabecera: dos niveles. Arriba la marca TerraTwin, el lema, la insignia del reto y las preferencias;
+/* ---- Cabecera: dos niveles. Arriba la marca GeoTwin, el lema, la insignia del reto y las preferencias;
    abajo, las vistas como pestañas. Misma identidad que el pitch: solo texto, Barlow Condensed 600.
    El ancho se limita aquí igual que el main del mapa; en Globos 3D (main a todo el ancho) se quita el
    límite justo debajo para que la cabecera quede alineada con la barra y los globos. ---- */
@@ -210,8 +210,37 @@ main.gl > .masthead { max-width: none; }
 }
 .views a[href="#sources"]:hover { background: none; text-decoration: underline; }
 
+/* Logo de NASA Space Apps (src/prefs.ts): a la derecha, delante de idioma y tema. Blanco en oscuro, negro en claro. */
+.brand-event {
+  order: 1;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.25;
+  text-decoration: none;
+}
+.brand-event:hover .brand-event__lead { color: var(--text); }
+.brand-event:focus-visible { outline-offset: 4px; }
+.brand-event__logo { display: block; width: auto; height: 36px; }
+:root[data-theme="light"] .brand-event__logo--dark,
+:root:not([data-theme="light"]) .brand-event__logo--light { display: none; }
+/* El nombre del reto ya va en el logo: el texto queda para lectores de pantalla y como nombre del enlace. */
+.brand-event__name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Idioma y tema (src/prefs.ts) */
 .prefs { order: 2; display: flex; align-items: center; gap: 10px; flex: none; margin-left: auto; }
+.brand-event ~ .prefs { margin-left: 0; }
 .lang-switch { display: flex; border: 1px solid var(--control-border); }
 .lang-switch button, .theme-toggle {
   min-height: 40px;
@@ -410,6 +439,8 @@ footer .ai-note { margin-top: 16px; color: var(--muted); font-size: 14px; max-wi
   :root { --pad: 16px; }
   .masthead { gap: 0 12px; }
   .masthead h1 { font-size: 28px; }
+  .brand-event__lead { display: none; }
+  .brand-event__logo { height: 28px; }
   /* Tres pestañas a partes iguales; el texto baja a dos líneas si no cabe. */
   .views a { flex: 1 1 0; justify-content: center; padding: 6px 8px; font-size: 15px; line-height: 1.1; text-align: center; }
   .views a[href="#sources"] { display: none; }

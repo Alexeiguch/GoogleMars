@@ -16,13 +16,13 @@
       // viven aquí, en los dos idiomas, y src/mapa.textos.ts los vuelve a pintar al cambiar de idioma.
       window.LM_EARLY = {
         en: {
-          intro: "TerraTwin searches all of Earth's land for the places most like Moon and Mars sites: pick a site to see its twins on Earth, where the likeness holds and where it breaks.",
+          intro: "GeoTwin searches all of Earth's land for the places most like Moon and Mars sites: pick a site to see its twins on Earth, where the likeness holds and where it breaks.",
           loading: "Loading the analogs…",
           skip: "Skip to the site list",
           ficha: "Its twin on Earth"
         },
         es: {
-          intro: "TerraTwin busca en toda la tierra firme los lugares más parecidos a sitios de la Luna y de Marte: elige un sitio para ver sus gemelos en la Tierra, en qué se parecen y en qué no.",
+          intro: "GeoTwin busca en toda la tierra firme los lugares más parecidos a sitios de la Luna y de Marte: elige un sitio para ver sus gemelos en la Tierra, en qué se parecen y en qué no.",
           loading: "Cargando los análogos…",
           skip: "Saltar a la lista de sitios",
           ficha: "Su gemelo en la Tierra"
@@ -35,15 +35,15 @@
       };
     </script>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-    <meta name="description" content="TerraTwin searches all of Earth's land for places that resemble the candidate zones for a Moon base and sites on Mars, and tells you where they match and where they do not.">
+    <meta name="description" content="GeoTwin searches all of Earth's land for places that resemble the candidate zones for a Moon base and sites on Mars, and tells you where they match and where they do not.">
     <meta name="ai-disclosure" content="Made with AI assistance: code and texts written with AI assistants (Claude, by Anthropic) and checked by hand; scores are computed by deterministic code from open data.">
-    <title data-i18n="lm.docTitle">TerraTwin</title>
+    <title data-i18n="lm.docTitle">GeoTwin</title>
   </head>
   <body>
     <a class="lm-skip" href="#panel" data-early="skip">Saltar a la lista de sitios</a>
     <main class="lm">
       <header class="masthead">
-        <h1><span data-i18n="site.title">TerraTwin</span></h1>
+        <h1><span data-i18n="site.title">GeoTwin</span></h1>
         <nav class="views" aria-label="Vistas" data-i18n-attr="aria-label:nav.label">
           <a href="./luna-marte.html" aria-current="page" data-i18n="nav.map">Mapa Luna y Marte</a>
           <a href="./globos.html" data-i18n="nav.globes">Globos 3D</a>
@@ -51,7 +51,7 @@
           <a href="#sources"><span data-i18n="nav.sources">Fuentes de datos</span> <span aria-hidden="true">↘</span></a>
         </nav>
       </header>
-      <p class="lm-intro" data-intro data-early="intro">TerraTwin busca en toda la tierra firme los lugares más parecidos a sitios de la Luna y de Marte: elige un sitio para ver sus gemelos en la Tierra, en qué se parecen y en qué no.</p>
+      <p class="lm-intro" data-intro data-early="intro">GeoTwin busca en toda la tierra firme los lugares más parecidos a sitios de la Luna y de Marte: elige un sitio para ver sus gemelos en la Tierra, en qué se parecen y en qué no.</p>
       <section class="lm-layout" aria-label="Análogos de la Luna y Marte en toda la Tierra" data-i18n-attr="aria-label:lm.layoutLabel">
         <!-- 1 · Elegir un sitio de la Luna o de Marte. Lo secundario (historias, ranking, referencias, validación) va plegado debajo. -->
         <aside class="lm-panel" id="panel" tabindex="-1">

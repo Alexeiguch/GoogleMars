@@ -1,8 +1,8 @@
-# TerraTwin
+# GeoTwin
 
-**TerraTwin busca en toda la Tierra los lugares que más se parecen a las zonas candidatas para una base lunar permanente y a sitios de exploración de Marte.** Para cada lugar dice en qué se parece y en qué no, dimensión por dimensión: terreno, superficie y clima.
+**GeoTwin busca en toda la Tierra los lugares que más se parecen a las zonas candidatas para una base lunar permanente y a sitios de exploración de Marte.** Para cada lugar dice en qué se parece y en qué no, dimensión por dimensión: terreno, superficie y clima.
 
-Proyecto para el reto **"Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars"** del NASA Space Apps Challenge 2026. El repositorio y su carpeta se llaman `GoogleMars`; el nombre del proyecto es TerraTwin.
+Proyecto para el reto **"Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars"** del NASA Space Apps Challenge 2026. El repositorio y su carpeta se llaman `GoogleMars`; el nombre del proyecto es GeoTwin.
 
 Este README describe la **versión 2** del método y de los datos (`src/data/results.json`, `version: 2`). El informe completo del método está en [`pipeline/INFORME_v2.md`](pipeline/INFORME_v2.md), con una fe de erratas al final.
 
@@ -40,7 +40,7 @@ La interfaz está en español y en inglés. Los globos de cerca y las imágenes 
 
 ## Las dos páginas
 
-La cabecera dice **TerraTwin** y enlaza las dos páginas y el planificador de rutas, que vive dentro de los globos. `index.html` solo redirige a `globos.html`.
+La cabecera dice **GeoTwin** y enlaza las dos páginas y el planificador de rutas, que vive dentro de los globos. `index.html` solo redirige a `globos.html`.
 
 ### Globos 3D (`globos.html`)
 
