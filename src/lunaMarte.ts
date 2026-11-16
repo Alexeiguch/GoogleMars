@@ -11,6 +11,8 @@ import "./lunaMarte.css";
 import "./prefs";
 import L from "leaflet";
 import { getLang, hasMsg, locale, onLangChange, t, tr, type Lang } from "./i18n";
+import { mountTutorial } from "./tutorial";
+import { mapSteps } from "./tutorial.steps";
 import { nasaAnalogs, nasaText, type NasaAnalog, type NasaAnalogSite } from "./nasaAnalogs";
 import rawTerrain from "./data/nasa-terrain.json";
 import rawResults from "virtual:terratwin-results/map";
@@ -1591,3 +1593,6 @@ onLangChange(() => {
   renderMapText();
   render();
 });
+
+// Guía de uso del mapa: solo desde el botón «Guía» de la cabecera (la que se abre sola es la de la portada).
+mountTutorial(() => mapSteps);

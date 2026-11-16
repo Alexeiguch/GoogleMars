@@ -22,6 +22,8 @@ import {
   refById, topSite, twinKeyOf, twinsOf,
   windowName, type Body, type EarthPoint, type EarthRole, type EarthSite, type GlobeId, type Reference,
 } from "./globosData";
+import { mountTutorial } from "./tutorial";
+import { globesSteps, plannerSteps } from "./tutorial.steps";
 import { nasaAnalogs, nasaText, type NasaAnalog } from "./nasaAnalogs";
 import { TileLayer, direction, type TileHealth, type TileLayerOptions } from "./tiles";
 import { mountPathPlanner } from "./pathPlanner";
@@ -2280,3 +2282,10 @@ if (startItem) {
   }, { rootMargin: "160px" });
   observer.observe(terrainStage);
 }
+
+// Guía de uso: se abre sola en la primera visita a la portada (no al entrar directo al planificador o a una
+// comparación enlazada) y siempre desde el botón «Guía» de la cabecera.
+mountTutorial(
+  () => (document.querySelector("main.gl")?.classList.contains("is-planning") ? plannerSteps : globesSteps),
+  { auto: location.hash !== "#path-planner" && !new URLSearchParams(location.search).has("site") },
+);

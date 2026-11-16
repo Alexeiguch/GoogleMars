@@ -1,0 +1,122 @@
+/* Guía de uso (src/tutorial.ts): resalta una parte de la página y explica qué hacer con ella.
+   Mismo lenguaje que el resto: esquinas rectas, título en Barlow Condensed y contador en mono, como los pasos «01». */
+.tut {
+  --tut-dim: rgba(6, 6, 8, .66);
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+}
+:root[data-theme="light"] .tut { --tut-dim: rgba(27, 26, 29, .5); }
+
+/* Capa que recoge los clics: la página no se toca mientras la guía está abierta. */
+.tut-shade { position: absolute; inset: 0; }
+.tut.is-centered .tut-shade { background: var(--tut-dim); }
+
+/* El hueco iluminado: la sombra enorme oscurece todo lo demás. */
+.tut-spot {
+  position: fixed;
+  border: 2px solid var(--action);
+  box-shadow: 0 0 0 200vmax var(--tut-dim);
+  pointer-events: none;
+  transition: left var(--t-enter) var(--ease-out), top var(--t-enter) var(--ease-out),
+    width var(--t-enter) var(--ease-out), height var(--t-enter) var(--ease-out);
+}
+.tut-spot[hidden] { display: none; }
+
+.tut-card {
+  position: fixed;
+  width: min(380px, calc(100vw - 32px));
+  padding: 18px 20px 16px;
+  border: 1px solid var(--control-border);
+  border-top: 3px solid var(--action);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .35);
+  animation: tut-in var(--t-enter) var(--ease-out) both;
+  transition: left var(--t-enter) var(--ease-out), top var(--t-enter) var(--ease-out);
+}
+.tut-card:focus { outline: none; }
+.tut-card:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+.tut.is-centered .tut-card { left: 50%; top: 50%; translate: -50% -50%; width: min(440px, calc(100vw - 32px)); }
+.tut.is-docked .tut-card { left: 16px; right: 16px; bottom: 16px; top: auto; width: auto; }
+
+.tut-count {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font: 500 12px/1.2 var(--font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.tut-title {
+  margin: 0;
+  font: 600 24px/1.1 var(--font-display);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.tut-body { margin: 10px 0 0; color: var(--story); font-size: 16px; line-height: 1.5; text-wrap: pretty; }
+
+.tut-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.tut-nav { display: flex; gap: 8px; margin-left: auto; }
+.tut-actions button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--control-border);
+  background: transparent;
+  color: var(--text);
+  font: 600 14px/1 var(--font-body);
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+}
+.tut-actions button:hover { background: var(--hover); }
+.tut-actions button:active { transform: scale(.97); }
+.tut-actions .tut-next { border-color: var(--action); background: var(--action); color: var(--action-ink); }
+.tut-actions .tut-next:hover { background: var(--action); opacity: .9; }
+.tut-actions .tut-skip { padding-inline: 0; border: 0; color: var(--muted); text-decoration: underline; text-underline-offset: .2em; }
+.tut-actions .tut-skip:hover { background: none; color: var(--text); }
+.tut-actions [hidden] { display: none; }
+
+@keyframes tut-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* Botón «Guía» de la cabecera, junto a idioma y tema. */
+.tut-open-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px 0 8px;
+  border: 1px solid var(--control-border);
+  background: transparent;
+  color: var(--text);
+  font: 500 13px/1 var(--font-mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+}
+.tut-open-button:hover { background: var(--hover); }
+.tut-open-button:active { transform: scale(.96); }
+.tut-q {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font: 600 12px/1 var(--font-body);
+}
+
+@media (max-width: 600px) {
+  .tut-open-button { width: 44px; padding: 0; justify-content: center; }
+  .tut-open-text { display: none; }
+  .tut-title { font-size: 21px; }
+  .tut-body { font-size: 15px; }
+}
+@media (pointer: coarse) {
+  .tut-open-button, .tut-actions button { min-height: 44px; }
+}
+.tut.tut-jump .tut-card, .tut.tut-jump .tut-spot { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tut-card, .tut-spot { animation: none; transition: none; }
+}
