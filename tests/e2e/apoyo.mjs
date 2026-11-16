@@ -53,9 +53,9 @@ export async function abrirNavegador() {
 
 /**
  * Contexto nuevo con el idioma fijado por el contrato C4 (localStorage["analogs-lang"]).
- * sinRed: aborta todo lo que no sea local (C3).
+ * sinRed: aborta todo lo que no sea local (C3). guia: deja que la guía de uso se abra sola (primera visita).
  */
-export async function nuevoContexto(browser, { lang = 'en', vista = '1920x1080', sinRed = false } = {}) {
+export async function nuevoContexto(browser, { lang = 'en', vista = '1920x1080', sinRed = false, guia = false } = {}) {
   const movil = VISTAS[vista].width < 600;
   const ctx = await browser.newContext({
     viewport: VISTAS[vista], deviceScaleFactor: 1, colorScheme: 'dark',
@@ -65,6 +65,8 @@ export async function nuevoContexto(browser, { lang = 'en', vista = '1920x1080',
   ctx.setDefaultTimeout(PASO);
   ctx.setDefaultNavigationTimeout(PASO);
   await ctx.addInitScript((l) => { try { localStorage.setItem('analogs-lang', l); } catch { /* sin almacenamiento */ } }, lang);
+  // La guía de uso se abre sola en la primera visita y tapa la página: salvo en su propia prueba (08), se da por vista.
+  if (!guia) await ctx.addInitScript(() => { try { localStorage.setItem('terratwin-tutorial', '1'); } catch { /* sin almacenamiento */ } });
   await ctx.addInitScript(enPagina);
   // Contra el servidor de desarrollo: sin recarga en caliente, para que una edición ajena no recargue la página a media prueba.
   await ctx.routeWebSocket(/.*/, () => {});
