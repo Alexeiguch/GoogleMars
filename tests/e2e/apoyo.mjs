@@ -1,4 +1,4 @@
-// Apoyo común de las pruebas de extremo a extremo de TerraTwin.
+// Apoyo común de las pruebas de extremo a extremo de GeoTwin.
 // Las pruebas se escriben contra los CONTRATOS C1-C6 (texto visible, roles, data-intro, data-aviso="sin-red"),
 // no contra clases CSS ni ids de la app: aquí no hay ningún selector por id o clase propia de la app
 // (la única clase usada es `.leaflet-container`, de la biblioteca Leaflet, para separar las teselas del mapa).
@@ -66,7 +66,7 @@ export async function nuevoContexto(browser, { lang = 'en', vista = '1920x1080',
   ctx.setDefaultNavigationTimeout(PASO);
   await ctx.addInitScript((l) => { try { localStorage.setItem('analogs-lang', l); } catch { /* sin almacenamiento */ } }, lang);
   // La guía de uso se abre sola en la primera visita y tapa la página: salvo en su propia prueba (08), se da por vista.
-  if (!guia) await ctx.addInitScript(() => { try { localStorage.setItem('terratwin-tutorial', '1'); } catch { /* sin almacenamiento */ } });
+  if (!guia) await ctx.addInitScript(() => { try { localStorage.setItem('geotwin-tutorial', '1'); } catch { /* sin almacenamiento */ } });
   await ctx.addInitScript(enPagina);
   // Contra el servidor de desarrollo: sin recarga en caliente, para que una edición ajena no recargue la página a media prueba.
   await ctx.routeWebSocket(/.*/, () => {});

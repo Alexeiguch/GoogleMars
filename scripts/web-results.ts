@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { normalizePath, type Plugin } from "vite";
 
 const source = normalizePath(fileURLToPath(new URL("../src/data/results.json", import.meta.url)));
-const prefix = "virtual:terratwin-results/";
+const prefix = "virtual:geotwin-results/";
 type Row = Record<string, unknown>;
 type BodyData = {
   sites: Row[];
@@ -68,7 +68,7 @@ export function webResults(): Plugin {
     [prefix + "map", mapResults],
   ]);
   return {
-    name: "terratwin-web-results",
+    name: "geotwin-web-results",
     resolveId(id) {
       if (projections.has(id)) return "\0" + id;
     },

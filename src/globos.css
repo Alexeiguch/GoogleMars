@@ -31,7 +31,7 @@ main.gl {
   text-transform: uppercase;
 }
 .gl-pickers { margin-left: auto; }
-/* Frase de entrada (data-intro): qué es TerraTwin y qué hacer, a la vista sin bajar. Ocupa su propia línea. */
+/* Frase de entrada (data-intro): qué es GeoTwin y qué hacer, a la vista sin bajar. Ocupa su propia línea. */
 .gl-intro {
   order: 10;
   flex: 1 1 100%;

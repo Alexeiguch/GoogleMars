@@ -12,14 +12,14 @@ export type TutorialStep = {
   body: Record<Lang, string>;
 };
 
-const SEEN_KEY = "terratwin-tutorial";
+const SEEN_KEY = "geotwin-tutorial";
 const UI: Record<Lang, Record<string, string>> = {
   es: {
-    button: "Guía", buttonLabel: "Cómo se usa TerraTwin", dialog: "Cómo se usa TerraTwin",
+    button: "Guía", buttonLabel: "Cómo se usa GeoTwin", dialog: "Cómo se usa GeoTwin",
     skip: "Saltar guía", back: "Atrás", next: "Siguiente", start: "Empezar", done: "Listo", of: "de",
   },
   en: {
-    button: "Guide", buttonLabel: "How to use TerraTwin", dialog: "How to use TerraTwin",
+    button: "Guide", buttonLabel: "How to use GeoTwin", dialog: "How to use GeoTwin",
     skip: "Skip guide", back: "Back", next: "Next", start: "Start", done: "Done", of: "of",
   },
 };

@@ -13,10 +13,10 @@ const again: TutorialStep = {
 /** Portada: los globos 3D. */
 export const globesSteps: TutorialStep[] = [
   {
-    title: { es: "Bienvenido a TerraTwin", en: "Welcome to TerraTwin" },
+    title: { es: "Bienvenido a GeoTwin", en: "Welcome to GeoTwin" },
     body: {
-      es: "TerraTwin busca en toda la tierra firme los lugares que más se parecen a sitios de la Luna y de Marte, y explica en qué se parecen y en qué no. En un minuto te mostramos cómo usarlo.",
-      en: "TerraTwin searches all of Earth's land for the places most like sites on the Moon and Mars, and explains where they match and where they don't. Here is how to use it in a minute.",
+      es: "GeoTwin busca en toda la tierra firme los lugares que más se parecen a sitios de la Luna y de Marte, y explica en qué se parecen y en qué no. En un minuto te mostramos cómo usarlo.",
+      en: "GeoTwin searches all of Earth's land for the places most like sites on the Moon and Mars, and explains where they match and where they don't. Here is how to use it in a minute.",
     },
   },
   {

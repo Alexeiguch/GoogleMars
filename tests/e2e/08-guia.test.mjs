@@ -6,8 +6,8 @@ import assert from 'node:assert/strict';
 import { abrirNavegador, nuevoContexto, abrir, ir, esperarArranque, BASE, PASO, CORTA } from './apoyo.mjs';
 
 const TEXTOS = {
-  es: { bienvenida: 'Bienvenido a TerraTwin', boton: 'Cómo se usa TerraTwin', saltar: 'Saltar guía', listo: 'Listo', mapa: 'Mapa Luna y Marte' },
-  en: { bienvenida: 'Welcome to TerraTwin', boton: 'How to use TerraTwin', saltar: 'Skip guide', listo: 'Done', mapa: 'Moon & Mars map' },
+  es: { bienvenida: 'Bienvenido a GeoTwin', boton: 'Cómo se usa GeoTwin', saltar: 'Saltar guía', listo: 'Listo', mapa: 'Mapa Luna y Marte' },
+  en: { bienvenida: 'Welcome to GeoTwin', boton: 'How to use GeoTwin', saltar: 'Skip guide', listo: 'Done', mapa: 'Moon & Mars map' },
 };
 const PASOS_PORTADA = 7;
 

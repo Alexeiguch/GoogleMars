@@ -1,6 +1,6 @@
 // Modelo de datos de la página «Globos 3D».
 // Los datos de origen no se modifican; aquí solo se leen y se fusionan.
-import rawResults from "virtual:terratwin-results/globes";
+import rawResults from "virtual:geotwin-results/globes";
 import { sites as catalogSites, type Site } from "./data";
 import { getLang, locale, t } from "./i18n";
 import { nasaAnalogs, type NasaAnalog } from "./nasaAnalogs";
