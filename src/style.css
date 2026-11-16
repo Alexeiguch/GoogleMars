@@ -396,6 +396,7 @@ footer h2 { font-size: 24px; font-weight: 600; letter-spacing: .03em; text-trans
 footer ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px 32px; margin: 12px 0 0; padding: 0; list-style: none; }
 footer a { color: var(--muted); font-size: 14px; }
 footer a:hover { color: var(--text); }
+footer .ai-note { margin-top: 16px; color: var(--muted); font-size: 14px; max-width: 70ch; }
 
 @media (max-width: 900px) {
   .intro { grid-template-columns: minmax(0, 1fr); padding-top: 32px; }

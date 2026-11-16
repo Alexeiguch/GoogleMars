@@ -296,6 +296,8 @@ Los enlaces a cada fuente están en el pie de las dos páginas de la app.
 - **Código y documentación.** El pipeline, la app y esta documentación se escribieron con ayuda de asistentes de IA. Los commits en los que participó Claude (Anthropic) llevan la línea `Co-Authored-By` en el historial de git.
 - **Revisión bibliográfica.** La hicieron agentes de IA: uno por candidato, con búsquedas en inglés y en el idioma local, y un verificador independiente que abrió cada enlace de los lugares «ya estudiados».
 - **Historias destacadas.** Un agente redactó cada una solo con los datos de `results.json` y fuentes web citadas. Otro agente comprobó cada cifra y después se revisaron a mano.
+- **Presentación.** Las diapositivas, el PDF y el video del pitch se generaron con código escrito con ayuda de IA y llevan la marca visible «Made with AI assistance». La música del video la compone un script, no un modelo de IA.
+- **Aviso en la app.** El pie de las dos páginas dice que la app se hizo con ayuda de IA (clave `sources.ai` en `src/i18n.ts`), y su `<head>` lo repite en `<meta name="ai-disclosure">`.
 - **Lo que no hace la IA.** Las puntuaciones las calcula código determinista (`pipeline/analogs/`), no un modelo de IA.
 
 ## Ideas para seguir
